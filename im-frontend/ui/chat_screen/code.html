@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="flex flex-col h-screen">
+<header class="flex-shrink-0 bg-background-light dark:bg-background-dark border-b border-gray-200 dark:border-gray-800">
+<div class="mx-auto px-6">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center space-x-4">
+<nav class="flex space-x-8">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 text-sm" href="#">聊天</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm font-medium" href="#">通讯录</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm font-medium" href="#">朋友圈</a>
+<a class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm font-medium" href="#">我的</a>
+</nav>
+</div>
+<div class="flex items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBWhb1AzJPN_nWV34tPMgGt1DoubOTuI-OkHAdpemRjbGmjZVBhr2IDzbdBppVMTpm11X-4qtTaJYlnN67yWjSw-h6_r6-O-Jk6gAgh8MLcUUMlByKKlmpazT3Wvb-uqT9EREELPQoclG2QM--Fd2c3E4LbbGz05Sn8eQ9mkUcbuQpd8n9s6Nhx-41QiBzhbobDTxJAX_Gy4h1JVoen-KF-_8_RtlyrhNo2yo2vGW7jxMu5m_l-cdzCE76r3i7HKg2H6TNdHh7qLHkO");'></div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex-grow flex overflow-hidden">
+<aside class="w-80 flex-shrink-0 bg-background-light dark:bg-background-dark border-r border-gray-200 dark:border-gray-800 flex flex-col">
+<div class="flex-grow overflow-y-auto">
+<div class="space-y-1 p-2">
+<a class="flex items-center gap-4 p-3 rounded-lg bg-primary/10 dark:bg-primary/20" href="#">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqu1tN3h-p9fo5Fm0SknskjvHeuHUf_tJZFJGgjYfAua1fUTqvaGrz4KFeTAZ7kWoTngDfcHiMXu9cHObaQ6OYl2bH4GQ0xggkKmYx00spz9iE5THRZE_r5Jnu4pS5knz9_7tZVg084ROHP9zM55LyghEyFHsWhB_w5BkkaJRQvs2UDNl3hr1skat_KKpl7R_DbLXSRnfpNlCOS020JlqSbbr7eHqJU_02lkyrMEVMikPuggHCLzCC87WpqIxwHQ4sSCfeb9CMYtgY");'></div>
+<span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-background-light dark:border-background-dark"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center">
+<p class="text-gray-900 dark:text-white font-semibold text-sm truncate">Sophia</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">10:30 AM</p>
+</div>
+<p class="text-gray-600 dark:text-gray-300 text-sm truncate mt-1">Hi there!</p>
+</div>
+<div class="flex flex-col items-end space-y-1">
+<span class="bg-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">3</span>
+</div>
+</a>
+<div class="border-t border-gray-200 dark:border-gray-800 mx-3"></div>
+<a class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBEKOZALdz6YPSrW7SXfCSQfMC4HOX7kEpvgygOBl9m1Oz5aP9D9_QHaMDQ6WJLf0ahuArIOGB_UhwsXbjNvaacQ1nGShIpj48UIDU_IuLBghQSWzz4N3VVHvipyqI_xl14ezUmyrk3-A3SOj8adg6IYcG0D77IjUA3kD64Gs-qygmpxWbd7N4ykoFyqdQxPesd-uRL1wnKjFfDaFzVd3cdtPTVlezLKP5PCg-9Iyr4p6BqI0ulo4k0BnC5dzt73f36htfauV3ObC_6");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center">
+<p class="text-gray-900 dark:text-white font-semibold text-sm truncate">Group Chat</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">Yesterday</p>
+</div>
+<p class="text-gray-600 dark:text-gray-300 text-sm truncate mt-1">See you tomorrow</p>
+</div>
+</a>
+<div class="border-t border-gray-200 dark:border-gray-800 mx-3"></div>
+<a class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCHCRvuWkma53RXktnKGU1rULU-5sndyOY_NNaKEdkXYUKloTfomA344m4uDQSWHzT_RgiaIgQX3d9d5_UFvV1mX_WD3NRWO0jCfMJq9--46IdpChPQ1A8FTcyZQI2rfRvl6F2UtsLXuAAQcDhvpQyDuG0LNSkXPXovQGFR28umJcLlq5HTr9Aw_LONdpvrHQIj73e74iiNu1lEbHamN0zJnoGwq4h__d2msI2ZasBiXua4FFiDfxYS400E3edjDbC5jG6mNwmjYMj6");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center">
+<p class="text-gray-900 dark:text-white font-semibold text-sm truncate">Liam</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">2d</p>
+</div>
+<p class="text-gray-600 dark:text-gray-300 text-sm truncate mt-1">How are you?</p>
+</div>
+</a>
+<div class="border-t border-gray-200 dark:border-gray-800 mx-3"></div>
+<a class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOrcE2opCfBcToaJdkfMdG9HrEt6mTvzuwAMq0h8Onb9FLoezESODOr28_AP_p6V1w_YoKRtApAsnMpd4wmnzc5VQ5MLHfobb7rQFNqNN20pvgq2UmABmMuClXATmGsrqZMgn2W5ni_JgVfuK2fZ4LBfoCus_JbokWqgrug8acpAqN3CC8KQg_IMkwegCQ9IKyfQ_pjkf7j20QLciBtLtrlcUFLWykhdE_PB9R46_ilcAOTMbm2CGnQJQKfFP90p9ZHaBEcTwk41Bt");'></div>
+<span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-gray-400 border-2 border-background-light dark:border-background-dark"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center">
+<p class="text-gray-900 dark:text-white font-semibold text-sm truncate">Emma</p>
+<p class="text-gray-500 dark:text-gray-400 text-xs">4d</p>
+</div>
+<p class="text-gray-600 dark:text-gray-300 text-sm truncate mt-1">Sounds good!</p>
+</div>
+</a>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col bg-white dark:bg-gray-900">
+<div class="flex-shrink-0 flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">Sophia</h3>
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<div class="flex items-start gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDSAgDXcHib7YaIssSYy-4bbfU33erM-1jd2bX_Rdc01c5gDblmvakwPQQ4U4psFojv8WuBQtkgy3977NO51GRPW_6cNjzVY0BesBWsFL4BH--tFXcimNx5jyaZO5dLvIf9ROp_lJyFxSFRY1v5P5Xnp2uMGpcmu09-PYrodslmDJ2N-NEkKPh4-QwEsoji5pywY-oPLDOotDG1Kv6wtC2sC2ykzwa8EPx2Ug-ullqfHyonYVj4EeRkgVCMRXNvLRWezL4J37ufo6w8");'></div>
+<div class="flex flex-col items-start">
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg rounded-tl-none px-4 py-3 max-w-lg shadow-sm">
+<p class="text-sm text-gray-800 dark:text-gray-200">Hi there!</p>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-4 justify-end">
+<div class="flex flex-col items-end">
+<div class="bg-primary text-white rounded-lg rounded-tr-none px-4 py-3 max-w-lg shadow-sm">
+<p class="text-sm">Hey Sophia!</p>
+</div>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB7SjWve_Ggm40LEEqBOAIe00WXcJyuunmDdNiCrvS4PUqZtvB3LLiwR1SqmmHY2mHE9wx9icXzzAHIDnDQ3srACArkz1NOX8DFcf0aBWcALrBM-iVOZB20g3OED0qGJFWFtoJPREjB4bCfs7Z5LUhq-oS_R71VvLt36JGKMfsHGn-jn1cOU97iStI4c9iWm4o9h5m7w4TW28gImdcAPAt28I5_WcyoXDAxecXpZApt2Muj3KFKrfqnVrcC1BInO_69HdvsjZStdkLd");'></div>
+</div>
+<div class="flex items-start gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCjU6Wy5pT8fiqpsHPCkKIagPvLFGR_aPMNxzy8hGfcQwiqMooBhIjIolPItZf4s8thDUnH9TLm-yVk6AtNXDGrCsBGt6b8aTr2yR0fhm_PgSHvQcAQLjtuRL046DsTNtRsgfrX6wVjkqV6697o_K-gsZSB6w6d3JuLK9HkvbgeKMKdrt6LI-voGfinWGVEH27uIX2utNEm3zy-nXdB430WCM-5mhd6bhYuOs9jZra0Uv6JG9kD6Gf-_7FlTiY_NtCkAI7oJl-na1eR");'></div>
+<div class="flex flex-col items-start">
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg rounded-tl-none px-4 py-3 max-w-lg shadow-sm">
+<p class="text-sm text-gray-800 dark:text-gray-200">How's your day going?</p>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-4 justify-end">
+<div class="flex flex-col items-end">
+<div class="bg-primary text-white rounded-lg rounded-tr-none px-4 py-3 max-w-lg shadow-sm">
+<p class="text-sm">It's been pretty good, thanks! Just finished a big project. How about yours?</p>
+</div>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqVZnMJT5NuCMrC1cdjbxoYxUB4odbTBE9Xjsb52mm1pNQpcO1sAOSMCGlyBcBIyOXB-wa41veZ1BgFPniTnVon0-VPdaRxfFyiTkbAQrxkCQQ7dkCdRI66wA2jJhMCtJZlQxNSBy3aOLn_R0j3vT1ektv0OHBKCMTm8ynfWjrj9N31K9OJ217OsCit60R7s1VwPhcJb9eXIY6cvd4Boprf9ctXy3e5pYr5cPMfcT_IHs9Jylxzu4AG1Q2vkI9HjhGTtk95dEca3cc");'></div>
+</div>
+<div class="flex items-start gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCB6_3mDQHm4othTTCFZFSgCEacoxZ_dDeY8SB_Nj8FehcvQlcjbdglf-7kOvjqdFD9N23HdU_Ts7J6cL5B_-8zhPJgQ_Ibjitv7L0kSZ7nVvW5445lxOHPF2y8VFOQ60t9pWkESXK0J2FegyCbv-iXHh9XQUUozLm5o8SaSIih-hSbfu8_AnrhfWBOTFwDvlMZcvU_ngO0E-_tS6NOxd2YWVtptoMBEh5qZsUxDYeJGJI3ddhg_htoMXb_WiRRTf5BcZ0gZkTj5fCM");'></div>
+<div class="flex flex-col items-start">
+<div class="bg-gray-100 dark:bg-gray-800 rounded-lg rounded-tl-none px-4 py-3 max-w-lg shadow-sm">
+<p class="text-sm text-gray-800 dark:text-gray-200">That's great to hear! Mine's been busy but productive. I'm heading out for a coffee break now.</p>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-4 justify-end">
+<div class="flex flex-col items-end">
+<div class="bg-primary text-white rounded-lg rounded-tr-none px-4 py-3 max-w-lg shadow-sm">
+<p class="text-sm">Nice! Enjoy your coffee. Talk to you later!</p>
+</div>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDELdx_NbSd5UT4KNSZ8zI4BKOtW9JvCaLJZ88tBbqYpyMFMowwDMsJtOLFNDCELkkVtOP9gAbGq9zCD8OulqUm9twGeCLf3PZ3F41TX8rcZ4hRuj7zUZAP02SCWTzIx5pkFRIXACWc20Ox4DqRRGJkdjOIpChcDUn6ndpY74lVfi-I8VWjA_5AlPEjBXDr5AbWN4s5r_NkP8eUsJGxo4cAMQauqCBau3ROAFh6SK2-L4WK0OYke631L-P5waQr3tNXetU1vfhoX7v2");'></div>
+</div>
+</div>
+<div class="flex-shrink-0 px-6 py-4 bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-gray-800">
+<div class="flex items-center gap-2">
+<div class="flex-1 relative">
+<input class="form-input w-full rounded-full py-3 pl-5 pr-12 bg-gray-100 dark:bg-gray-800 border-transparent focus:border-primary focus:ring-primary text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" placeholder="Type a message" type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-4 gap-2">
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-3">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="bg-primary hover:bg-primary/90 text-white rounded-full p-3 flex items-center justify-center">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>
