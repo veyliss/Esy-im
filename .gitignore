@@ -1,3 +1,6 @@
+# 所有隐藏文件和目录（以.开头的文件）
+.*
+
 # 环境配置文件 - 包含敏感信息
 .env
 .env.local
@@ -8,6 +11,7 @@
 
 # vscode文件
 .vscode
+
 
 # 数据库配置
 config/database.yml
@@ -34,13 +38,17 @@ ehthumbs.db
 Thumbs.db
 
 # IDE和编辑器文件
-.vscode/settings.json
-.vscode/launch.json
-.vscode/extensions.json
+.vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# AI工具配置
+.claude/
+*.claude/
+.codebuddy/
+*.codebuddy/
 
 # 依赖目录
 node_modules/
@@ -51,6 +59,7 @@ dist/
 build/
 out/
 target/
+.next/
 
 # 测试覆盖率报告
 coverage/
