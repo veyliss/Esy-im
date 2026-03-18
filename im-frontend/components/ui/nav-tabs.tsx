@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import clsx from "clsx";
-import React, { useState } from "react";
+import type { ReactNode } from "react";
 
-export type NavKey = "chat" | "contacts" | "moments" | "me";
+export type NavKey = "chat" | "contacts" | "groups" | "moments" | "me";
 
 export interface NavTabsProps {
   active: NavKey;
@@ -12,7 +12,7 @@ export interface NavTabsProps {
   // 视觉风格：light 更醒目；muted 更低对比度；modern 现代化风格
   variant?: "light" | "muted" | "classic" | "modern";
   // 右侧插槽（头像、图标按钮等）
-  rightSlot?: React.ReactNode;
+  rightSlot?: ReactNode;
   // 是否显示图标
   showIcons?: boolean;
   // 是否显示未读数量
@@ -33,28 +33,35 @@ const items: Array<{
     label: "聊天",
     href: "/chat",
     icon: "chat",
-    description: "即时消息和对话"
+    description: "即时消息和对话",
   },
   {
     key: "contacts",
     label: "通讯录",
     href: "/contacts",
     icon: "contacts",
-    description: "管理联系人和好友"
+    description: "管理联系人和好友",
+  },
+  {
+    key: "groups",
+    label: "群聊",
+    href: "/groups",
+    icon: "groups",
+    description: "发现和管理群聊",
   },
   {
     key: "moments",
     label: "朋友圈",
     href: "/moments",
     icon: "photo_camera",
-    description: "分享生活动态"
+    description: "分享生活动态",
   },
   {
     key: "me",
     label: "我的",
     href: "/me",
     icon: "person",
-    description: "个人资料和设置"
+    description: "个人资料和设置",
   },
 ];
 
@@ -65,114 +72,91 @@ export function NavTabs({
   rightSlot,
   showIcons = true,
   showBadges = false,
-  badges = {}
+  badges = {},
 }: NavTabsProps) {
-  const [hoveredItem, setHoveredItem] = useState<NavKey | null>(null);
-
   const styles = {
     light: {
-      container: "bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200/50 dark:border-slate-700/50",
-      link: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-200",
-      active: "text-primary border-b-2 border-primary pb-2 font-semibold",
+      container:
+        "rounded-2xl border border-slate-200/70 bg-white/90 p-1 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/80",
+      link: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100",
+      active: "bg-primary/10 text-primary dark:bg-primary/20",
     },
     muted: {
-      container: "bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm",
-      link: "text-slate-600 dark:text-slate-400 hover:text-primary transition-colors duration-200",
-      active: "text-primary border-b-2 border-primary pb-1",
+      container:
+        "rounded-2xl border border-slate-200/60 bg-slate-50/80 p-1 dark:border-slate-700/60 dark:bg-slate-900/70",
+      link: "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
+      active: "bg-white text-primary shadow-sm dark:bg-slate-800 dark:text-primary",
     },
     classic: {
-      container: "bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700",
-      link: "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors text-base font-semibold pb-4 border-b-2 border-transparent",
-      active: "text-[#0d5adb] border-[#0d5adb]",
+      container:
+        "rounded-2xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900",
+      link: "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
+      active: "border-b-2 border-primary text-primary",
     },
     modern: {
-      container: "bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border-b border-slate-200/30 dark:border-slate-700/30 shadow-sm",
-      link: "relative flex items-center gap-2 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-300 group",
-      active: "text-primary bg-primary/10 dark:bg-primary/20 shadow-sm",
+      container:
+        "rounded-2xl border border-white/70 bg-white/65 p-1 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/65",
+      link: "text-slate-600 hover:bg-primary/8 hover:text-primary dark:text-slate-300 dark:hover:bg-primary/15 dark:hover:text-primary",
+      active: "bg-primary/12 text-primary shadow-sm dark:bg-primary/20",
     },
   } as const;
 
   const tone = styles[variant] ?? styles.modern;
 
   return (
-    <div className={clsx("flex items-center justify-between w-full px-4 py-2", tone.container, className)}>
-      <nav className={clsx(
-        "flex items-center",
-        variant === "modern" ? "gap-2" : "gap-6"
-      )}>
-        {items.map((item) => {
-          const isActive = item.key === active;
-          const isHovered = hoveredItem === item.key;
-          const badgeCount = badges[item.key] || 0;
+    <div className={clsx("flex w-full items-center gap-3", className)}>
+      <nav aria-label="主导航" className={clsx("min-w-0 flex-1 overflow-x-auto", tone.container)}>
+        <ul className={clsx("flex items-center whitespace-nowrap", variant === "modern" ? "gap-1" : "gap-2")}>
+          {items.map((item) => {
+            const isActive = item.key === active;
+            const badgeCount = badges[item.key] || 0;
 
-          return (
-            <div key={item.key} className="relative">
-              <Link
-                href={item.href}
-                className={clsx(
-                  tone.link,
-                  isActive && tone.active,
-                  variant === "modern" && "min-w-[80px] justify-center"
-                )}
-                onMouseEnter={() => setHoveredItem(item.key)}
-                onMouseLeave={() => setHoveredItem(null)}
-                title={item.description}
-              >
-                {/* 图标 */}
-                {showIcons && (
-                  <span className={clsx(
-                    "material-symbols-outlined text-xl transition-transform duration-200",
-                    isActive && "scale-110",
-                    isHovered && !isActive && "scale-105"
-                  )}>
-                    {item.icon}
+            return (
+              <li key={item.key} className="relative">
+                <Link
+                  href={item.href}
+                  title={item.description}
+                  aria-current={isActive ? "page" : undefined}
+                  className={clsx(
+                    "relative inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                    tone.link,
+                    isActive && tone.active,
+                    variant === "classic" && "rounded-b-none border-b-2 border-transparent",
+                    variant === "modern" && "min-w-[78px]",
+                  )}
+                >
+                  {showIcons ? (
+                    <span
+                      className={clsx(
+                        "material-symbols-outlined text-[18px] transition-transform duration-200",
+                        isActive && variant === "modern" && "scale-105",
+                      )}
+                    >
+                      {item.icon}
+                    </span>
+                  ) : null}
+
+                  <span className={clsx(showIcons ? "text-[13px] sm:text-sm" : "text-sm", isActive && "font-semibold")}>
+                    {item.label}
                   </span>
-                )}
 
-                {/* 标签文本 */}
-                <span className={clsx(
-                  "transition-all duration-200",
-                  variant === "modern" && showIcons ? "text-sm" : "text-base",
-                  isActive && "font-semibold"
-                )}>
-                  {item.label}
-                </span>
+                  {variant === "modern" && isActive ? (
+                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary" />
+                  ) : null}
+                </Link>
 
-                {/* 现代风格的活跃指示器 */}
-                {variant === "modern" && isActive && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-primary rounded-full" />
-                )}
-
-                {/* 悬停效果 */}
-                {variant === "modern" && isHovered && !isActive && (
-                  <div className="absolute inset-0 bg-primary/5 dark:bg-primary/10 rounded-xl -z-10 animate-fade-in-scale" />
-                )}
-              </Link>
-
-              {/* 未读数量徽章 */}
-              {showBadges && badgeCount > 0 && (
-                <div className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium animate-fade-in-scale">
-                  {badgeCount > 99 ? "99+" : badgeCount}
-                </div>
-              )}
-
-              {/* 悬停提示 */}
-              {variant === "modern" && isHovered && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 bg-black/80 text-white text-xs rounded whitespace-nowrap opacity-0 animate-slide-in-down pointer-events-none z-50">
-                  {item.description}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                {showBadges && badgeCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
+                    {badgeCount > 99 ? "99+" : badgeCount}
+                  </span>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
-      {/* 右侧插槽 */}
-      {rightSlot && (
-        <div className="flex items-center gap-3">
-          {rightSlot}
-        </div>
-      )}
+      {rightSlot ? <div className="flex shrink-0 items-center gap-2 sm:gap-3">{rightSlot}</div> : null}
     </div>
   );
 }

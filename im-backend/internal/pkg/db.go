@@ -61,5 +61,15 @@ func InitPostgres() {
 		log.Fatalf("❌ 消息表迁移失败: %v", err)
 	}
 
+	// 创建群聊相关表
+	if err := DB.AutoMigrate(
+		&model.Group{},
+		&model.GroupMember{},
+		&model.GroupMessage{},
+		&model.GroupMessageRead{},
+	); err != nil {
+		log.Fatalf("❌ 群聊表迁移失败: %v", err)
+	}
+
 	log.Println("✅ Postgres 连接成功并完成迁移")
 }

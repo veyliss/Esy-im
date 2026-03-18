@@ -31,8 +31,6 @@ export function FriendItem({ friend, isActive, onClick }: FriendItemProps) {
           width={44}
           height={44}
         />
-        {/* 在线状态指示器 */}
-        <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
       </div>
       <div className="flex-1 min-w-0">
         <p className={`truncate text-sm font-medium ${

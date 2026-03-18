@@ -7,6 +7,10 @@ import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { Group, User } from "@/lib/types/api";
 import { UserAPI } from "@/lib/api/user";
+import { AppShell } from "@/components/layout/app-shell";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { ErrorAlert, EmptyState } from "@/components/ui/error-alert";
+import { PageLoading } from "@/components/ui/loading-states";
 
 export default function GroupsPage() {
   const token = useAuthStore((state) => state.token);
@@ -115,81 +119,64 @@ export default function GroupsPage() {
   }, [searchKeyword]);
 
   return (
-    <div className="flex h-screen flex-col bg-background-light dark:bg-background-dark font-display">
-      <header className="flex-shrink-0 bg-background-light dark:bg-background-dark border-b border-gray-200 dark:border-gray-800">
-        <div className="mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <nav className="flex items-center gap-6">
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/chat">聊天</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/contacts">通讯录</a>
-                <a className="text-sm font-medium text-primary" href="/groups">群聊</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/moments">朋友圈</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/me">我的</a>
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-medium"
-              >
-                创建群聊
-              </button>
-              {currentUser?.avatar && (
-                <div
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  style={{ backgroundImage: `url(${currentUser.avatar})` }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+    <AppShell
+      active="groups"
+      navVariant="modern"
+      rightSlot={
+        <>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          >
+            创建群聊
+          </button>
+          <UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />
+        </>
+      }
+      headerDescription="统一群聊导航入口，保持搜索、列表与详情区的视觉一致性。"
+    >
+      <ErrorAlert error={error} onClose={() => setError(null)} className="mx-0 mt-0 mb-4" />
 
-      <div className="flex-grow flex overflow-hidden">
-        <aside className="w-80 flex-shrink-0 bg-background-light dark:bg-background-dark border-r border-gray-200 dark:border-gray-800 flex flex-col">
-          {/* 搜索框 */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex min-h-[72vh] overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-xl shadow-slate-200/50 dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30">
+        <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200/70 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/70">
+          <div className="border-b border-slate-200/70 p-4 dark:border-slate-800">
             <input
               type="text"
               placeholder="搜索群组..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="ui-input w-full rounded-xl px-4 py-2 text-sm"
             />
           </div>
 
-          {/* 群组列表 */}
-          <div className="flex-grow overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-2">
             {searchKeyword.trim() ? (
-              // 搜索结果
-              <div className="p-2">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">搜索结果</h3>
+              <div>
+                <h3 className="mb-2 px-2 text-sm font-medium text-slate-500 dark:text-slate-400">搜索结果</h3>
                 {searchResults.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    未找到相关群组
+                  <div className="px-2">
+                    <EmptyState title="未找到相关群组" description="尝试其他关键词" />
                   </div>
                 ) : (
                   searchResults.map((group) => (
                     <div
                       key={group.group_id}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                      className="mb-2 flex items-center gap-3 rounded-2xl border border-transparent bg-white/80 p-3 transition-all hover:border-slate-200 hover:bg-white dark:bg-slate-800/70 dark:hover:border-slate-700 dark:hover:bg-slate-800"
                     >
-                      <div
-                        className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12"
-                        style={{ backgroundImage: `url(${group.avatar || '/default-group-avatar.png'})` }}
+                      <UserAvatar
+                        src={group.avatar || "/default-group-avatar.png"}
+                        name={group.name}
+                        size="md"
+                        shape="rounded"
+                        border
                       />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-gray-900 dark:text-white font-medium text-sm truncate">
-                          {group.name}
-                        </p>
-                        <p className="text-gray-500 dark:text-gray-400 text-xs">
-                          {group.member_count} 人
-                        </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{group.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
                       </div>
                       <button
                         onClick={() => handleJoinGroup(group.group_id)}
-                        className="bg-primary hover:bg-primary/90 text-white px-3 py-1 rounded text-xs"
+                        className="rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-primary/90"
                       >
                         加入
                       </button>
@@ -198,44 +185,40 @@ export default function GroupsPage() {
                 )}
               </div>
             ) : (
-              // 我的群组
-              <div className="p-2">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">我的群组</h3>
+              <div>
+                <h3 className="mb-2 px-2 text-sm font-medium text-slate-500 dark:text-slate-400">我的群组</h3>
                 {loading ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    加载中...
-                  </div>
+                  <PageLoading message="加载群组中..." size="sm" />
                 ) : groups.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    暂无群组
-                    <p className="text-xs mt-1">点击右上角创建群聊</p>
+                  <div className="px-2">
+                    <EmptyState title="暂无群组" description="点击右上角创建群聊" />
                   </div>
                 ) : (
                   groups.map((group) => {
                     const isActive = currentGroup?.group_id === group.group_id;
                     return (
-                      <div
+                      <button
                         key={group.group_id}
-                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                        type="button"
+                        className={`mb-2 flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all ${
                           isActive
-                            ? "bg-primary/10 dark:bg-primary/20"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                            ? "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/20"
+                            : "border-transparent bg-white/80 hover:border-slate-200 hover:bg-white dark:bg-slate-800/70 dark:hover:border-slate-700 dark:hover:bg-slate-800"
                         }`}
                         onClick={() => setCurrentGroup(group)}
                       >
-                        <div
-                          className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12"
-                          style={{ backgroundImage: `url(${group.avatar || '/default-group-avatar.png'})` }}
+                        <UserAvatar
+                          src={group.avatar || "/default-group-avatar.png"}
+                          name={group.name}
+                          size="md"
+                          shape="rounded"
+                          border
                         />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-gray-900 dark:text-white font-medium text-sm truncate">
-                            {group.name}
-                          </p>
-                          <p className="text-gray-500 dark:text-gray-400 text-xs">
-                            {group.member_count} 人
-                          </p>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{group.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
                         </div>
-                      </div>
+                      </button>
                     );
                   })
                 )}
@@ -244,31 +227,16 @@ export default function GroupsPage() {
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col bg-white dark:bg-gray-900">
+        <main className="min-w-0 flex-1 bg-white/80 dark:bg-slate-900/60">
           {currentGroup ? (
-            <GroupDetail group={currentGroup} currentUser={currentUser} />
+            <GroupDetail group={currentGroup} />
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-400">
-              <span className="material-symbols-outlined text-5xl text-slate-300">groups</span>
-              <p className="text-lg font-semibold text-slate-500">选择一个群组查看详情</p>
-              <p className="text-sm">或者创建一个新的群组</p>
+            <div className="flex h-full min-h-[52vh] items-center justify-center px-6">
+              <EmptyState title="选择一个群组查看详情" description="或者创建一个新的群组" />
             </div>
           )}
         </main>
       </div>
-
-      {/* 错误提示 */}
-      {error && (
-        <div className="fixed top-4 right-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg">
-          {error}
-          <button
-            onClick={() => setError(null)}
-            className="ml-3 text-xs text-red-600 underline"
-          >
-            知道了
-          </button>
-        </div>
-      )}
 
       {/* 创建群组模态框 */}
       {showCreateModal && (
@@ -280,12 +248,12 @@ export default function GroupsPage() {
           }}
         />
       )}
-    </div>
+    </AppShell>
   );
 }
 
 // 群组详情组件
-function GroupDetail({ group, currentUser }: { group: Group; currentUser: User | null }) {
+function GroupDetail({ group }: { group: Group }) {
   const { groupMembers, setGroupMembers } = useGroupStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -314,58 +282,57 @@ function GroupDetail({ group, currentUser }: { group: Group; currentUser: User |
   }, [group.group_id]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* 群组信息头部 */}
-      <div className="flex-shrink-0 p-6 border-b border-gray-200 dark:border-gray-800">
+    <div className="flex h-full flex-col">
+      <div className="border-b border-slate-200/70 p-6 dark:border-slate-800">
         <div className="flex items-center gap-4">
-          <div
-            className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-16"
-            style={{ backgroundImage: `url(${group.avatar || '/default-group-avatar.png'})` }}
+          <UserAvatar
+            src={group.avatar || "/default-group-avatar.png"}
+            name={group.name}
+            size="xl"
+            shape="rounded"
+            border
           />
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{group.name}</h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              {group.description || '暂无群描述'}
-            </p>
-            <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{group.name}</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{group.description || "暂无群描述"}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               {group.member_count} 人 · 群号: {group.group_id}
             </p>
           </div>
           <div className="flex gap-2">
-            <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm">
+            <button className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
               发消息
             </button>
-            <button className="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm">
+            <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
               管理
             </button>
           </div>
         </div>
       </div>
 
-      {/* 群成员列表 */}
       <div className="flex-1 overflow-y-auto p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">群成员</h3>
+        <h3 className="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">群成员</h3>
         {loading ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            加载中...
-          </div>
+          <PageLoading message="加载群成员中..." size="sm" />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => (
               <div
                 key={member.user_id}
-                className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
+                className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-800/70"
               >
-                <div
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  style={{ backgroundImage: `url(${member.user?.avatar || '/default-avatar.png'})` }}
+                <UserAvatar
+                  src={member.user?.avatar || "/default-avatar.png"}
+                  name={member.nickname || member.user?.nickname || `用户${member.user_id}`}
+                  size="md"
+                  border
                 />
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-900 dark:text-white font-medium text-sm truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {member.nickname || member.user?.nickname || `用户${member.user_id}`}
                   </p>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs">
-                    {member.role === 3 ? '群主' : member.role === 2 ? '管理员' : '成员'}
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {member.role === 3 ? "群主" : member.role === 2 ? "管理员" : "成员"}
                   </p>
                 </div>
               </div>
@@ -374,18 +341,7 @@ function GroupDetail({ group, currentUser }: { group: Group; currentUser: User |
         )}
       </div>
 
-      {/* 错误提示 */}
-      {error && (
-        <div className="mx-6 mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-          <button
-            onClick={() => setError(null)}
-            className="ml-3 text-xs text-red-600 underline"
-          >
-            知道了
-          </button>
-        </div>
-      )}
+      <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mb-4" />
     </div>
   );
 }
@@ -442,7 +398,7 @@ function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; onSucce
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              className="ui-input w-full rounded-lg px-3 py-2"
               placeholder="请输入群组名称"
               maxLength={100}
             />
@@ -455,7 +411,7 @@ function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; onSucce
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              className="ui-textarea w-full rounded-lg px-3 py-2"
               placeholder="请输入群组描述"
               rows={3}
               maxLength={500}
@@ -470,7 +426,7 @@ function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; onSucce
               type="number"
               value={formData.max_members}
               onChange={(e) => setFormData({ ...formData, max_members: parseInt(e.target.value) || 500 })}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
+              className="ui-input w-full rounded-lg px-3 py-2"
               min={2}
               max={2000}
             />
@@ -482,7 +438,7 @@ function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; onSucce
                 type="checkbox"
                 checked={formData.is_public}
                 onChange={(e) => setFormData({ ...formData, is_public: e.target.checked })}
-                className="mr-2"
+                className="mr-2 h-4 w-4 accent-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">公开群组</span>
             </label>
@@ -492,7 +448,7 @@ function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; onSucce
                 type="checkbox"
                 checked={formData.join_approval}
                 onChange={(e) => setFormData({ ...formData, join_approval: e.target.checked })}
-                className="mr-2"
+                className="mr-2 h-4 w-4 accent-primary"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">需要审批</span>
             </label>

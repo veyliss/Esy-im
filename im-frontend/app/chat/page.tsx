@@ -11,6 +11,9 @@ import type { Message, MessageType, Conversation, Group, GroupMessage, GroupMess
 import { UserAPI } from "@/lib/api/user";
 import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
+import { AppShell } from "@/components/layout/app-shell";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { ErrorAlert, EmptyState } from "@/components/ui/error-alert";
 
 // 聊天项目类型（私聊或群聊）
 type ChatItem = {
@@ -469,116 +472,102 @@ export default function ChatPage() {
   }, [privateUnreadCount, groupUnreadCounts]);
 
   return (
-    <div className="flex h-screen flex-col bg-background-light dark:bg-background-dark font-display">
-      <header className="flex-shrink-0 bg-background-light dark:bg-background-dark border-b border-gray-200 dark:border-gray-800">
-        <div className="mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <nav className="flex items-center gap-6">
-                <a className="text-sm font-medium text-primary" href="/chat">聊天</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/contacts">通讯录</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/groups">群聊</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/moments">朋友圈</a>
-                <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/me">我的</a>
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <span className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-emerald-500" : "bg-amber-400"}`} />
-                {wsConnected ? "已连接" : "连接中..."}
-              </div>
-              {totalUnreadCount > 0 && (
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                  未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
-                </span>
-              )}
-              {currentUser?.avatar && (
-                <div
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  style={{ backgroundImage: `url(${currentUser.avatar})` }}
-                />
-              )}
-            </div>
+    <AppShell
+      active="chat"
+      navVariant="modern"
+      rightSlot={
+        <>
+          <div className="hidden items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-xs text-slate-500 dark:border-slate-700/60 dark:bg-slate-800/70 dark:text-slate-300 sm:flex">
+            <span className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-emerald-500" : "bg-amber-400"}`} />
+            {wsConnected ? "已连接" : "连接中..."}
           </div>
-        </div>
-      </header>
-
-      <div className="flex-grow flex overflow-hidden">
-        <aside className="w-80 flex-shrink-0 bg-background-light dark:bg-background-dark border-r border-gray-200 dark:border-gray-800 flex flex-col">
-          {/* 搜索框 */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          {totalUnreadCount > 0 ? (
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+            </span>
+          ) : null}
+          <UserAvatar
+            src={currentUser?.avatar}
+            name={currentUser?.nickname || "我"}
+            size="sm"
+            border
+            showStatus
+            status={wsConnected ? "online" : "away"}
+          />
+        </>
+      }
+      headerDescription="统一私聊与群聊入口，快速切换会话。"
+    >
+      <div className="flex min-h-[72vh] overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-xl shadow-slate-200/50 dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30">
+        <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200/70 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/70">
+          <div className="border-b border-slate-200/70 p-4 dark:border-slate-800">
             <input
               type="text"
               placeholder="搜索聊天..."
               value={chatFilter}
               onChange={(e) => setChatFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="ui-input w-full rounded-xl px-4 py-2 text-sm"
             />
           </div>
 
-          {/* 聊天列表 */}
-          <div className="flex-grow overflow-y-auto">
-            <div className="space-y-1 p-2">
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="space-y-1">
               {filteredChatList.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300/70 py-12 text-center text-sm text-slate-400">
-                  {chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
-                  {!chatFilter.trim() && <p className="mt-1 text-xs">去联系人页面添加好友或创建群聊吧</p>}
-                </div>
+                <EmptyState
+                  title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
+                  description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
+                />
               ) : (
                 filteredChatList.map((chatItem) => {
                   const isActive = currentChat?.id === chatItem.id;
-                  
+
                   return (
-                    <div
+                    <button
                       key={chatItem.id}
-                      className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors ${
-                        isActive
-                          ? "bg-primary/10 dark:bg-primary/20"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }`}
+                      type="button"
                       onClick={() => handleSelectChat(chatItem)}
+                      className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-all ${
+                        isActive
+                          ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
+                          : "border-transparent hover:border-slate-200 hover:bg-white/90 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                      }`}
                     >
                       <div className="relative">
-                        <div
-                          className={`bg-center bg-no-repeat aspect-square bg-cover size-12 ${
-                            chatItem.type === 'group' ? 'rounded-lg' : 'rounded-full'
-                          }`}
-                          style={{ backgroundImage: `url(${chatItem.avatar})` }}
+                        <UserAvatar
+                          src={chatItem.avatar}
+                          name={chatItem.name}
+                          size="md"
+                          shape={chatItem.type === "group" ? "rounded" : "circle"}
+                          border
                         />
-                        {chatItem.type === 'group' && (
-                          <span className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-xs px-1 rounded">群</span>
-                        )}
-                        {chatItem.type === 'private' && (
-                          <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-background-light dark:border-background-dark"></span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center">
-                          <p className="text-gray-900 dark:text-white font-semibold text-sm truncate">
-                            {chatItem.name}
-                          </p>
-                          <p className="text-gray-500 dark:text-gray-400 text-xs">
-                            {chatItem.lastMessageTime ?
-                              new Date(chatItem.lastMessageTime).toLocaleTimeString('zh-CN', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              }) :
-                              ''
-                            }
-                          </p>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm truncate mt-1">
-                          {chatItem.lastMessage || '暂无消息'}
-                        </p>
-                      </div>
-                      {chatItem.unreadCount > 0 && (
-                        <div className="flex flex-col items-end space-y-1">
-                          <span className="bg-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                            {chatItem.unreadCount > 99 ? '99+' : chatItem.unreadCount}
+                        {chatItem.type === "group" ? (
+                          <span className="absolute -bottom-1 -right-1 rounded bg-blue-500 px-1 text-[10px] font-semibold text-white">
+                            群
                           </span>
+                        ) : null}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{chatItem.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {chatItem.lastMessageTime
+                              ? new Date(chatItem.lastMessageTime).toLocaleTimeString("zh-CN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : ""}
+                          </p>
                         </div>
-                      )}
-                    </div>
+                        <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
+                      </div>
+
+                      {chatItem.unreadCount > 0 ? (
+                        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                          {chatItem.unreadCount > 99 ? "99+" : chatItem.unreadCount}
+                        </span>
+                      ) : null}
+                    </button>
                   );
                 })
               )}
@@ -586,100 +575,106 @@ export default function ChatPage() {
           </div>
         </aside>
 
-        <main className="flex-1 flex flex-col bg-white dark:bg-gray-900">
+        <main className="flex min-w-0 flex-1 flex-col bg-white/80 dark:bg-slate-900/60">
           {currentChat ? (
             <>
-              <div className="flex-shrink-0 flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-3 dark:border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`bg-center bg-no-repeat aspect-square bg-cover size-10 ${
-                      currentChat.type === 'group' ? 'rounded-lg' : 'rounded-full'
-                    }`}
-                    style={{ backgroundImage: `url(${currentChat.avatar})` }}
+                  <UserAvatar
+                    src={currentChat.avatar}
+                    name={currentChat.name}
+                    size="md"
+                    shape={currentChat.type === "group" ? "rounded" : "circle"}
+                    border
                   />
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{currentChat.name}</h3>
-                    {currentChat.type === 'group' && 'member_count' in currentChat.data && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {currentChat.data.member_count} 人
-                      </p>
-                    )}
+                    <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{currentChat.name}</h3>
+                    {currentChat.type === "group" && "member_count" in currentChat.data ? (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{currentChat.data.member_count} 人</p>
+                    ) : null}
                   </div>
                 </div>
-                <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+                <button
+                  type="button"
+                  aria-label="会话更多操作"
+                  title="会话更多操作"
+                  className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    ></path>
                   </svg>
                 </button>
               </div>
 
-              {(error || connectionError) && (
-                <div className="mx-6 mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                  {error || connectionError}
-                  <button
-                    onClick={() => {
-                      setError(null);
-                      setConnectionError(null);
-                    }}
-                    className="ml-3 text-xs text-amber-600 underline"
-                  >
-                    知道了
-                  </button>
-                </div>
-              )}
+              <ErrorAlert
+                error={connectionError}
+                type="warning"
+                onClose={() => setConnectionError(null)}
+                className="mx-6 mt-4"
+              />
+              <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mt-3" />
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 space-y-6 overflow-y-auto p-6">
                 {currentMessages.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 py-12 text-center text-slate-400">
-                    暂无消息，开始聊天吧
-                  </div>
+                  <EmptyState title="暂无消息" description="开始发送第一条消息吧" />
                 ) : (
                   currentMessages.map((message) => {
                     const isMyMessage = message.from_user_id === currentUser?.user_id;
                     const messageUser = isMyMessage ? currentUser : message.from_user;
 
                     if (isMyMessage) {
-                      // 我发送的消息 - 右对齐
                       return (
-                        <div key={message.id} className="flex items-start gap-4 justify-end">
-                          <div className="flex flex-col items-end max-w-lg">
-                            <div className="bg-primary text-white rounded-lg rounded-tr-none px-4 py-3 shadow-sm">
-                              <p className="text-sm">{message.content}</p>
-                            </div>
+                        <div key={message.id} className="flex justify-end gap-3">
+                          <div className="max-w-lg rounded-2xl rounded-tr-md bg-primary px-4 py-3 text-sm text-white shadow-sm">
+                            {message.content}
                           </div>
-                          <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0"
-                               style={{ backgroundImage: `url(${messageUser?.avatar || '/default-avatar.png'})` }} />
-                        </div>
-                      );
-                    } else {
-                      // 对方发送的消息 - 左对齐
-                      return (
-                        <div key={message.id} className="flex items-start gap-4">
-                          <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10 shrink-0"
-                               style={{ backgroundImage: `url(${messageUser?.avatar || '/default-avatar.png'})` }} />
-                          <div className="flex flex-col items-start max-w-lg">
-                            {currentChat.type === 'group' && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                {messageUser?.nickname || `用户${message.from_user_id}`}
-                              </p>
-                            )}
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg rounded-tl-none px-4 py-3 shadow-sm">
-                              <p className="text-sm text-gray-800 dark:text-gray-200">{message.content}</p>
-                            </div>
-                          </div>
+                          <UserAvatar
+                            src={messageUser?.avatar}
+                            name={messageUser?.nickname || "我"}
+                            size="md"
+                            border
+                            className="shrink-0"
+                          />
                         </div>
                       );
                     }
+
+                    return (
+                      <div key={message.id} className="flex gap-3">
+                        <UserAvatar
+                          src={messageUser?.avatar}
+                          name={messageUser?.nickname || `用户${message.from_user_id}`}
+                          size="md"
+                          border
+                          className="shrink-0"
+                        />
+                        <div className="max-w-lg">
+                          {currentChat.type === "group" ? (
+                            <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
+                              {messageUser?.nickname || `用户${message.from_user_id}`}
+                            </p>
+                          ) : null}
+                          <div className="rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+                            {message.content}
+                          </div>
+                        </div>
+                      </div>
+                    );
                   })
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="flex-shrink-0 px-6 py-4 bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-gray-800">
+              <div className="border-t border-slate-200/70 bg-slate-50/70 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/50">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 relative">
+                  <div className="relative flex-1">
                     <input
-                      className="form-input w-full rounded-full py-3 pl-5 pr-12 bg-gray-100 dark:bg-gray-800 border-transparent focus:border-primary focus:ring-primary text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                      className="form-input w-full rounded-full py-3 pl-5 pr-14 text-sm"
                       placeholder="输入消息..."
                       type="text"
                       value={messageInput}
@@ -694,41 +689,68 @@ export default function ChatPage() {
                       }}
                       disabled={sendingMessage}
                     />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 gap-2">
-                      <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+                    <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-3">
+                      <button
+                        type="button"
+                        aria-label="插入表情"
+                        title="插入表情"
+                        className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                          ></path>
                         </svg>
                       </button>
-                      <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+                      <button
+                        type="button"
+                        aria-label="添加附件"
+                        title="添加附件"
+                        className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                          ></path>
                         </svg>
                       </button>
                     </div>
                   </div>
-                  <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-3">
-                    <span className="material-symbols-outlined">history</span>
-                  </button>
+
                   <button
-                    className="bg-primary hover:bg-primary/90 text-white rounded-full p-3 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-60"
+                    type="button"
+                    aria-label="打开历史记录"
+                    title="打开历史记录"
+                    className="rounded-full p-2.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">history</span>
+                  </button>
+
+                  <button
+                    className="flex items-center justify-center rounded-full bg-primary p-2.5 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={handleSendMessage}
                     disabled={sendingMessage || !messageInput.trim()}
+                    aria-label="发送消息"
+                    title="发送消息"
                   >
-                    <span className="material-symbols-outlined">send</span>
+                    <span className="material-symbols-outlined text-[20px]">send</span>
                   </button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 text-slate-400">
-              <span className="material-symbols-outlined text-5xl text-slate-300">chat</span>
-              <p className="text-lg font-semibold text-slate-500">选择一个聊天开始交流</p>
-              <p className="text-sm">支持私聊和群聊</p>
+            <div className="flex flex-1 items-center justify-center px-6">
+              <EmptyState title="选择一个聊天开始交流" description="支持私聊与群聊" />
             </div>
           )}
         </main>
       </div>
-    </div>
+    </AppShell>
   );
 }

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"im-backend/internal/controller"
 	"im-backend/internal/pkg"
 	"im-backend/internal/repository"
@@ -23,11 +24,28 @@ func NewGroupHandler(groupController *controller.GroupController, userRepo *repo
 	}
 }
 
+// getCurrentUserID 从Context的Email获取user_id
+func (h *GroupHandler) getCurrentUserID(r *http.Request) (string, error) {
+	email := pkg.GetUserIDFromContext(r.Context())
+	if email == "" {
+		return "", errors.New("未认证")
+	}
+	user, err := h.userRepo.FindByEmail(email)
+	if err != nil || user == nil {
+		return "", errors.New("用户不存在")
+	}
+	return user.UserID, nil
+}
+
 // ==================== Group 管理 ====================
 
 // CreateGroup 创建群组
 func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 
 	var req struct {
 		Name         string `json:"name"`
@@ -72,7 +90,11 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 
 // GetGroupInfo 获取群组信息
 func (h *GroupHandler) GetGroupInfo(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -92,7 +114,11 @@ func (h *GroupHandler) GetGroupInfo(w http.ResponseWriter, r *http.Request) {
 
 // UpdateGroupInfo 更新群组信息
 func (h *GroupHandler) UpdateGroupInfo(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -112,7 +138,7 @@ func (h *GroupHandler) UpdateGroupInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupController.UpdateGroupInfo(groupID, userID, req.Name, req.Description, req.Avatar)
+	err = h.groupController.UpdateGroupInfo(groupID, userID, req.Name, req.Description, req.Avatar)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -123,7 +149,11 @@ func (h *GroupHandler) UpdateGroupInfo(w http.ResponseWriter, r *http.Request) {
 
 // DeleteGroup 解散群组
 func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -132,7 +162,7 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupController.DeleteGroup(groupID, userID)
+	err = h.groupController.DeleteGroup(groupID, userID)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -143,7 +173,11 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 
 // GetUserGroups 获取用户加入的群组列表
 func (h *GroupHandler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 
 	// 获取分页参数
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
@@ -193,7 +227,11 @@ func (h *GroupHandler) SearchGroups(w http.ResponseWriter, r *http.Request) {
 
 // JoinGroup 加入群组
 func (h *GroupHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 
 	var req struct {
 		GroupID string `json:"group_id"`
@@ -209,7 +247,7 @@ func (h *GroupHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupController.JoinGroup(req.GroupID, userID)
+	err = h.groupController.JoinGroup(req.GroupID, userID)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -220,7 +258,11 @@ func (h *GroupHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
 
 // LeaveGroup 退出群组
 func (h *GroupHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -229,7 +271,7 @@ func (h *GroupHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupController.LeaveGroup(groupID, userID)
+	err = h.groupController.LeaveGroup(groupID, userID)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -240,7 +282,11 @@ func (h *GroupHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 
 // KickMember 踢出成员
 func (h *GroupHandler) KickMember(w http.ResponseWriter, r *http.Request) {
-	operatorID := r.Context().Value("user_id").(string)
+	operatorID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -263,7 +309,7 @@ func (h *GroupHandler) KickMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupController.KickMember(groupID, operatorID, req.TargetUserID)
+	err = h.groupController.KickMember(groupID, operatorID, req.TargetUserID)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -274,7 +320,11 @@ func (h *GroupHandler) KickMember(w http.ResponseWriter, r *http.Request) {
 
 // SetMemberRole 设置成员角色
 func (h *GroupHandler) SetMemberRole(w http.ResponseWriter, r *http.Request) {
-	operatorID := r.Context().Value("user_id").(string)
+	operatorID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -298,7 +348,7 @@ func (h *GroupHandler) SetMemberRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.groupController.SetMemberRole(groupID, operatorID, req.TargetUserID, req.Role)
+	err = h.groupController.SetMemberRole(groupID, operatorID, req.TargetUserID, req.Role)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -309,7 +359,11 @@ func (h *GroupHandler) SetMemberRole(w http.ResponseWriter, r *http.Request) {
 
 // GetGroupMembers 获取群成员列表
 func (h *GroupHandler) GetGroupMembers(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -342,7 +396,11 @@ func (h *GroupHandler) GetGroupMembers(w http.ResponseWriter, r *http.Request) {
 
 // SendGroupMessage 发送群消息
 func (h *GroupHandler) SendGroupMessage(w http.ResponseWriter, r *http.Request) {
-	fromUserID := r.Context().Value("user_id").(string)
+	fromUserID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 
 	var req struct {
 		GroupID     string `json:"group_id"`
@@ -384,7 +442,11 @@ func (h *GroupHandler) SendGroupMessage(w http.ResponseWriter, r *http.Request) 
 
 // GetGroupMessages 获取群消息历史
 func (h *GroupHandler) GetGroupMessages(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -415,7 +477,11 @@ func (h *GroupHandler) GetGroupMessages(w http.ResponseWriter, r *http.Request) 
 
 // RecallGroupMessage 撤回群消息
 func (h *GroupHandler) RecallGroupMessage(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	messageIDStr := vars["message_id"]
 
@@ -436,7 +502,11 @@ func (h *GroupHandler) RecallGroupMessage(w http.ResponseWriter, r *http.Request
 
 // MarkGroupMessagesAsRead 标记群消息为已读
 func (h *GroupHandler) MarkGroupMessagesAsRead(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 
@@ -445,7 +515,7 @@ func (h *GroupHandler) MarkGroupMessagesAsRead(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err := h.groupController.MarkGroupMessagesAsRead(groupID, userID)
+	err = h.groupController.MarkGroupMessagesAsRead(groupID, userID)
 	if err != nil {
 		pkg.Error(w, 4002, err.Error())
 		return
@@ -456,7 +526,11 @@ func (h *GroupHandler) MarkGroupMessagesAsRead(w http.ResponseWriter, r *http.Re
 
 // GetUserUnreadGroupMessages 获取用户在群组中的未读消息数
 func (h *GroupHandler) GetUserUnreadGroupMessages(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.Error(w, 4001, err.Error())
+		return
+	}
 	vars := mux.Vars(r)
 	groupID := vars["group_id"]
 

@@ -207,7 +207,7 @@ export function MomentItem({
                     handleCommentSubmit();
                   }
                 }}
-                className="flex-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary focus:ring-2 focus:ring-primary/20 px-3 py-2 text-sm transition-all"
+                className="ui-input flex-1 rounded-lg px-3 py-2 text-sm"
               />
               <button
                 onClick={handleCommentSubmit}

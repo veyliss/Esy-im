@@ -9,6 +9,7 @@ interface AppShellProps {
   headerDescription?: ReactNode;
   navVariant?: NavTabsProps["variant"];
   className?: string;
+  contentClassName?: string;
 }
 
 export function AppShell({
@@ -16,24 +17,26 @@ export function AppShell({
   children,
   rightSlot,
   headerDescription,
-  navVariant = "light",
+  navVariant = "modern",
   className,
+  contentClassName,
 }: AppShellProps) {
   return (
     <div
       className={clsx(
-        "min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-100/40 px-4 py-6 font-display dark:from-background-dark dark:via-[#182430] dark:to-[#0b121a] sm:px-6 lg:px-10",
+        "flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-100/45 px-4 py-5 font-display text-slate-800 dark:from-[#0b1118] dark:via-[#132130] dark:to-[#0b121a] dark:text-slate-200 sm:px-6 sm:py-6 lg:px-8",
         className,
       )}
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-        <header className="rounded-2xl border border-white/60 bg-white/85 px-6 py-4 shadow-xl backdrop-blur dark:border-slate-800/60 dark:bg-slate-900/80">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 lg:gap-6">
+        <header className="rounded-3xl border border-white/70 bg-white/85 px-4 py-3 shadow-xl shadow-slate-200/40 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30 sm:px-5 sm:py-4">
           <NavTabs active={active} variant={navVariant} rightSlot={rightSlot} />
           {headerDescription ? (
-            <div className="mt-3 text-sm text-slate-500 dark:text-slate-400">{headerDescription}</div>
+            <div className="mt-3 px-1 text-sm text-slate-500 dark:text-slate-400">{headerDescription}</div>
           ) : null}
         </header>
-        {children}
+
+        <section className={clsx("min-h-0", contentClassName)}>{children}</section>
       </div>
     </div>
   );

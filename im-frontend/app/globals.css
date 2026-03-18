@@ -104,6 +104,11 @@
   box-sizing: border-box;
 }
 
+/* 兼容部分浏览器：确保 Tailwind v4 的 border 工具类有默认样式 */
+*, ::before, ::after, ::backdrop {
+  --tw-border-style: solid;
+}
+
 body {
   font-family: var(--font-display);
   background: var(--color-background-light);
@@ -185,142 +190,99 @@ html, body {
     'opsz' 24
 }
 
-/* 修复 Tailwind v4 样式不生效问题 - 强制应用关键样式 */
-.form-input {
-  display: flex;
+/* 统一输入控件样式：覆盖 Tailwind v4 下零散输入框视觉不一致问题 */
+.form-input,
+.ui-input,
+.ui-textarea {
   width: 100%;
   min-width: 0;
-  flex: 1 1 0%;
-  resize: none;
-  overflow: hidden;
-  border-width: 1px;
-  outline: 2px solid transparent;
-  outline-offset: 2px;
+  border: 1px solid #d5deea;
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition:
+    border-color var(--duration-150) var(--ease-out),
+    box-shadow var(--duration-150) var(--ease-out),
+    background-color var(--duration-150) var(--ease-out),
+    color var(--duration-150) var(--ease-out);
 }
 
-.form-input:focus {
-  outline-width: 2px;
-  outline-style: solid;
-  outline-color: rgba(17, 115, 212, 0.5);
+.form-input::placeholder,
+.ui-input::placeholder,
+.ui-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-input:hover:not(:focus):not(:disabled),
+.ui-input:hover:not(:focus):not(:disabled),
+.ui-textarea:hover:not(:focus):not(:disabled) {
+  border-color: #b9c7da;
+}
+
+.form-input:focus,
+.ui-input:focus,
+.ui-textarea:focus {
+  outline: none;
   border-color: #1173d4;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 3px rgba(17, 115, 212, 0.14),
+    0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
-.form-input:hover:not(:focus) {
-  border-color: #9ca3af;
+.form-input:disabled,
+.ui-input:disabled,
+.ui-textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background: #f8fafc;
+  color: #94a3b8;
 }
 
-.dark .form-input:hover:not(:focus) {
-  border-color: #64748b;
+.dark .form-input,
+.dark .ui-input,
+.dark .ui-textarea {
+  border-color: #334155;
+  background: rgba(15, 23, 42, 0.82);
+  color: #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.32);
 }
 
-/* 确保间距工具类生效 */
-.space-y-6 > * + * {
-  margin-top: 1.5rem !important;
+.dark .form-input::placeholder,
+.dark .ui-input::placeholder,
+.dark .ui-textarea::placeholder {
+  color: #64748b;
 }
 
-.space-y-4 > * + * {
-  margin-top: 1rem !important;
+.dark .form-input:hover:not(:focus):not(:disabled),
+.dark .ui-input:hover:not(:focus):not(:disabled),
+.dark .ui-textarea:hover:not(:focus):not(:disabled) {
+  border-color: #475569;
+  background: rgba(15, 23, 42, 0.9);
 }
 
-/* 确保内边距工具类生效 */
-.px-4 {
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
+.dark .form-input:focus,
+.dark .ui-input:focus,
+.dark .ui-textarea:focus {
+  border-color: #69b6ff;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow:
+    0 0 0 3px rgba(105, 182, 255, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.36);
 }
 
-.py-3 {
-  padding-top: 0.75rem !important;
-  padding-bottom: 0.75rem !important;
+.dark .form-input:disabled,
+.dark .ui-input:disabled,
+.dark .ui-textarea:disabled {
+  background: rgba(15, 23, 42, 0.6);
+  color: #64748b;
 }
 
-.px-8 {
-  padding-left: 2rem !important;
-  padding-right: 2rem !important;
-}
+/* 说明：移除对 spacing/rounded/text 等工具类的全局 !important 覆盖，
+   避免破坏统一导航与壳层视觉。保留主题 token、动画和必要的输入控件统一样式。 */
 
-.pb-2 {
-  padding-bottom: 0.5rem !important;
-}
-
-.pb-2\.5, .pb-2-5 {
-  padding-bottom: 0.625rem !important;
-}
-
-.mt-6 {
-  margin-top: 1.5rem !important;
-}
-
-.mt-4 {
-  margin-top: 1rem !important;
-}
-
-/* 确保高度工具类生效 */
-.h-12 {
-  height: 3rem !important;
-}
-
-.h-14 {
-  height: 3.5rem !important;
-}
-
-/* 确保圆角工具类生效 */
-.rounded-xl {
-  border-radius: 0.75rem !important;
-}
-
-.rounded-lg {
-  border-radius: 0.5rem !important;
-}
-
-/* 确保文字大小工具类生效 */
-.text-lg {
-  font-size: 1.125rem !important;
-  line-height: 1.75rem !important;
-}
-
-.text-base {
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
-}
-
-/* 确保字重工具类生效 */
-.font-semibold {
-  font-weight: 600 !important;
-}
-
-.font-bold {
-  font-weight: 700 !important;
-}
-
-/* 增强的过渡效果 */
-.transition-all {
-  transition-property: all !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.transition-colors {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.transition-transform {
-  transition-property: transform !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.transition-opacity {
-  transition-property: opacity !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.duration-75 { transition-duration: 75ms !important; }
-.duration-100 { transition-duration: 100ms !important; }
-.duration-150 { transition-duration: 150ms !important; }
-.duration-200 { transition-duration: 200ms !important; }
-.duration-300 { transition-duration: 300ms !important; }
-.duration-500 { transition-duration: 500ms !important; }
-.duration-700 { transition-duration: 700ms !important; }
-.duration-1000 { transition-duration: 1000ms !important; }
+/* 过渡动画由 Tailwind 工具类原生控制，避免全局 !important 覆盖 */
 
 /* 自定义动画关键帧 */
 @keyframes float {
