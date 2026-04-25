@@ -114,10 +114,17 @@ export function getErrorMessage(code: ErrorCode, fallback?: string): string {
 /**
  * 判断是否需要重新登录
  */
-export function shouldRelogin(code: ErrorCode): boolean {
-  return code === ErrorCode.UNAUTHORIZED || 
-         code === ErrorCode.TOKEN_INVALID || 
-         code === ErrorCode.TOKEN_EXPIRED;
+export function shouldRelogin(error: Pick<ApiError, 'code' | 'message'>): boolean {
+  if (error.code === ErrorCode.TOKEN_INVALID || error.code === ErrorCode.TOKEN_EXPIRED) {
+    return true;
+  }
+
+  if (error.code !== ErrorCode.UNAUTHORIZED) {
+    return false;
+  }
+
+  return ["未授权", "未提供Token", "token无效", "token已过期", "重新登录"]
+    .some((keyword) => error.message.includes(keyword));
 }
 
 /**
@@ -197,7 +204,7 @@ export function createUserFriendlyErrorMessage(error: ApiError): string {
   }
   
   // 认证错误
-  if (shouldRelogin(error.code)) {
+  if (shouldRelogin(error)) {
     return '登录已过期，请重新登录';
   }
   

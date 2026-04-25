@@ -14,6 +14,7 @@ import type { User, FriendRequest, Group } from "@/lib/types/api";
 import { useRouter } from "next/navigation";
 import { wsClient } from "@/lib/websocket/client";
 import { FriendRequestItem } from "@/components/contacts/FriendRequestItem";
+import { EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function ContactsPage() {
   } = useContactStore();
 
   // 群聊相关
-  const { groups, setGroups, currentGroup, setCurrentGroup, groupMembers, setGroupMembers } = useGroupStore();
+  const { groups, setGroups, currentGroup, setCurrentGroup } = useGroupStore();
 
   const { setCurrentConversation } = useChatStore();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -139,8 +140,6 @@ export default function ContactsPage() {
       const handleFriendRequest = (request: FriendRequest) => {
         console.log("📨 收到新的好友请求:", request);
         loadReceivedRequests();
-        // 根据需求可替换为通知组件
-        // eslint-disable-next-line no-alert
         alert(`收到来自 ${request.from_user?.nickname || request.from_user_id} 的好友请求`);
         setActiveRightTab("requests");
       };
@@ -151,7 +150,6 @@ export default function ContactsPage() {
         loadFriends();
         loadSentRequests();
         if (data.friend) {
-          // eslint-disable-next-line no-alert
           alert(`${data.friend.nickname} 已同意你的好友请求`);
         }
       };
@@ -341,21 +339,6 @@ export default function ContactsPage() {
     }
   };
 
-  // 退出群聊
-  const handleLeaveCurrentGroup = async (groupId: string) => {
-    try {
-      const res = await GroupAPI.leaveGroup(groupId);
-      if (res.data.code === 0) {
-        alert("已退出群聊");
-        await loadUserGroups();
-        setCurrentGroup(null);
-      }
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "退出群聊失败");
-    }
-  };
-
   // 左侧选择逻辑：选择好友时清空选中群，选择群时清空选中好友
   const selectFriend = (friend: (typeof friends)[number]) => {
     setSelectedFriend(friend);
@@ -371,13 +354,14 @@ export default function ContactsPage() {
   const friendUser = selectedFriend?.friend_user;
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+    <div className="min-h-screen bg-slate-50 font-display text-slate-800 dark:bg-background-dark dark:text-slate-200">
       <div className="flex h-screen flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-6 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
           <div className="flex items-center gap-8">
             <nav className="flex items-center gap-6">
               <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/chat">聊天</a>
               <a className="text-sm font-medium text-primary" href="/contacts">通讯录</a>
+              <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/groups">群聊</a>
               <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/moments">朋友圈</a>
               <a className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="/me">我的</a>
             </nav>
@@ -397,147 +381,142 @@ export default function ContactsPage() {
               <span className="material-symbols-outlined text-base">person_add</span>
               添加好友
             </button>
-            <button className="relative">
-              {currentUser?.avatar && (
-                <img
+            <button className="relative overflow-hidden rounded-full">
+              {currentUser?.avatar ? (
+                <Image
                   alt="User avatar"
                   className="h-8 w-8 rounded-full object-cover"
                   src={currentUser.avatar}
+                  width={32}
+                  height={32}
                 />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  {(currentUser?.nickname || "我").slice(0, 1)}
+                </div>
               )}
             </button>
           </div>
         </header>
 
         <div className="flex flex-1 overflow-hidden">
-          <aside className="w-80 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto">
-            <div className="p-4">
-              <details className="group" open>
-                <summary className="flex cursor-pointer items-center justify-between py-2 font-semibold text-slate-800 dark:text-slate-200">
-                  <span>群聊</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-90">chevron_right</span>
-                </summary>
-                <div className="mt-2 space-y-1">
-                  {groups.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-slate-300 bg-white py-6 text-center text-xs text-slate-400">
-                      暂无群聊，点击右上角添加/加入
-                    </div>
-                  ) : (
-                    groups.map((group) => {
-                      const isActive = currentGroup?.group_id === group.group_id;
-                      return (
-                        <a
-                          key={group.group_id}
-                          className={`flex items-center gap-3 rounded-lg p-2 cursor-pointer transition-colors ${
-                            isActive
-                              ? "bg-primary/10 dark:bg-primary/20 text-primary"
-                              : "hover:bg-slate-100 dark:hover:bg-slate-800"
-                          }`}
-                          onClick={() => selectGroup(group)}
-                        >
-                          <div
-                            className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-8"
-                            style={{ backgroundImage: `url(${group.avatar || '/default-group-avatar.png'})` }}
+          <aside className="w-[380px] flex-shrink-0 border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-y-auto">
+            <div className="p-4 space-y-4">
+              <SidebarSection title="群聊">
+                {groups.length === 0 ? (
+                  <EmptyPanel title="暂无群聊" description="点击右上角添加或加入群聊" className="min-h-[140px]" />
+                ) : (
+                  groups.map((group) => {
+                    const isActive = currentGroup?.group_id === group.group_id;
+                    return (
+                      <a
+                        key={group.group_id}
+                        className={`flex items-center gap-3 rounded-2xl p-3 cursor-pointer transition-colors ${
+                          isActive
+                            ? "bg-primary/10 dark:bg-primary/20 text-primary"
+                            : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800"
+                        }`}
+                        onClick={() => selectGroup(group)}
+                      >
+                        <div className="relative h-10 w-10 overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
+                          <Image
+                            src={group.avatar || "/default-group-avatar.png"}
+                            alt={group.name}
+                            fill
+                            className="object-cover"
                           />
-                          <span className={`flex-1 truncate text-sm ${isActive ? 'font-semibold' : ''}`}>
-                            {group.name}
-                          </span>
-                          {group.member_count ? (
-                            <span className="text-xs text-slate-400">{group.member_count}</span>
-                          ) : null}
-                        </a>
-                      );
-                    })
-                  )}
-                </div>
-              </details>
-            </div>
+                        </div>
+                        <span className={`flex-1 truncate text-sm ${isActive ? 'font-semibold' : ''}`}>
+                          {group.name}
+                        </span>
+                        {group.member_count ? (
+                          <span className="text-xs text-slate-400">{group.member_count}</span>
+                        ) : null}
+                      </a>
+                    );
+                  })
+                )}
+              </SidebarSection>
 
-            <div className="border-t border-slate-200 dark:border-slate-800 p-4">
-              <details className="group" open>
-                <summary className="flex cursor-pointer items-center justify-between py-2 font-semibold text-slate-800 dark:text-slate-200">
-                  <span>我的好友</span>
-                  <span className="material-symbols-outlined transition-transform group-open:rotate-90">chevron_right</span>
-                </summary>
-                <div className="mt-2 space-y-1">
-                  {friends.length === 0 ? (
-                    <div className="rounded-lg border border-dashed border-slate-300 bg-white py-6 text-center text-xs text-slate-400">
-                      暂无好友，点击右上角添加
-                    </div>
-                  ) : (
-                    friends.map((friend) => {
-                      const isActive = selectedFriend?.id === friend.id;
-                      const friendUser = friend.friend_user;
+              <SidebarSection title="我的好友">
+                {friends.length === 0 ? (
+                  <EmptyPanel title="暂无好友" description="点击右上角添加好友" className="min-h-[140px]" />
+                ) : (
+                  friends.map((friend) => {
+                    const isActive = selectedFriend?.id === friend.id;
+                    const friendUser = friend.friend_user;
 
-                      return (
-                        <a
-                          key={friend.id}
-                          className={`flex items-center gap-3 rounded-lg p-2 cursor-pointer transition-colors ${
-                            isActive
-                              ? "bg-primary/10 dark:bg-primary/20 text-primary"
-                              : "hover:bg-slate-100 dark:hover:bg-slate-800"
-                          }`}
-                          onClick={() => selectFriend(friend)}
-                        >
-                          <div className="relative inline-block">
-                            <img
-                              className="size-8 rounded-full object-cover"
-                              src={friendUser?.avatar || '/default-avatar.png'}
-                              alt={friendUser?.nickname || 'User'}
-                            />
-                            <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
-                          </div>
-                          <span className={`flex-1 truncate text-sm ${isActive ? 'font-semibold' : ''}`}>
-                            {friend.remark || friendUser?.nickname || `用户${friendUser?.user_id}`}
-                          </span>
-                        </a>
-                      );
-                    })
-                  )}
-                </div>
-              </details>
+                    return (
+                      <a
+                        key={friend.id}
+                        className={`flex items-center gap-3 rounded-2xl p-3 cursor-pointer transition-colors ${
+                          isActive
+                            ? "bg-primary/10 dark:bg-primary/20 text-primary"
+                            : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800"
+                        }`}
+                        onClick={() => selectFriend(friend)}
+                      >
+                        <div className="relative inline-block">
+                          <Image
+                            className="size-10 rounded-full object-cover"
+                            src={friendUser?.avatar || "/default-avatar.png"}
+                            alt={friendUser?.nickname || "User"}
+                            width={40}
+                            height={40}
+                          />
+                          <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
+                        </div>
+                        <span className={`flex-1 truncate text-sm ${isActive ? 'font-semibold' : ''}`}>
+                          {friend.remark || friendUser?.nickname || `用户${friendUser?.user_id}`}
+                        </span>
+                      </a>
+                    );
+                  })
+                )}
+              </SidebarSection>
             </div>
           </aside>
 
-          <main className="flex-1 overflow-y-auto p-8">
-            <div className="mx-auto max-w-2xl">
-              {/* 右侧顶部子标签 */}
-              <div className="mb-6 flex items-center gap-2 border-b border-slate-200 dark:border-slate-800">
-                <button
-                  className={`relative px-4 py-2 text-sm font-medium rounded-t-lg ${
-                    activeRightTab === 'detail'
-                      ? 'text-primary bg-primary/10 dark:bg-primary/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                  onClick={() => setActiveRightTab('detail')}
-                >
-                  详情
-                </button>
-                <button
-                  className={`relative px-4 py-2 text-sm font-medium rounded-t-lg ${
-                    activeRightTab === 'requests'
-                      ? 'text-primary bg-primary/10 dark:bg-primary/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                  onClick={() => setActiveRightTab('requests')}
-                >
-                  好友请求
-                  {pendingRequestCount > 0 && (
-                    <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
-                      {pendingRequestCount > 99 ? '99+' : pendingRequestCount}
-                    </span>
-                  )}
-                </button>
-              </div>
+          <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950/30">
+            <div className="h-full p-8">
+              <SectionCard className="mb-6 p-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    className={`relative rounded-2xl px-4 py-2 text-sm font-medium ${
+                      activeRightTab === 'detail'
+                        ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                    onClick={() => setActiveRightTab('detail')}
+                  >
+                    详情
+                  </button>
+                  <button
+                    className={`relative rounded-2xl px-4 py-2 text-sm font-medium ${
+                      activeRightTab === 'requests'
+                        ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                    onClick={() => setActiveRightTab('requests')}
+                  >
+                    好友请求
+                    {pendingRequestCount > 0 && (
+                      <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
+                        {pendingRequestCount > 99 ? '99+' : pendingRequestCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </SectionCard>
 
               {/* 右侧内容 */}
               {activeRightTab === 'requests' ? (
-                <div className="space-y-8">
-                  <section>
-                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3">收到的请求</h3>
+                <div className="space-y-6">
+                  <SectionCard>
+                    <SectionTitle title="收到的请求" className="mb-4" />
                     <div className="space-y-3">
                       {receivedRequests.length === 0 ? (
-                        <div className="text-center text-sm text-slate-400 py-8">暂无收到的请求</div>
+                        <EmptyPanel title="暂无收到的请求" className="min-h-[180px]" />
                       ) : (
                         receivedRequests.map((req) => (
                           <FriendRequestItem
@@ -550,13 +529,13 @@ export default function ContactsPage() {
                         ))
                       )}
                     </div>
-                  </section>
+                  </SectionCard>
 
-                  <section>
-                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3">我发出的请求</h3>
+                  <SectionCard>
+                    <SectionTitle title="我发出的请求" className="mb-4" />
                     <div className="space-y-3">
                       {sentRequests.length === 0 ? (
-                        <div className="text-center text-sm text-slate-400 py-8">暂无发出的请求</div>
+                        <EmptyPanel title="暂无发出的请求" className="min-h-[180px]" />
                       ) : (
                         sentRequests.map((req) => (
                           <FriendRequestItem
@@ -567,85 +546,83 @@ export default function ContactsPage() {
                         ))
                       )}
                     </div>
-                  </section>
+                  </SectionCard>
                 </div>
               ) : selectedFriend && friendUser ? (
                 // 好友详情
                 <>
-                  <div className="flex flex-col items-center gap-6 text-center">
-                    <div className="relative inline-block">
-                      <img
-                        alt={`${friendUser.nickname}'s avatar`}
-                        className="size-32 rounded-full object-cover"
-                        src={friendUser.avatar || '/default-avatar.png'}
-                      />
-                      <span className="absolute bottom-2 right-2 block h-6 w-6 rounded-full bg-green-500 ring-4 ring-white dark:ring-background-light"></span>
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                        {selectedFriend.remark || friendUser.nickname}
-                      </h2>
-                      <p className="text-slate-500 dark:text-slate-400">
-                        昵称: {friendUser.nickname}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-12 space-y-8">
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                        基础信息
-                      </h3>
-                      <div className="space-y-3">
-                        <div className="flex">
-                          <p className="w-24 shrink-0 text-slate-500 dark:text-slate-400">User ID</p>
-                          <p className="text-slate-800 dark:text-slate-200">{friendUser.user_id}</p>
-                        </div>
-                        <div className="flex">
-                          <p className="w-24 shrink-0 text-slate-500 dark:text-slate-400">邮箱</p>
-                          <p className="text-slate-800 dark:text-slate-200">{friendUser.email || '未填写'}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-                        备注信息
-                      </h3>
-                      <div>
-                        <label className="sr-only" htmlFor="contact-note">My Note for this contact</label>
-                        <input
-                          className="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary"
-                          id="contact-note"
-                          placeholder="添加备注"
-                          type="text"
-                          value={remark}
-                          onChange={(e) => setRemark(e.target.value)}
+                  <SectionCard>
+                    <div className="flex flex-col items-center gap-6 text-center">
+                      <div className="relative inline-block">
+                        <Image
+                          alt={`${friendUser.nickname}'s avatar`}
+                          className="size-32 rounded-full object-cover"
+                          src={friendUser.avatar || "/default-avatar.png"}
+                          width={128}
+                          height={128}
                         />
+                        <span className="absolute bottom-2 right-2 block h-6 w-6 rounded-full bg-green-500 ring-4 ring-white dark:ring-background-light"></span>
+                      </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+                          {selectedFriend.remark || friendUser.nickname}
+                        </h2>
+                        <p className="text-slate-500 dark:text-slate-400">昵称：{friendUser.nickname}</p>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-12 flex justify-center gap-4">
-                    <button
-                      onClick={handleSendMessage}
-                      className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
-                    >
-                      发送消息
-                    </button>
-                    <button
-                      onClick={handleUpdateRemark}
-                      className="rounded-lg bg-slate-200 dark:bg-slate-800 px-6 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700"
-                    >
-                      保存备注
-                    </button>
-                    <button
-                      onClick={handleDeleteFriend}
-                      className="rounded-lg bg-red-100 dark:bg-red-900/20 px-6 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/30"
-                    >
-                      删除联系人
-                    </button>
-                  </div>
+                    <div className="mt-12 w-full space-y-8 text-left">
+                      <div>
+                        <SectionTitle title="基础信息" className="mb-4 border-b border-slate-200 pb-2 dark:border-slate-800" />
+                        <div className="space-y-3">
+                          <div className="flex">
+                            <p className="w-24 shrink-0 text-slate-500 dark:text-slate-400">用户 ID</p>
+                            <p className="text-slate-800 dark:text-slate-200">{friendUser.user_id}</p>
+                          </div>
+                          <div className="flex">
+                            <p className="w-24 shrink-0 text-slate-500 dark:text-slate-400">邮箱</p>
+                            <p className="text-slate-800 dark:text-slate-200">{friendUser.email || '未填写'}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <SectionTitle title="备注信息" className="mb-4 border-b border-slate-200 pb-2 dark:border-slate-800" />
+                        <div>
+                          <label className="sr-only" htmlFor="contact-note">My Note for this contact</label>
+                          <input
+                            className="w-full rounded-2xl border border-slate-300 bg-background-light px-4 py-3 dark:border-slate-700 dark:bg-background-dark focus:border-primary focus:ring-primary"
+                            id="contact-note"
+                            placeholder="添加备注"
+                            type="text"
+                            value={remark}
+                            onChange={(e) => setRemark(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-12 flex flex-wrap justify-center gap-4">
+                      <button
+                        onClick={handleSendMessage}
+                        className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90"
+                      >
+                        发送消息
+                      </button>
+                      <button
+                        onClick={handleUpdateRemark}
+                        className="rounded-lg bg-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      >
+                        保存备注
+                      </button>
+                      <button
+                        onClick={handleDeleteFriend}
+                        className="rounded-lg bg-red-100 px-6 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                      >
+                        删除联系人
+                      </button>
+                    </div>
+                  </SectionCard>
                 </>
               ) : currentGroup ? (
                 // 群聊详情（整合自群聊页）
@@ -657,11 +634,7 @@ export default function ContactsPage() {
                   }}
                 />
               ) : (
-                <div className="flex h-full flex-col items-center justify-center text-slate-400">
-                  <span className="material-symbols-outlined text-6xl text-slate-300">contacts_product</span>
-                  <p className="mt-4 text-lg font-semibold text-slate-600">从左侧选择群聊或联系人查看详情</p>
-                  <p className="text-sm">也可以使用右上角按钮添加好友或加入群聊</p>
-                </div>
+                <EmptyPanel title="从左侧选择群聊或联系人查看详情" description="也可以使用右上角按钮添加好友或加入群聊" className="min-h-[520px] border-solid bg-white dark:bg-slate-900" />
               )}
             </div>
           </main>

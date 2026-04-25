@@ -5,11 +5,11 @@ import { useAuthStore } from "@/lib/store";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
-import type { Group, User } from "@/lib/types/api";
-import { UserAPI } from "@/lib/api/user";
-import { AppShell } from "@/components/layout/app-shell";
+import type { Group } from "@/lib/types/api";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { ActionBar, EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { ErrorAlert, EmptyState } from "@/components/ui/error-alert";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
 
 export default function GroupsPage() {
@@ -25,30 +25,9 @@ export default function GroupsPage() {
     setError,
   } = useGroupStore();
 
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResults, setSearchResults] = useState<Group[]>([]);
-
-  // 加载当前用户信息
-  useEffect(() => {
-    const loadCurrentUser = async () => {
-      try {
-        const res = await UserAPI.getMe();
-        if (res.data.code === 0) {
-          setCurrentUser(res.data.data);
-        }
-      } catch (error) {
-        console.error("加载用户信息失败:", error);
-        const apiError = handleApiError(error);
-        setError(createUserFriendlyErrorMessage(apiError));
-      }
-    };
-
-    if (token) {
-      loadCurrentUser();
-    }
-  }, [token, setError]);
 
   // 加载用户群组列表
   const loadUserGroups = async () => {
@@ -119,126 +98,117 @@ export default function GroupsPage() {
   }, [searchKeyword]);
 
   return (
-    <AppShell
-      active="groups"
-      navVariant="modern"
-      rightSlot={
-        <>
+    <>
+      <WorkspaceShell
+        active="groups"
+        navVariant="modern"
+        rightSlot={
           <button
             onClick={() => setShowCreateModal(true)}
-            className="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90"
           >
             创建群聊
           </button>
-          <UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />
-        </>
-      }
-      headerDescription="统一群聊导航入口，保持搜索、列表与详情区的视觉一致性。"
-    >
-      <ErrorAlert error={error} onClose={() => setError(null)} className="mx-0 mt-0 mb-4" />
+        }
+        headerDescription="统一群聊导航入口，保持搜索、列表与详情区的视觉一致性。"
+        sidebar={
+          <div className="flex h-full flex-col p-4">
+            <SidebarSection
+              title={searchKeyword.trim() ? "搜索结果" : "我的群组"}
+              className="flex min-h-0 flex-1 flex-col"
+              bodyClassName="flex-1 space-y-2"
+            >
+              <input
+                type="text"
+                placeholder="搜索群组..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                className="ui-input w-full rounded-2xl px-4 py-3 text-sm"
+              />
 
-      <div className="flex min-h-[72vh] overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-xl shadow-slate-200/50 dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30">
-        <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200/70 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/70">
-          <div className="border-b border-slate-200/70 p-4 dark:border-slate-800">
-            <input
-              type="text"
-              placeholder="搜索群组..."
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              className="ui-input w-full rounded-xl px-4 py-2 text-sm"
-            />
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-2">
-            {searchKeyword.trim() ? (
-              <div>
-                <h3 className="mb-2 px-2 text-sm font-medium text-slate-500 dark:text-slate-400">搜索结果</h3>
-                {searchResults.length === 0 ? (
-                  <div className="px-2">
-                    <EmptyState title="未找到相关群组" description="尝试其他关键词" />
-                  </div>
-                ) : (
-                  searchResults.map((group) => (
-                    <div
-                      key={group.group_id}
-                      className="mb-2 flex items-center gap-3 rounded-2xl border border-transparent bg-white/80 p-3 transition-all hover:border-slate-200 hover:bg-white dark:bg-slate-800/70 dark:hover:border-slate-700 dark:hover:bg-slate-800"
-                    >
-                      <UserAvatar
-                        src={group.avatar || "/default-group-avatar.png"}
-                        name={group.name}
-                        size="md"
-                        shape="rounded"
-                        border
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{group.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
-                      </div>
-                      <button
-                        onClick={() => handleJoinGroup(group.group_id)}
-                        className="rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-primary/90"
-                      >
-                        加入
-                      </button>
+              <div className="flex-1 overflow-y-auto pt-2">
+                {searchKeyword.trim() ? (
+                  searchResults.length === 0 ? (
+                    <EmptyPanel title="未找到相关群组" description="尝试其他关键词" className="min-h-[220px]" />
+                  ) : (
+                    <div className="space-y-2">
+                      {searchResults.map((group) => (
+                        <div
+                          key={group.group_id}
+                          className="flex items-center gap-3 rounded-2xl border border-transparent bg-slate-50 px-3 py-3 transition-all hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                        >
+                          <UserAvatar
+                            src={group.avatar || "/default-group-avatar.png"}
+                            name={group.name}
+                            size="md"
+                            shape="rounded"
+                            border
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{group.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
+                          </div>
+                          <button
+                            onClick={() => handleJoinGroup(group.group_id)}
+                            className="rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-primary/90"
+                          >
+                            加入
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  ))
-                )}
-              </div>
-            ) : (
-              <div>
-                <h3 className="mb-2 px-2 text-sm font-medium text-slate-500 dark:text-slate-400">我的群组</h3>
-                {loading ? (
+                  )
+                ) : loading ? (
                   <PageLoading message="加载群组中..." size="sm" />
                 ) : groups.length === 0 ? (
-                  <div className="px-2">
-                    <EmptyState title="暂无群组" description="点击右上角创建群聊" />
-                  </div>
+                  <EmptyPanel title="暂无群组" description="点击右上角创建群聊" className="min-h-[220px]" />
                 ) : (
-                  groups.map((group) => {
-                    const isActive = currentGroup?.group_id === group.group_id;
-                    return (
-                      <button
-                        key={group.group_id}
-                        type="button"
-                        className={`mb-2 flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all ${
-                          isActive
-                            ? "border-primary/30 bg-primary/10 dark:border-primary/40 dark:bg-primary/20"
-                            : "border-transparent bg-white/80 hover:border-slate-200 hover:bg-white dark:bg-slate-800/70 dark:hover:border-slate-700 dark:hover:bg-slate-800"
-                        }`}
-                        onClick={() => setCurrentGroup(group)}
-                      >
-                        <UserAvatar
-                          src={group.avatar || "/default-group-avatar.png"}
-                          name={group.name}
-                          size="md"
-                          shape="rounded"
-                          border
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{group.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
-                        </div>
-                      </button>
-                    );
-                  })
+                  <div className="space-y-2">
+                    {groups.map((group) => {
+                      const isActive = currentGroup?.group_id === group.group_id;
+                      return (
+                        <button
+                          key={group.group_id}
+                          type="button"
+                          className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all ${
+                            isActive
+                              ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
+                              : "border-transparent bg-slate-50 hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                          }`}
+                          onClick={() => setCurrentGroup(group)}
+                        >
+                          <UserAvatar
+                            src={group.avatar || "/default-group-avatar.png"}
+                            name={group.name}
+                            size="md"
+                            shape="rounded"
+                            border
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{group.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
+            </SidebarSection>
+          </div>
+        }
+        main={
+          <div className="h-full overflow-y-auto p-6">
+            <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
+            {currentGroup ? (
+              <GroupDetail group={currentGroup} />
+            ) : (
+              <EmptyPanel title="选择一个群组查看详情" description="或者创建一个新的群组" className="min-h-[520px] border-solid bg-white/80 dark:bg-slate-900/70" />
             )}
           </div>
-        </aside>
+        }
+      />
 
-        <main className="min-w-0 flex-1 bg-white/80 dark:bg-slate-900/60">
-          {currentGroup ? (
-            <GroupDetail group={currentGroup} />
-          ) : (
-            <div className="flex h-full min-h-[52vh] items-center justify-center px-6">
-              <EmptyState title="选择一个群组查看详情" description="或者创建一个新的群组" />
-            </div>
-          )}
-        </main>
-      </div>
-
-      {/* 创建群组模态框 */}
       {showCreateModal && (
         <CreateGroupModal
           onClose={() => setShowCreateModal(false)}
@@ -248,7 +218,7 @@ export default function GroupsPage() {
           }}
         />
       )}
-    </AppShell>
+    </>
   );
 }
 
@@ -282,38 +252,38 @@ function GroupDetail({ group }: { group: Group }) {
   }, [group.group_id]);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-slate-200/70 p-6 dark:border-slate-800">
-        <div className="flex items-center gap-4">
-          <UserAvatar
-            src={group.avatar || "/default-group-avatar.png"}
-            name={group.name}
-            size="xl"
-            shape="rounded"
-            border
-          />
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{group.name}</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{group.description || "暂无群描述"}</p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {group.member_count} 人 · 群号: {group.group_id}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <button className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
-              发消息
-            </button>
-            <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
-              管理
-            </button>
-          </div>
-        </div>
+    <SectionCard className="flex min-h-[520px] flex-col p-0">
+      <div className="border-b border-slate-200/70 px-6 py-5 dark:border-slate-800">
+        <SectionTitle
+          title={group.name}
+          description={`${group.member_count} 人 · 群号：${group.group_id}`}
+          action={
+            <UserAvatar
+              src={group.avatar || "/default-group-avatar.png"}
+              name={group.name}
+              size="xl"
+              shape="rounded"
+              border
+            />
+          }
+        />
+        <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{group.description || "暂无群描述"}</p>
+        <ActionBar className="mt-4 justify-start">
+          <button className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
+            发消息
+          </button>
+          <button className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+            管理
+          </button>
+        </ActionBar>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
-        <h3 className="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">群成员</h3>
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        <SectionTitle title="群成员" className="mb-4" />
         {loading ? (
           <PageLoading message="加载群成员中..." size="sm" />
+        ) : members.length === 0 ? (
+          <EmptyPanel title="暂无成员信息" description="稍后刷新再试" className="min-h-[220px]" />
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => (
@@ -342,7 +312,7 @@ function GroupDetail({ group }: { group: Group }) {
       </div>
 
       <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mb-4" />
-    </div>
+    </SectionCard>
   );
 }
 

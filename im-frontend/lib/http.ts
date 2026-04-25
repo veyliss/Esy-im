@@ -13,7 +13,7 @@ import type { ApiResponse } from "@/lib/types/api";
 // }
 
 export const http = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8090/api/v1",
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ http.interceptors.response.use(
       error.detail = `请求URL: ${res.config.url}, 请求方法: ${res.config.method}`;
       
       // 如果需要重新登录
-      if (shouldRelogin(error.code)) {
+      if (shouldRelogin(error)) {
         useAuthStore.getState().clearToken();
         if (typeof window !== "undefined") {
           // 显示友好的错误消息

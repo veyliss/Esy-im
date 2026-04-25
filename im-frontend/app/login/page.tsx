@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
@@ -37,6 +37,8 @@ type CodeButtonProps = {
 type AuthInputProps = {
   placeholder: string;
   type?: string;
+  name?: string;
+  autoComplete?: string;
   value: string;
   onChange: (value: string) => void;
   onEnter?: () => void;
@@ -128,6 +130,8 @@ function CodeButton({ disabled, countdown, onClick }: CodeButtonProps) {
 function AuthInput({
   placeholder,
   type = "text",
+  name,
+  autoComplete,
   value,
   onChange,
   onEnter,
@@ -140,6 +144,8 @@ function AuthInput({
         className={`${inputClassName} ${withCodeButton ? "pr-32" : ""}`.trim()}
         placeholder={placeholder}
         type={type}
+        name={name}
+        autoComplete={autoComplete}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={(event) => {
@@ -195,20 +201,29 @@ export default function LoginPage() {
   const [regEmail, setRegEmail] = useState("");
   const [regCode, setRegCode] = useState("");
 
+  const hasCheckedStoredTokenRef = useRef(false);
+
   useEffect(() => {
-    const verifyCurrentToken = async () => {
-      if (!token) return;
+    if (!token) return;
 
-      try {
-        await AuthAPI.getCurrentUser();
-        router.replace("/chat");
-      } catch {
-        console.log("Token 已过期或无效，已清除");
-        clearToken();
-      }
-    };
+    if (!hasCheckedStoredTokenRef.current) {
+      hasCheckedStoredTokenRef.current = true;
 
-    verifyCurrentToken();
+      const verifyStoredToken = async () => {
+        try {
+          await AuthAPI.getCurrentUser();
+          router.replace("/chat");
+        } catch {
+          console.log("Token 已过期或无效，已清除");
+          clearToken();
+        }
+      };
+
+      verifyStoredToken();
+      return;
+    }
+
+    router.replace("/chat");
   }, [token, router, clearToken]);
 
   useEffect(() => {
@@ -361,8 +376,11 @@ export default function LoginPage() {
       <FormField label="账号">
         <AuthInput
           placeholder="请输入您的账号"
+          name="username"
+          autoComplete="username"
           value={account}
           onChange={setAccount}
+          onEnter={onLogin}
         />
       </FormField>
 
@@ -370,6 +388,8 @@ export default function LoginPage() {
         <AuthInput
           placeholder="请输入您的密码"
           type="password"
+          name="current-password"
+          autoComplete="current-password"
           value={password}
           onChange={setPassword}
           onEnter={onLogin}

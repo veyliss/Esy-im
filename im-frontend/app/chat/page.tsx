@@ -11,9 +11,10 @@ import type { Message, MessageType, Conversation, Group, GroupMessage, GroupMess
 import { UserAPI } from "@/lib/api/user";
 import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
-import { AppShell } from "@/components/layout/app-shell";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { ActionBar, EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { ErrorAlert, EmptyState } from "@/components/ui/error-alert";
+import { ErrorAlert } from "@/components/ui/error-alert";
 
 // 聊天项目类型（私聊或群聊）
 type ChatItem = {
@@ -472,15 +473,13 @@ export default function ChatPage() {
   }, [privateUnreadCount, groupUnreadCounts]);
 
   return (
-    <AppShell
+    <WorkspaceShell
       active="chat"
       navVariant="modern"
+      headerDescription="统一私聊与群聊入口，快速切换会话。"
       rightSlot={
-        <>
-          <div className="hidden items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-xs text-slate-500 dark:border-slate-700/60 dark:bg-slate-800/70 dark:text-slate-300 sm:flex">
-            <span className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-emerald-500" : "bg-amber-400"}`} />
-            {wsConnected ? "已连接" : "连接中..."}
-          </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-500 dark:text-slate-400">{wsConnected ? "已连接" : "连接中"}</span>
           {totalUnreadCount > 0 ? (
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
@@ -494,121 +493,104 @@ export default function ChatPage() {
             showStatus
             status={wsConnected ? "online" : "away"}
           />
-        </>
+        </div>
       }
-      headerDescription="统一私聊与群聊入口，快速切换会话。"
-    >
-      <div className="flex min-h-[72vh] overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-xl shadow-slate-200/50 dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30">
-        <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200/70 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/70">
-          <div className="border-b border-slate-200/70 p-4 dark:border-slate-800">
+      sidebar={
+        <div className="flex h-full flex-col p-4">
+          <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col" bodyClassName="flex-1 space-y-2">
             <input
               type="text"
               placeholder="搜索聊天..."
               value={chatFilter}
               onChange={(e) => setChatFilter(e.target.value)}
-              className="ui-input w-full rounded-xl px-4 py-2 text-sm"
+              className="ui-input w-full rounded-2xl px-4 py-3 text-sm"
             />
-          </div>
 
-          <div className="flex-1 overflow-y-auto p-2">
-            <div className="space-y-1">
-              {filteredChatList.length === 0 ? (
-                <EmptyState
-                  title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
-                  description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
-                />
-              ) : (
-                filteredChatList.map((chatItem) => {
-                  const isActive = currentChat?.id === chatItem.id;
+            <div className="flex-1 overflow-y-auto pt-2">
+              <div className="space-y-2">
+                {filteredChatList.length === 0 ? (
+                  <EmptyPanel
+                    title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
+                    description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
+                    className="min-h-[220px]"
+                  />
+                ) : (
+                  filteredChatList.map((chatItem) => {
+                    const isActive = currentChat?.id === chatItem.id;
 
-                  return (
-                    <button
-                      key={chatItem.id}
-                      type="button"
-                      onClick={() => handleSelectChat(chatItem)}
-                      className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-all ${
-                        isActive
-                          ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
-                          : "border-transparent hover:border-slate-200 hover:bg-white/90 dark:hover:border-slate-700 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <div className="relative">
-                        <UserAvatar
-                          src={chatItem.avatar}
-                          name={chatItem.name}
-                          size="md"
-                          shape={chatItem.type === "group" ? "rounded" : "circle"}
-                          border
-                        />
-                        {chatItem.type === "group" ? (
-                          <span className="absolute -bottom-1 -right-1 rounded bg-blue-500 px-1 text-[10px] font-semibold text-white">
-                            群
+                    return (
+                      <button
+                        key={chatItem.id}
+                        type="button"
+                        onClick={() => handleSelectChat(chatItem)}
+                        className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all ${
+                          isActive
+                            ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
+                            : "border-transparent bg-slate-50 hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        <div className="relative">
+                          <UserAvatar
+                            src={chatItem.avatar}
+                            name={chatItem.name}
+                            size="md"
+                            shape={chatItem.type === "group" ? "rounded" : "circle"}
+                            border
+                          />
+                          {chatItem.type === "group" ? (
+                            <span className="absolute -bottom-1 -right-1 rounded bg-slate-700 px-1 text-[10px] font-semibold text-white dark:bg-slate-200 dark:text-slate-900">
+                              群
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{chatItem.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {chatItem.lastMessageTime
+                                ? new Date(chatItem.lastMessageTime).toLocaleTimeString("zh-CN", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : ""}
+                            </p>
+                          </div>
+                          <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
+                        </div>
+
+                        {chatItem.unreadCount > 0 ? (
+                          <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                            {chatItem.unreadCount > 99 ? "99+" : chatItem.unreadCount}
                           </span>
                         ) : null}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{chatItem.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {chatItem.lastMessageTime
-                              ? new Date(chatItem.lastMessageTime).toLocaleTimeString("zh-CN", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : ""}
-                          </p>
-                        </div>
-                        <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
-                      </div>
-
-                      {chatItem.unreadCount > 0 ? (
-                        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
-                          {chatItem.unreadCount > 99 ? "99+" : chatItem.unreadCount}
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })
-              )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
-        </aside>
-
-        <main className="flex min-w-0 flex-1 flex-col bg-white/80 dark:bg-slate-900/60">
-          {currentChat ? (
-            <>
-              <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-3 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                  <UserAvatar
-                    src={currentChat.avatar}
-                    name={currentChat.name}
-                    size="md"
-                    shape={currentChat.type === "group" ? "rounded" : "circle"}
-                    border
-                  />
-                  <div>
-                    <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{currentChat.name}</h3>
-                    {currentChat.type === "group" && "member_count" in currentChat.data ? (
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{currentChat.data.member_count} 人</p>
-                    ) : null}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  aria-label="会话更多操作"
-                  title="会话更多操作"
-                  className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    ></path>
-                  </svg>
-                </button>
+          </SidebarSection>
+        </div>
+      }
+      main={
+        currentChat ? (
+          <div className="flex h-full min-w-0 flex-1 flex-col p-6">
+            <SectionCard className="flex min-h-0 flex-1 flex-col p-0">
+              <div className="border-b border-slate-200/70 px-6 py-5 dark:border-slate-800">
+                <SectionTitle
+                  title={currentChat.name}
+                  description={currentChat.type === "group" && "member_count" in currentChat.data ? `${currentChat.data.member_count} 人` : "当前会话"}
+                  action={
+                    <UserAvatar
+                      src={currentChat.avatar}
+                      name={currentChat.name}
+                      size="md"
+                      shape={currentChat.type === "group" ? "rounded" : "circle"}
+                      border
+                    />
+                  }
+                />
               </div>
 
               <ErrorAlert
@@ -619,138 +601,95 @@ export default function ChatPage() {
               />
               <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mt-3" />
 
-              <div className="flex-1 space-y-6 overflow-y-auto p-6">
+              <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
                 {currentMessages.length === 0 ? (
-                  <EmptyState title="暂无消息" description="开始发送第一条消息吧" />
+                  <EmptyPanel title="暂无消息" description="开始发送第一条消息吧" className="min-h-[420px]" />
                 ) : (
-                  currentMessages.map((message) => {
-                    const isMyMessage = message.from_user_id === currentUser?.user_id;
-                    const messageUser = isMyMessage ? currentUser : message.from_user;
+                currentMessages.map((message) => {
+                  const isMyMessage = message.from_user_id === currentUser?.user_id;
+                  const messageUser = isMyMessage ? currentUser : message.from_user;
 
-                    if (isMyMessage) {
-                      return (
-                        <div key={message.id} className="flex justify-end gap-3">
-                          <div className="max-w-lg rounded-2xl rounded-tr-md bg-primary px-4 py-3 text-sm text-white shadow-sm">
-                            {message.content}
-                          </div>
-                          <UserAvatar
-                            src={messageUser?.avatar}
-                            name={messageUser?.nickname || "我"}
-                            size="md"
-                            border
-                            className="shrink-0"
-                          />
-                        </div>
-                      );
-                    }
-
+                  if (isMyMessage) {
                     return (
-                      <div key={message.id} className="flex gap-3">
+                      <div key={message.id} className="flex justify-end gap-3">
+                        <div className="max-w-lg rounded-2xl rounded-tr-md bg-primary px-4 py-3 text-sm text-white shadow-sm">
+                          {message.content}
+                        </div>
                         <UserAvatar
                           src={messageUser?.avatar}
-                          name={messageUser?.nickname || `用户${message.from_user_id}`}
+                          name={messageUser?.nickname || "我"}
                           size="md"
                           border
                           className="shrink-0"
                         />
-                        <div className="max-w-lg">
-                          {currentChat.type === "group" ? (
-                            <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
-                              {messageUser?.nickname || `用户${message.from_user_id}`}
-                            </p>
-                          ) : null}
-                          <div className="rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
-                            {message.content}
-                          </div>
-                        </div>
                       </div>
                     );
-                  })
-                )}
-                <div ref={messagesEndRef} />
-              </div>
+                  }
 
-              <div className="border-t border-slate-200/70 bg-slate-50/70 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/50">
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      className="form-input w-full rounded-full py-3 pl-5 pr-14 text-sm"
-                      placeholder="输入消息..."
-                      type="text"
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          if (!sendingMessage) {
-                            handleSendMessage();
-                          }
-                        }
-                      }}
-                      disabled={sendingMessage}
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-3">
-                      <button
-                        type="button"
-                        aria-label="插入表情"
-                        title="插入表情"
-                        className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                      >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                          ></path>
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="添加附件"
-                        title="添加附件"
-                        className="rounded-full p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                      >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                          ></path>
-                        </svg>
-                      </button>
+                  return (
+                    <div key={message.id} className="flex gap-3">
+                      <UserAvatar
+                        src={messageUser?.avatar}
+                        name={messageUser?.nickname || `用户${message.from_user_id}`}
+                        size="md"
+                        border
+                        className="shrink-0"
+                      />
+                      <div className="max-w-lg">
+                        {currentChat.type === "group" ? (
+                          <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
+                            {messageUser?.nickname || `用户${message.from_user_id}`}
+                          </p>
+                        ) : null}
+                        <div className="rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+                          {message.content}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+              <div className="border-t border-slate-200/70 bg-white/80 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/70">
+                <ActionBar className="gap-2">
+                  <input
+                    className="form-input flex-1 rounded-2xl px-4 py-3 text-sm"
+                    placeholder="输入消息..."
+                    type="text"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!sendingMessage) {
+                          handleSendMessage();
+                        }
+                      }
+                    }}
+                    disabled={sendingMessage}
+                  />
 
                   <button
-                    type="button"
-                    aria-label="打开历史记录"
-                    title="打开历史记录"
-                    className="rounded-full p-2.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">history</span>
-                  </button>
-
-                  <button
-                    className="flex items-center justify-center rounded-full bg-primary p-2.5 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={handleSendMessage}
                     disabled={sendingMessage || !messageInput.trim()}
                     aria-label="发送消息"
                     title="发送消息"
                   >
-                    <span className="material-symbols-outlined text-[20px]">send</span>
+                    发送
                   </button>
-                </div>
+                </ActionBar>
               </div>
-            </>
-          ) : (
-            <div className="flex flex-1 items-center justify-center px-6">
-              <EmptyState title="选择一个聊天开始交流" description="支持私聊与群聊" />
-            </div>
-          )}
-        </main>
-      </div>
-    </AppShell>
+            </SectionCard>
+          </div>
+        ) : (
+          <div className="flex h-full min-h-[72vh] items-center justify-center p-6">
+            <EmptyPanel title="选择一个聊天开始交流" description="支持私聊与群聊" className="min-h-[520px] w-full border-solid bg-white/80 dark:bg-slate-900/70" />
+          </div>
+        )
+      }
+    />
   );
 }

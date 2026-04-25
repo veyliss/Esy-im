@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import { MomentItem } from "@/components/moments/MomentItem";
-import { AppShell } from "@/components/layout/app-shell";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { ActionBar, EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { EmptyState } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
 import { useAuthStore } from "@/lib/store";
 import { useMomentStore } from "@/lib/store/moment";
@@ -230,71 +230,43 @@ export default function MomentsPage() {
   const moments = activeTab === "timeline" ? timeline : myMoments;
 
   return (
-    <AppShell
+    <WorkspaceShell
       active="moments"
       navVariant="modern"
-      rightSlot={
-        <>
-          <button
-            type="button"
-            aria-label="搜索朋友圈"
-            title="搜索"
-            className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-          >
-            <svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
-              <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
-            </svg>
-          </button>
-          <button
-            type="button"
-            aria-label="朋友圈筛选"
-            title="筛选"
-            className="rounded-full p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-          >
-            <svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
-              <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path>
-            </svg>
-          </button>
-          <UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />
-        </>
-      }
       headerDescription="统一朋友圈导航与发布入口，保留动态流业务逻辑。"
-    >
-      <div className="flex min-h-[72vh] overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-xl shadow-slate-200/50 dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30">
-        <aside className="w-72 shrink-0 border-r border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/70">
-          <ul className="space-y-2">
-            <li>
-              <button
-                type="button"
-                className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-                  activeTab === "my"
-                    ? "bg-primary/10 text-primary dark:bg-primary/20"
-                    : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-                }`}
-                onClick={() => setActiveTab("my")}
-              >
-                我的朋友圈
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-                  activeTab === "timeline"
-                    ? "bg-primary/10 text-primary dark:bg-primary/20"
-                    : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-                }`}
-                onClick={() => setActiveTab("timeline")}
-              >
-                朋友动态
-              </button>
-            </li>
-          </ul>
-        </aside>
-
-        <main className="min-w-0 flex-1 overflow-y-auto p-6">
-          <div className="mx-auto max-w-3xl">
-            <div className="mb-6 rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
+      rightSlot={<UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />}
+      sidebar={
+        <div className="flex h-full flex-col p-4">
+          <SidebarSection title="时间流视图" className="flex-1">
+            <button
+              type="button"
+              className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
+                activeTab === "my"
+                  ? "bg-primary/10 text-primary dark:bg-primary/20"
+                  : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+              }`}
+              onClick={() => setActiveTab("my")}
+            >
+              我的朋友圈
+            </button>
+            <button
+              type="button"
+              className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
+                activeTab === "timeline"
+                  ? "bg-primary/10 text-primary dark:bg-primary/20"
+                  : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+              }`}
+              onClick={() => setActiveTab("timeline")}
+            >
+              朋友动态
+            </button>
+          </SidebarSection>
+        </div>
+      }
+      main={
+        <div className="h-full overflow-y-auto p-6">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <SectionCard>
               <div className="flex gap-4">
                 <UserAvatar
                   src={currentUser?.avatar || "/default-avatar.png"}
@@ -304,33 +276,32 @@ export default function MomentsPage() {
                   className="shrink-0"
                 />
                 <div className="flex-1">
+                  <SectionTitle
+                    title={activeTab === "timeline" ? "发布动态" : "记录此刻"}
+                    description={activeTab === "timeline" ? "分享给朋友可见的内容" : "管理你自己的动态内容"}
+                    className="mb-4"
+                  />
                   <textarea
-                    className="ui-textarea w-full resize-none rounded-xl p-3 text-sm"
+                    className="ui-textarea w-full resize-none rounded-2xl p-4 text-sm"
                     placeholder="想说的话"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                   />
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleImageSelect}
-                        aria-label="上传动态图片"
-                        title="上传图片"
-                        className="rounded-full p-2 text-slate-500 transition-colors hover:bg-primary/10 hover:text-primary dark:text-slate-400"
-                      >
-                        <svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z"></path>
-                        </svg>
-                      </button>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">{images.length}/9 张图片</span>
-                    </div>
+                  <ActionBar className="mt-3 justify-between">
+                    <button
+                      onClick={handleImageSelect}
+                      type="button"
+                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    >
+                      添加图片 {images.length > 0 ? `(${images.length}/9)` : ""}
+                    </button>
                     <button
                       onClick={handlePublish}
                       className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                     >
                       发布
                     </button>
-                  </div>
+                  </ActionBar>
 
                   {images.length > 0 ? (
                     <div className="mt-3 grid grid-cols-3 gap-2">
@@ -364,15 +335,16 @@ export default function MomentsPage() {
                   />
                 </div>
               </div>
-            </div>
+            </SectionCard>
 
             <div className="space-y-6">
               {loading ? (
                 <PageLoading message="加载动态中..." size="md" />
               ) : moments.length === 0 ? (
-                <EmptyState
+                <EmptyPanel
                   title={activeTab === "timeline" ? "暂无朋友动态" : "还没有发布任何动态"}
                   description={activeTab === "timeline" ? "稍后再来看看" : "发布第一条动态吧"}
+                  className="min-h-[240px] border-solid bg-white/80 dark:bg-slate-900/70"
                 />
               ) : (
                 moments.map((moment) => (
@@ -389,8 +361,8 @@ export default function MomentsPage() {
               )}
             </div>
           </div>
-        </main>
-      </div>
-    </AppShell>
+        </div>
+      }
+    />
   );
 }

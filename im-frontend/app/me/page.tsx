@@ -1,6 +1,7 @@
 "use client";
 
-import { AppShell } from "@/components/layout/app-shell";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { ActionBar, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { PageLoading } from "@/components/ui/loading-states";
 import { useAuthStore } from "@/lib/store";
@@ -180,171 +181,158 @@ export default function MePage() {
 
   if (loading) {
     return (
-      <AppShell active="me" navVariant="modern" headerDescription="正在加载个人信息...">
-        <div className="rounded-3xl border border-white/70 bg-white/85 px-6 py-12 dark:border-slate-700/70 dark:bg-slate-900/80">
-          <PageLoading message="加载中..." size="md" />
-        </div>
-      </AppShell>
+      <WorkspaceShell
+        active="me"
+        navVariant="modern"
+        headerDescription="正在加载个人信息..."
+        sidebar={<div className="h-full bg-white/60 dark:bg-slate-900/40" />}
+        main={
+          <div className="h-full overflow-y-auto p-8">
+            <div className="mx-auto max-w-4xl rounded-[32px] border border-slate-200 bg-white/85 px-6 py-12 dark:border-slate-800 dark:bg-slate-900/70">
+              <PageLoading message="加载中..." size="md" />
+            </div>
+          </div>
+        }
+      />
     );
   }
 
   return (
-    <AppShell
+    <WorkspaceShell
       active="me"
       navVariant="modern"
-      rightSlot={
-        <>
+      headerDescription="统一个人中心导航与设置布局，不改动账号业务逻辑。"
+      rightSlot={<UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />}
+      sidebar={
+        <div className="flex h-full flex-col p-4">
+          <SidebarSection title="个人中心" className="flex-1" bodyClassName="space-y-2">
+            <a className="block rounded-2xl bg-primary/10 px-4 py-3 text-sm font-medium text-primary dark:bg-primary/20" href="#">
+              我的资料
+            </a>
+            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+              账号与安全
+            </a>
+            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+              隐私设置
+            </a>
+            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+              通用设置
+            </a>
+            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+              关于我们
+            </a>
+          </SidebarSection>
+
           <button
             type="button"
-            aria-label="通知"
-            title="通知"
-            className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="mt-4 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            onClick={handleLogout}
           >
-            <span className="material-symbols-outlined text-xl">notifications</span>
+            {logoutLoading ? "退出中..." : "退出登录"}
           </button>
-          <UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />
-        </>
+        </div>
       }
-      headerDescription="统一个人中心导航与设置布局，不改动账号业务逻辑。"
-    >
-      <div className="flex min-h-[72vh] overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-xl shadow-slate-200/50 dark:border-slate-700/70 dark:bg-slate-900/80 dark:shadow-black/30">
-        <aside className="w-72 shrink-0 border-r border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/70">
-          <div className="flex h-full flex-col justify-between">
-            <div className="space-y-1">
-              <a className="flex items-center gap-3 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary dark:bg-primary/20" href="#">
-                <span className="material-symbols-outlined text-lg">person</span>
-                <span>我的资料</span>
-              </a>
-              <a className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
-                <span className="material-symbols-outlined text-lg">security</span>
-                <span>账号与安全</span>
-              </a>
-              <a className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
-                <span className="material-symbols-outlined text-lg">visibility</span>
-                <span>隐私设置</span>
-              </a>
-              <a className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
-                <span className="material-symbols-outlined text-lg">notifications</span>
-                <span>通知设置</span>
-              </a>
-              <a className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
-                <span className="material-symbols-outlined text-lg">settings</span>
-                <span>通用设置</span>
-              </a>
-              <a className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
-                <span className="material-symbols-outlined text-lg">info</span>
-                <span>关于我们</span>
-              </a>
-            </div>
-
-            <button
-              type="button"
-              className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-              onClick={handleLogout}
-            >
-              <span className="material-symbols-outlined text-lg">logout</span>
-              <span>{logoutLoading ? "退出中..." : "退出登录"}</span>
-            </button>
-          </div>
-        </aside>
-
-        <main className="min-w-0 flex-1 overflow-y-auto p-8">
-          <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200/70 bg-white/90 p-8 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
-            <div className="py-4 text-center">
-              <div className="relative mx-auto inline-block">
-                <UserAvatar
-                  src={avatar || currentUser?.avatar || "/default-avatar.png"}
-                  name={currentUser?.nickname || "我"}
-                  size="2xl"
-                  border
-                />
-                <button
-                  onClick={handleAvatarClick}
-                  className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white"
-                  aria-label="修改头像"
-                  title="修改头像"
-                >
-                  <span className="material-symbols-outlined text-lg">edit</span>
-                </button>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-              </div>
-              <div className="mt-4">
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentUser?.nickname}</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">User ID: {currentUser?.user_id}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Region: San Francisco</p>
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">个人信息</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">昵称</label>
-                    <input
-                      className="ui-input w-full rounded-xl px-4 py-3"
-                      value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
-                      placeholder="请输入昵称"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">邮箱</label>
-                    <input
-                      className="ui-input w-full rounded-xl px-4 py-3 text-slate-500 dark:text-slate-400"
-                      value={currentUser?.email || ""}
-                      disabled
-                    />
-                  </div>
+      main={
+        <div className="h-full overflow-y-auto p-8">
+          <div className="mx-auto max-w-4xl space-y-6">
+            <SectionCard>
+              <div className="py-4 text-center">
+                <div className="relative mx-auto inline-block">
+                  <UserAvatar
+                    src={avatar || currentUser?.avatar || "/default-avatar.png"}
+                    name={currentUser?.nickname || "我"}
+                    size="2xl"
+                    border
+                  />
+                  <button
+                    onClick={handleAvatarClick}
+                    className="absolute bottom-0 right-0 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white"
+                    aria-label="修改头像"
+                    title="修改头像"
+                  >
+                    更换
+                  </button>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+                </div>
+                <div className="mt-4">
+                  <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{currentUser?.nickname}</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">用户 ID：{currentUser?.user_id}</p>
                 </div>
               </div>
+            </SectionCard>
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">修改密码</h3>
+            <SectionCard>
+              <div className="space-y-8">
                 <div className="space-y-4">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">新密码</label>
-                    <input
-                      type="password"
-                      className="ui-input w-full rounded-xl px-4 py-3"
-                      placeholder="请输入新密码（最少8位）"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">确认密码</label>
-                    <input
-                      type="password"
-                      className="ui-input w-full rounded-xl px-4 py-3"
-                      placeholder="请再次输入密码"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
+                  <SectionTitle title="个人信息" />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">昵称</label>
+                      <input
+                        className="ui-input w-full rounded-2xl px-4 py-3"
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        placeholder="请输入昵称"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">邮箱</label>
+                      <input
+                        className="ui-input w-full rounded-2xl px-4 py-3 text-slate-500 dark:text-slate-400"
+                        value={currentUser?.email || ""}
+                        disabled
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex justify-center gap-4 pt-4">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
-                >
-                  {saving ? "保存中..." : "保存修改"}
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={saving}
-                  className="rounded-xl bg-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                >
-                  取消
-                </button>
+                <div className="space-y-4">
+                  <SectionTitle title="修改密码" />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">新密码</label>
+                      <input
+                        type="password"
+                        className="ui-input w-full rounded-2xl px-4 py-3"
+                        placeholder="请输入新密码（最少8位）"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">确认密码</label>
+                      <input
+                        type="password"
+                        className="ui-input w-full rounded-2xl px-4 py-3"
+                        placeholder="请再次输入密码"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <ActionBar className="justify-center pt-4">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {saving ? "保存中..." : "保存修改"}
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    disabled={saving}
+                    className="rounded-xl bg-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                  >
+                    取消
+                  </button>
+                </ActionBar>
               </div>
-            </div>
+            </SectionCard>
           </div>
-        </main>
-      </div>
-    </AppShell>
+        </div>
+      }
+    />
   );
 }
