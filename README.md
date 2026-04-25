@@ -1,58 +1,87 @@
 # Esy-IM
 
-一个现代化的即时通讯应用，包含前端和后端完整实现。
+Esy-IM 是一个包含 [`Next.js`](im-frontend/package.json) 前端与 [`Go`](im-backend/go.mod) 后端的即时通讯项目。
 
-## 项目结构
+当前项目已经进入“文档治理 + 整体重构”阶段，后续所有整理与重构工作都应围绕统一文档体系推进，而不是继续增加零散总结文档。
 
-```
+## 1. 文档入口
+
+### 1.1 项目总方案
+- [`PROJECT_REFACTOR_MASTER_PLAN.md`](PROJECT_REFACTOR_MASTER_PLAN.md)
+  - 项目文档治理与整体重构唯一主控文档
+
+### 1.2 前端文档入口
+- [`im-frontend/DOCUMENTATION_INDEX.md`](im-frontend/DOCUMENTATION_INDEX.md)
+  - 前端文档总索引
+- [`im-frontend/FRONTEND_REFACTOR_ARCHITECTURE.md`](im-frontend/FRONTEND_REFACTOR_ARCHITECTURE.md)
+  - 前端重构架构文档
+- [`im-frontend/API_INTEGRATION_GUIDE.md`](im-frontend/API_INTEGRATION_GUIDE.md)
+  - 前端 API 接入指南
+
+### 1.3 后端文档入口
+- [`im-backend/DOCUMENTATION_INDEX.md`](im-backend/DOCUMENTATION_INDEX.md)
+  - 后端文档总索引
+- [`im-backend/API_DOCUMENTATION.md`](im-backend/API_DOCUMENTATION.md)
+  - 后端 API 主文档
+- [`im-backend/MESSAGE_API_DOCUMENTATION.md`](im-backend/MESSAGE_API_DOCUMENTATION.md)
+  - 消息域接口文档
+- [`im-backend/DEVELOPMENT.md`](im-backend/DEVELOPMENT.md)
+  - 后端开发文档
+
+### 1.4 历史归档入口
+- [`docs-archive/root/README.md`](docs-archive/root/README.md)
+  - 根目录历史文档归档说明
+- [`im-frontend/archive/README.md`](im-frontend/archive/README.md)
+  - 前端历史文档归档说明
+- [`im-backend/archive/README.md`](im-backend/archive/README.md)
+  - 后端历史文档归档说明
+
+---
+
+## 2. 项目结构
+
+```text
 Esy-IM/
-├── im-frontend/          # Next.js 前端应用
-├── im-backend/           # Go 后端服务
-├── .github/              # GitHub 配置
-├── .gitignore           # Git 忽略文件
-├── SECURITY.md          # 安全配置指南
-└── docker-compose.yml   # Docker 编排文件
+├── README.md
+├── PROJECT_REFACTOR_MASTER_PLAN.md
+├── docs-archive/
+│   └── root/
+├── im-frontend/
+│   ├── DOCUMENTATION_INDEX.md
+│   ├── FRONTEND_REFACTOR_ARCHITECTURE.md
+│   ├── API_INTEGRATION_GUIDE.md
+│   └── app/
+└── im-backend/
+    ├── DOCUMENTATION_INDEX.md
+    ├── API_DOCUMENTATION.md
+    ├── DEVELOPMENT.md
+    └── internal/
 ```
 
-## 功能特性
+---
 
-- 🔐 用户注册和登录
-- 💬 实时聊天消息
-- 👥 好友管理系统
-- 📱 响应式界面设计
-- 🔒 安全的环境配置
+## 3. 开发入口
 
-## 快速开始
+### 3.1 前端
+- 前端说明见 [`im-frontend/README.md`](im-frontend/README.md)
+- 当前前端架构说明见 [`im-frontend/FRONTEND_REFACTOR_ARCHITECTURE.md`](im-frontend/FRONTEND_REFACTOR_ARCHITECTURE.md)
 
-### 环境配置
+### 3.2 后端
+- 后端说明见 [`im-backend/README.md`](im-backend/README.md)
+- 当前后端开发说明见 [`im-backend/DEVELOPMENT.md`](im-backend/DEVELOPMENT.md)
 
-1. 复制环境变量模板：
-   ```bash
-   cp im-backend/.env.example im-backend/.env
-   ```
+---
 
-2. 编辑 `im-backend/.env` 文件，填入您的配置信息
+## 4. 当前治理规则
 
-### 运行项目
+1. 顶层只保留长期有效入口文档
+2. 一次性修补总结不再作为主导航文档
+3. 前端、后端分别通过各自索引文档维护导航
+4. 历史阶段性文档统一进入归档目录
+5. 后续重构必须优先更新主文档，而不是新增散落 markdown
 
-详细的运行说明请参考：
-- 后端：[im-backend/README.md](im-backend/README.md)
-- 前端：[im-frontend/README.md](im-frontend/README.md)
+---
 
-## 安全说明
+## 5. 安全说明
 
-⚠️ **重要**：请查看 [SECURITY.md](SECURITY.md) 了解如何正确配置敏感信息。
-
-本项目已配置 `.gitignore` 来保护您的隐私配置文件，包括：
-- 数据库密码
-- SMTP 配置
-- JWT 密钥
-- 其他敏感信息
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 许可证
-
-MIT License
+敏感信息配置规则见 [`SECURITY.md`](SECURITY.md)。
