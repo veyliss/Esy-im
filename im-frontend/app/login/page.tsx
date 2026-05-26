@@ -7,7 +7,6 @@ import { AuthAPI } from "@/lib/api/auth";
 import { handleApiError } from "@/lib/utils/errors";
 import {
   MainTabButton,
-  ToggleTabButton,
   UnderlineTabButton,
   FormField,
   AuthInput,
@@ -18,7 +17,7 @@ type MainTabKey = "login" | "register";
 type LoginTabKey = "email" | "account";
 
 const cardClassName =
-  "w-full max-w-md mx-4 sm:mx-0 rounded-xl bg-white p-4 shadow-lg dark:bg-slate-900 sm:p-8";
+  "auth-card";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,6 +43,15 @@ export default function LoginPage() {
   const [regCode, setRegCode] = useState("");
 
   const hasCheckedStoredTokenRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") === "register" || params.get("mode") === "register") {
+      setMainTab("register");
+    }
+  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -182,28 +190,13 @@ export default function LoginPage() {
   };
 
   const renderLoginSwitcher = () => {
-    if (loginTab === "account") {
-      return (
-        <div className="mt-5 px-4 py-3">
-          <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] p-1 dark:bg-slate-800">
-            <ToggleTabButton active={true} onClick={() => switchLoginTab("account")}>
-              账号密码登录
-            </ToggleTabButton>
-            <ToggleTabButton active={false} onClick={() => switchLoginTab("email")}>
-              邮箱登录
-            </ToggleTabButton>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div className="px-4 pt-3">
-        <div className="flex justify-center border-b border-gray-200 dark:border-slate-700">
-          <UnderlineTabButton active={true} onClick={() => switchLoginTab("email")}>
+      <div className="auth-login-switcher compact">
+        <div className="auth-underline-group">
+          <UnderlineTabButton active={loginTab === "email"} onClick={() => switchLoginTab("email")}>
             邮箱登录
           </UnderlineTabButton>
-          <UnderlineTabButton active={false} onClick={() => switchLoginTab("account")}>
+          <UnderlineTabButton active={loginTab === "account"} onClick={() => switchLoginTab("account")}>
             账号密码登录
           </UnderlineTabButton>
         </div>
@@ -212,7 +205,7 @@ export default function LoginPage() {
   };
 
   const renderAccountLoginForm = () => (
-    <div className="mt-5 space-y-4 px-4 py-3">
+    <div className="auth-form-stack">
       <FormField label="账号">
         <AuthInput
           placeholder="请输入您的账号"
@@ -243,13 +236,13 @@ export default function LoginPage() {
             type="checkbox"
             checked={remember}
             onChange={(event) => setRemember(event.target.checked)}
-            className="form-checkbox rounded border-gray-300 bg-background-light text-primary focus:ring-primary/50 dark:border-slate-600 dark:bg-slate-800 dark:checked:bg-primary"
+            className="auth-checkbox"
           />
-          <label htmlFor="remember-me" className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+          <label htmlFor="remember-me" className="auth-checkbox-label">
             记住密码
           </label>
         </div>
-        <a className="text-sm text-primary hover:text-primary/90" href="#">
+        <a className="auth-link" href="#">
           忘记密码？
         </a>
       </div>
@@ -259,7 +252,7 @@ export default function LoginPage() {
   );
 
   const renderEmailLoginForm = () => (
-    <div className="mt-5 space-y-4 px-4 py-3">
+    <div className="auth-form-stack">
       <FormField label="邮箱">
         <AuthInput
           placeholder="请输入您的邮箱"
@@ -280,7 +273,7 @@ export default function LoginPage() {
       </FormField>
 
       <div className="mt-2 flex justify-end">
-        <a className="text-sm text-primary hover:text-primary/90" href="#">
+        <a className="auth-link" href="#">
           忘记密码？
         </a>
       </div>
@@ -290,7 +283,7 @@ export default function LoginPage() {
   );
 
   const renderRegisterForm = () => (
-    <div className="mt-5 space-y-4 px-4 py-3">
+    <div className="auth-form-stack">
       <FormField label="账号/手机号">
         <AuthInput placeholder="请输入您的账号或手机号" value={regUserId} onChange={setRegUserId} />
       </FormField>
@@ -318,11 +311,19 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
+    <main className="auth-page">
+      <div className="auth-brand-block">
+        <div className="auth-logo">
+          E
+        </div>
+        <h1>Esy-IM</h1>
+        <p>即时通讯系统</p>
+      </div>
+
       <div className={cardClassName}>
-        <div className="flex flex-1 flex-col">
-          <div className="pb-3">
-            <div className="flex gap-8 border-b border-[#cfdbe7] px-4 dark:border-slate-700">
+            <div className="flex flex-1 flex-col">
+              <div className="pb-3">
+                <div className="auth-main-tabs">
               <MainTabButton active={mainTab === "login"} onClick={() => switchMainTab("login")}>
                 登录
               </MainTabButton>
@@ -333,13 +334,13 @@ export default function LoginPage() {
           </div>
 
           {errorMsg && (
-            <div className="mx-8 mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+            <div className="auth-alert auth-alert-error">
               {errorMsg}
             </div>
           )}
 
           {successMsg && (
-            <div className="mx-8 mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
+            <div className="auth-alert auth-alert-success">
               {successMsg}
             </div>
           )}
@@ -352,8 +353,8 @@ export default function LoginPage() {
           ) : (
             renderRegisterForm()
           )}
-        </div>
       </div>
-    </div>
+      </div>
+    </main>
   );
 }

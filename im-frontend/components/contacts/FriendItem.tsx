@@ -16,7 +16,7 @@ export function FriendItem({ friend, isActive, onClick }: FriendItemProps) {
 
   return (
     <a
-      className={`flex items-center gap-3 rounded-xl p-3 transition-all cursor-pointer ${
+      className={`flex items-center gap-3 rounded-lg p-3 transition-all cursor-pointer ${
         isActive
           ? "bg-primary/10 dark:bg-primary/20 text-primary shadow-sm"
           : "hover:bg-slate-100 dark:hover:bg-slate-800 hover:shadow-sm"

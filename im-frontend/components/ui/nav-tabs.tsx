@@ -77,27 +77,26 @@ export function NavTabs({
   const styles = {
     light: {
       container:
-        "rounded-2xl border border-slate-200/70 bg-white/90 p-1 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/80",
-      link: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100",
-      active: "bg-primary/10 text-primary dark:bg-primary/20",
+        "rounded-lg border border-slate-200/80 bg-white/92 p-1 shadow-sm dark:border-slate-800 dark:bg-slate-950/80",
+      link: "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100",
+      active: "bg-primary text-white shadow-sm dark:bg-primary",
     },
     muted: {
       container:
-        "rounded-2xl border border-slate-200/60 bg-slate-50/80 p-1 dark:border-slate-700/60 dark:bg-slate-900/70",
-      link: "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
-      active: "bg-white text-primary shadow-sm dark:bg-slate-800 dark:text-primary",
+        "rounded-lg border border-slate-200/70 bg-slate-50/85 p-1 dark:border-slate-800 dark:bg-slate-950/60",
+      link: "text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200",
+      active: "bg-white text-primary shadow-sm dark:bg-slate-900 dark:text-primary-light",
     },
     classic: {
       container:
-        "rounded-2xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900",
+        "rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-950",
       link: "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
       active: "border-b-2 border-primary text-primary",
     },
     modern: {
-      container:
-        "rounded-2xl border border-white/70 bg-white/65 p-1 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/65",
-      link: "text-slate-600 hover:bg-primary/8 hover:text-primary dark:text-slate-300 dark:hover:bg-primary/15 dark:hover:text-primary",
-      active: "bg-primary/12 text-primary shadow-sm dark:bg-primary/20",
+      container: "bg-transparent p-0",
+      link: "text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary-light",
+      active: "text-primary dark:text-primary-light",
     },
   } as const;
 
@@ -118,11 +117,11 @@ export function NavTabs({
                   title={item.description}
                   aria-current={isActive ? "page" : undefined}
                   className={clsx(
-                    "relative inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                    "relative inline-flex items-center justify-center gap-1.5 px-1 py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                     tone.link,
                     isActive && tone.active,
                     variant === "classic" && "rounded-b-none border-b-2 border-transparent",
-                    variant === "modern" && "min-w-[78px]",
+                    variant === "modern" && "min-w-[64px]",
                   )}
                 >
                   {showIcons ? (
@@ -141,7 +140,7 @@ export function NavTabs({
                   </span>
 
                   {variant === "modern" && isActive ? (
-                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary" />
+                    <span className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded-full bg-primary" />
                   ) : null}
                 </Link>
 

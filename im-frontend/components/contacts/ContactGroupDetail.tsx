@@ -68,12 +68,12 @@ export function ContactGroupDetail({ group, onLeave }: { group: Group; onLeave?:
         />
         <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{group.description || "暂无群描述"}</p>
         <ActionBar className="mt-4 justify-start">
-          <button className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
+          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
             发消息
           </button>
           <button
             onClick={handleLeave}
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             退出群组
           </button>
@@ -91,7 +91,7 @@ export function ContactGroupDetail({ group, onLeave }: { group: Group; onLeave?:
             {members.map((member) => (
               <div
                 key={member.user_id}
-                className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-800/70"
+                className="flex items-center gap-3 rounded-lg border border-slate-200/80 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-800/70"
               >
                 <UserAvatar
                   src={member.user?.avatar || "/default-avatar.png"}

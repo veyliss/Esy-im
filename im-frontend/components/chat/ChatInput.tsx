@@ -98,7 +98,7 @@ export function ChatInput({
     <div className={clsx("relative", className)}>
       {/* 表情面板 */}
       {showEmojiPanel && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-4 animate-slide-in-up">
+        <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl p-4 animate-slide-in-up">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">选择表情</h3>
             <button
@@ -124,7 +124,7 @@ export function ChatInput({
 
       {/* 输入区域 */}
       <div className={clsx(
-        "flex items-end gap-3 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl transition-all duration-200",
+        "flex items-end gap-3 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition-all duration-200",
         isFocused && "border-primary dark:border-primary shadow-lg shadow-primary/10",
         disabled && "opacity-50 cursor-not-allowed"
       )}>
@@ -132,7 +132,7 @@ export function ChatInput({
         {showAttachment && (
           <button
             disabled={disabled}
-            className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:cursor-not-allowed"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:cursor-not-allowed"
             title="发送附件"
           >
             <span className="material-symbols-outlined text-xl text-slate-500">attach_file</span>
@@ -176,7 +176,7 @@ export function ChatInput({
             disabled={disabled}
             onClick={() => setShowEmojiPanel(!showEmojiPanel)}
             className={clsx(
-              "p-2 rounded-xl transition-colors disabled:cursor-not-allowed",
+              "p-2 rounded-lg transition-colors disabled:cursor-not-allowed",
               showEmojiPanel
                 ? "bg-primary/10 text-primary"
                 : "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500"
@@ -192,7 +192,7 @@ export function ChatInput({
           onClick={handleSend}
           disabled={disabled || !message.trim() || isOverLimit}
           className={clsx(
-            "p-2 rounded-xl transition-all duration-200 disabled:cursor-not-allowed",
+            "p-2 rounded-lg transition-all duration-200 disabled:cursor-not-allowed",
             message.trim() && !isOverLimit && !disabled
               ? "bg-primary text-white hover:bg-primary-dark shadow-lg hover:shadow-xl hover:scale-105"
               : "bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500"

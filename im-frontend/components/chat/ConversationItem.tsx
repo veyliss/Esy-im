@@ -40,7 +40,7 @@ export function ConversationItem({
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
         isActive ? "bg-[#e8f0ff]" : "hover:bg-white"
       }`}
     >

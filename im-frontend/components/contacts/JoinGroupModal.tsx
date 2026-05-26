@@ -50,7 +50,7 @@ export function JoinGroupModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-2xl dark:bg-slate-900">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined rounded-full bg-primary/10 p-2 text-primary">group_add</span>
@@ -77,12 +77,12 @@ export function JoinGroupModal({
               onChange={(e) => setKeyword(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
               placeholder="输入群组关键词或群号"
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-10 pr-3 text-sm focus:border-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-10 pr-3 text-sm focus:border-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <button
             onClick={handleSearch}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
           >
             搜索
           </button>
@@ -95,7 +95,7 @@ export function JoinGroupModal({
             results.map((group) => (
               <div
                 key={group.group_id}
-                className="flex items-center gap-3 rounded-2xl p-3 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <UserAvatar
                   src={group.avatar || "/default-group-avatar.png"}

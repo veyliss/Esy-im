@@ -503,7 +503,7 @@ export default function ChatPage() {
               placeholder="搜索聊天..."
               value={chatFilter}
               onChange={(e) => setChatFilter(e.target.value)}
-              className="ui-input w-full rounded-2xl px-4 py-3 text-sm"
+              className="ui-input w-full rounded-lg px-4 py-3 text-sm"
             />
 
             <div className="flex-1 overflow-y-auto pt-2">
@@ -523,7 +523,7 @@ export default function ChatPage() {
                         key={chatItem.id}
                         type="button"
                         onClick={() => handleSelectChat(chatItem)}
-                        className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all ${
+                        className={`flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left transition-all ${
                           isActive
                             ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
                             : "border-transparent bg-slate-50 hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
@@ -612,7 +612,7 @@ export default function ChatPage() {
                   if (isMyMessage) {
                     return (
                       <div key={message.id} className="flex justify-end gap-3">
-                        <div className="max-w-lg rounded-2xl rounded-tr-md bg-primary px-4 py-3 text-sm text-white shadow-sm">
+                        <div className="max-w-lg rounded-lg rounded-tr-md bg-primary px-4 py-3 text-sm text-white shadow-sm">
                           {message.content}
                         </div>
                         <UserAvatar
@@ -641,7 +641,7 @@ export default function ChatPage() {
                             {messageUser?.nickname || `用户${message.from_user_id}`}
                           </p>
                         ) : null}
-                        <div className="rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+                        <div className="rounded-lg rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
                           {message.content}
                         </div>
                       </div>
@@ -655,7 +655,7 @@ export default function ChatPage() {
               <div className="border-t border-slate-200/70 bg-white/80 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/70">
                 <ActionBar className="gap-2">
                   <input
-                    className="form-input flex-1 rounded-2xl px-4 py-3 text-sm"
+                    className="form-input flex-1 rounded-lg px-4 py-3 text-sm"
                     placeholder="输入消息..."
                     type="text"
                     value={messageInput}
@@ -672,7 +672,7 @@ export default function ChatPage() {
                   />
 
                   <button
-                    className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={handleSendMessage}
                     disabled={sendingMessage || !messageInput.trim()}
                     aria-label="发送消息"

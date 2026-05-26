@@ -53,7 +53,7 @@ export function AddFriendModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-2xl dark:bg-slate-900">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined rounded-full bg-primary/10 p-2 text-primary">person_add</span>
@@ -82,12 +82,12 @@ export function AddFriendModal({
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
                 placeholder="输入用户ID或手机号"
-                className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-10 pr-3 text-sm focus:border-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-10 pr-3 text-sm focus:border-primary focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
             <button
               onClick={handleSearch}
-              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
             >
               搜索
             </button>
@@ -95,7 +95,7 @@ export function AddFriendModal({
         </div>
 
         {searchResult ? (
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 dark:bg-primary/10">
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 dark:bg-primary/10">
             <div className="flex items-center gap-4">
               <UserAvatar
                 src={searchResult.avatar}

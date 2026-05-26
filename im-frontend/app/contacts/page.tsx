@@ -265,7 +265,7 @@ export default function ContactsPage() {
                     <button
                       key={group.group_id}
                       type="button"
-                      className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors ${
                         isActive
                           ? "border-primary/30 bg-primary/10 dark:bg-primary/20"
                           : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800"
@@ -302,7 +302,7 @@ export default function ContactsPage() {
                     <button
                       key={friend.id}
                       type="button"
-                      className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors ${
                         isActive
                           ? "border-primary/30 bg-primary/10 dark:bg-primary/20"
                           : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/40 dark:hover:bg-slate-800"
@@ -333,7 +333,7 @@ export default function ContactsPage() {
             <SectionCard className="mb-6 p-2">
               <div className="flex items-center gap-2">
                 <button
-                  className={`rounded-2xl px-4 py-2 text-sm font-medium ${
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${
                     activeRightTab === "detail"
                       ? "bg-primary/10 text-primary dark:bg-primary/20"
                       : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -343,7 +343,7 @@ export default function ContactsPage() {
                   详情
                 </button>
                 <button
-                  className={`rounded-2xl px-4 py-2 text-sm font-medium ${
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${
                     activeRightTab === "requests"
                       ? "bg-primary/10 text-primary dark:bg-primary/20"
                       : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -430,7 +430,7 @@ export default function ContactsPage() {
                   <div>
                     <SectionTitle title="备注信息" className="mb-4 border-b border-slate-200 pb-2 dark:border-slate-800" />
                     <input
-                      className="w-full rounded-2xl border border-slate-300 bg-background-light px-4 py-3 dark:border-slate-700 dark:bg-background-dark focus:border-primary focus:ring-primary"
+                      className="w-full rounded-lg border border-slate-300 bg-background-light px-4 py-3 dark:border-slate-700 dark:bg-background-dark focus:border-primary focus:ring-primary"
                       placeholder="添加备注"
                       type="text"
                       value={remark}

@@ -37,7 +37,7 @@ export function FriendRequestItem({
   // };
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:shadow-md transition-all">
+    <div className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:shadow-md transition-all">
       <div className="relative">
         <Image
           className="size-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"

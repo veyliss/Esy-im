@@ -82,7 +82,7 @@ export function MessageItem({
         <div className="flex flex-col items-end max-w-lg">
           {/* 消息气泡 */}
           <div className={clsx(
-            "relative bg-gradient-to-br from-primary to-primary-light text-white rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200",
+            "relative bg-gradient-to-br from-primary to-primary-light text-white rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200",
             isMe ? "rounded-tr-md" : "rounded-tl-md",
             isHovered && "scale-[1.02]"
           )}>
@@ -147,7 +147,7 @@ export function MessageItem({
 
         {/* 消息气泡 */}
         <div className={clsx(
-          "relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200",
+          "relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-200",
           "rounded-tl-md",
           isHovered && "scale-[1.02] border-primary/20 dark:border-primary/30"
         )}>

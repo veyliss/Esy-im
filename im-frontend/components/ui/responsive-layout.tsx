@@ -241,7 +241,7 @@ export function ResponsiveCard({
 
   return (
     <div className={clsx(
-      "rounded-xl p-4 transition-all duration-200",
+      "rounded-lg p-4 transition-all duration-200",
       variantClasses[variant],
       hover && "hover:shadow-md hover:-translate-y-1",
       className

@@ -9,7 +9,7 @@ export function SectionCard({ children, className, ...props }: SectionCardProps)
   return (
     <div
       className={clsx(
-        "rounded-[28px] border border-slate-200 bg-white/85 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70",
+        "rounded-lg border border-slate-200/80 bg-white/86 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/56",
         className,
       )}
       {...props}
@@ -30,7 +30,7 @@ export function SectionTitle({ title, description, action, className }: SectionT
   return (
     <div className={clsx("flex items-start justify-between gap-4", className)}>
       <div className="min-w-0">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
+        <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-100">{title}</h2>
         {description ? (
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
         ) : null}
@@ -49,8 +49,8 @@ interface SidebarSectionProps {
 
 export function SidebarSection({ title, children, className, bodyClassName }: SidebarSectionProps) {
   return (
-    <section className={clsx("rounded-[24px] border border-slate-200 bg-white/80 p-3 dark:border-slate-800 dark:bg-slate-900/60", className)}>
-      <h3 className="px-1 pb-3 text-sm font-medium text-slate-500 dark:text-slate-400">{title}</h3>
+    <section className={clsx("rounded-lg border border-slate-200/80 bg-white/70 p-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/44", className)}>
+      <h3 className="px-1 pb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{title}</h3>
       <div className={clsx("space-y-2", bodyClassName)}>{children}</div>
     </section>
   );
@@ -66,7 +66,7 @@ export function EmptyPanel({ title, description, className }: EmptyPanelProps) {
   return (
     <div
       className={clsx(
-        "flex min-h-[240px] items-center justify-center rounded-[28px] border border-dashed border-slate-200 bg-white/70 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/50",
+        "flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300/80 bg-white/58 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-950/42",
         className,
       )}
     >

@@ -125,7 +125,7 @@ export default function GroupsPage() {
                 placeholder="搜索群组..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
-                className="ui-input w-full rounded-2xl px-4 py-3 text-sm"
+                className="ui-input w-full rounded-lg px-4 py-3 text-sm"
               />
 
               <div className="flex-1 overflow-y-auto pt-2">
@@ -137,7 +137,7 @@ export default function GroupsPage() {
                       {searchResults.map((group) => (
                         <div
                           key={group.group_id}
-                          className="flex items-center gap-3 rounded-2xl border border-transparent bg-slate-50 px-3 py-3 transition-all hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                          className="flex items-center gap-3 rounded-lg border border-transparent bg-slate-50 px-3 py-3 transition-all hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
                         >
                           <UserAvatar
                             src={group.avatar || "/default-group-avatar.png"}
@@ -172,7 +172,7 @@ export default function GroupsPage() {
                         <button
                           key={group.group_id}
                           type="button"
-                          className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all ${
+                          className={`flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left transition-all ${
                             isActive
                               ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
                               : "border-transparent bg-slate-50 hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"

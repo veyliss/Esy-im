@@ -184,7 +184,7 @@ export default function MePage() {
         sidebar={<div className="h-full bg-white/60 dark:bg-slate-900/40" />}
         main={
           <div className="h-full overflow-y-auto p-8">
-            <div className="mx-auto max-w-4xl rounded-[32px] border border-slate-200 bg-white/85 px-6 py-12 dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="mx-auto max-w-4xl rounded-lg border border-slate-200 bg-white/85 px-6 py-12 dark:border-slate-800 dark:bg-slate-900/70">
               <PageLoading message="加载中..." size="md" />
             </div>
           </div>
@@ -202,26 +202,26 @@ export default function MePage() {
       sidebar={
         <div className="flex h-full flex-col p-4">
           <SidebarSection title="个人中心" className="flex-1" bodyClassName="space-y-2">
-            <a className="block rounded-2xl bg-primary/10 px-4 py-3 text-sm font-medium text-primary dark:bg-primary/20" href="#">
+            <a className="block rounded-lg bg-primary/10 px-4 py-3 text-sm font-medium text-primary dark:bg-primary/20" href="#">
               我的资料
             </a>
-            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+            <a className="block rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
               账号与安全
             </a>
-            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+            <a className="block rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
               隐私设置
             </a>
-            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+            <a className="block rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
               通用设置
             </a>
-            <a className="block rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
+            <a className="block rounded-lg px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" href="#">
               关于我们
             </a>
           </SidebarSection>
 
           <button
             type="button"
-            className="mt-4 rounded-2xl px-4 py-3 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="mt-4 rounded-lg px-4 py-3 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
             onClick={handleLogout}
           >
             {logoutLoading ? "退出中..." : "退出登录"}
@@ -266,7 +266,7 @@ export default function MePage() {
                     <div>
                       <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">昵称</label>
                       <input
-                        className="ui-input w-full rounded-2xl px-4 py-3"
+                        className="ui-input w-full rounded-lg px-4 py-3"
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
                         placeholder="请输入昵称"
@@ -275,7 +275,7 @@ export default function MePage() {
                     <div>
                       <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">邮箱</label>
                       <input
-                        className="ui-input w-full rounded-2xl px-4 py-3 text-slate-500 dark:text-slate-400"
+                        className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
                         value={currentUser?.email || ""}
                         disabled
                       />
@@ -290,7 +290,7 @@ export default function MePage() {
                       <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">新密码</label>
                       <input
                         type="password"
-                        className="ui-input w-full rounded-2xl px-4 py-3"
+                        className="ui-input w-full rounded-lg px-4 py-3"
                         placeholder="请输入新密码（最少8位）"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
@@ -300,7 +300,7 @@ export default function MePage() {
                       <label className="mb-2 block text-sm font-medium text-slate-600 dark:text-slate-300">确认密码</label>
                       <input
                         type="password"
-                        className="ui-input w-full rounded-2xl px-4 py-3"
+                        className="ui-input w-full rounded-lg px-4 py-3"
                         placeholder="请再次输入密码"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -313,14 +313,14 @@ export default function MePage() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
                   >
                     {saving ? "保存中..." : "保存修改"}
                   </button>
                   <button
                     onClick={handleCancel}
                     disabled={saving}
-                    className="rounded-xl bg-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                    className="rounded-lg bg-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
                   >
                     取消
                   </button>

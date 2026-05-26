@@ -52,7 +52,7 @@ export function MomentItem({
   };
 
   return (
-    <div className="bg-white dark:bg-[#182430] rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-[#182430] rounded-lg shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden hover:shadow-md transition-shadow">
       {/* Header */}
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">

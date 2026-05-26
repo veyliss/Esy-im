@@ -233,7 +233,7 @@ export default function MomentsPage() {
           <SidebarSection title="时间流视图" className="flex-1">
             <button
               type="button"
-              className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
+              className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
                 activeTab === "my"
                   ? "bg-primary/10 text-primary dark:bg-primary/20"
                   : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -244,7 +244,7 @@ export default function MomentsPage() {
             </button>
             <button
               type="button"
-              className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors ${
+              className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
                 activeTab === "timeline"
                   ? "bg-primary/10 text-primary dark:bg-primary/20"
                   : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -276,7 +276,7 @@ export default function MomentsPage() {
                     className="mb-4"
                   />
                   <textarea
-                    className="ui-textarea w-full resize-none rounded-2xl p-4 text-sm"
+                    className="ui-textarea w-full resize-none rounded-lg p-4 text-sm"
                     placeholder="想说的话"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -285,13 +285,13 @@ export default function MomentsPage() {
                     <button
                       onClick={handleImageSelect}
                       type="button"
-                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                       添加图片 {images.length > 0 ? `(${images.length}/9)` : ""}
                     </button>
                     <button
                       onClick={handlePublish}
-                      className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                      className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                     >
                       发布
                     </button>
