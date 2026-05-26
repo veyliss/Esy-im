@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ConnectHub - Moments</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200">
+<div class="flex flex-col min-h-screen">
+<header class="flex items-center justify-between px-6 py-3 bg-white dark:bg-[#182430] border-b border-slate-200 dark:border-slate-800">
+<nav class="flex items-center gap-8">
+<a class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary" href="#">聊天</a>
+<a class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary" href="#">通讯录</a>
+<a class="text-sm font-bold text-primary" href="#">朋友圈</a>
+<a class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-primary" href="#">我的</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+</svg>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"></path>
+</svg>
+</button>
+<div class="size-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCgg7d2A8_rMhEC4rDoCwUugIHc1uRq-RM-A70Lx1gEtWBgefmogbfeyCPrhghbATuSv7k6EPHrTSGjw7tfcV-2zJ2PIY1t_XiYTPPsdWFuwIFdDHwiXcm-DSaVUhxyq-1SAGTKbhAt5BFgkc9jYjPOLS9SZ9g164tSlH265qSH9wmB7rGJdhOfzWyWMhfxw1Lu6a9EKAo5OCNb8_pHW7GeLhT5YjeO3BBV2kYkkP-crXO7URn__CTjozVHKHH5Aunh60381-8_jEEc");'></div>
+</div>
+</header>
+<div class="flex flex-1">
+<aside class="w-80 flex-shrink-0 bg-white dark:bg-[#182430] border-r border-slate-200 dark:border-slate-800 p-4">
+<ul class="space-y-1">
+<li><a class="block rounded-lg bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary" href="#">我的朋友圈</a></li>
+<li><a class="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" href="#">朋友动态</a></li>
+</ul>
+</aside>
+<main class="flex-1 p-6 overflow-y-auto">
+<div class="max-w-3xl mx-auto">
+<div class="bg-white dark:bg-[#182430] rounded-lg p-4 mb-6 shadow-sm">
+<div class="flex gap-4">
+<div class="size-10 rounded-full bg-cover bg-center flex-shrink-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCGV_c2MEp7FGROPCmC-u_qGQSLk7E6N5TOIFwCOeFWw_gaDfPyTDZR4namiPlz3aHYKPeQm661kd-ooQp3TSSPwAtZqbTzYeJX3xUCHiRQl0wATBpjfRvLYts7C7KFD4A-YzPf4ihGZzDnFJW4U8-vvvvdHIqWMKx_OHZ1HK_6Ikq3u3dGH6AuRUJBynv1wfhVfkPxgSGs8JPDyev_4HDHJp9LEQZPd_v3GAzvq6kKtSwsaLB0dbrBU97SVAMbNsnmnyLS-C3C6CfD");'></div>
+<div class="flex-1">
+<textarea class="form-textarea w-full resize-none bg-background-light dark:bg-background-dark border-slate-300 dark:border-slate-700 rounded-lg p-3 focus:ring-primary focus:border-primary text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500" placeholder="想说的话"></textarea>
+<div class="flex justify-between items-center mt-3">
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-primary/10 hover:text-primary">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z"></path>
+</svg>
+</button>
+<span class="text-xs text-slate-400 dark:text-slate-500">0/9 张图片</span>
+</div>
+<button class="bg-primary text-white text-sm font-bold py-2 px-6 rounded-lg hover:bg-primary/90 transition-colors">发布</button>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="bg-white dark:bg-[#182430] rounded-lg shadow-sm overflow-hidden">
+<div class="p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="size-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCgg7d2A8_rMhEC4rDoCwUugIHc1uRq-RM-A70Lx1gEtWBgefmogbfeyCPrhghbATuSv7k6EPHrTSGjw7tfcV-2zJ2PIY1t_XiYTPPsdWFuwIFdDHwiXcm-DSaVUhxyq-1SAGTKbhAt5BFgkc9jYjPOLS9SZ9g164tSlH265qSH9wmB7rGJdhOfzWyWMhfxw1Lu6a9EKAo5OCNb8_pHW7GeLhT5YjeO3BBV2kYkkP-crXO7URn__CTjozVHKHH5Aunh60381-8_jEEc");'></div>
+<div>
+<p class="font-bold text-slate-800 dark:text-slate-200">Sophia</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">2 小时前</p>
+</div>
+</div>
+<p class="mb-3 text-sm">Enjoying a beautiful day at the park with friends! #parklife #goodtimes</p>
+</div>
+<div class="grid grid-cols-3 gap-1">
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDV-FUTDYGniUS6ehzn3V52nUiti8-9aEdqGX21pXDn7kNvNX5rtQOHbmEoYefIpdB6W1RRZH1u6-bpkEYbamH3LCYGdpMi6TlVIkB2QcVF0Lbmx-FHLHzIBaEBLjp1tTnmIfwky62HZ3-peZeG1O3pb7nt6ttCLQlPld0BLm83iKmAuytpbJke2J3BbnFoNHaFpVMKPNSYmpfhawZYQy2XqhWPZzB6wTQ8c1wVLOCAKL0ecmExSMqRZVBrRDEMrLvIW_RIxZDjiU2w");'></div>
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD7te4nJlz_R1JvOyEXX0vNWbG_uk1_UOYufVnAoy59rY9SggAetUqfll5D-6kvO12BUOlsTEb4K9kuMPvzwDgl1hlI6ceN8PQQh0nLAVCznbaqJtwJvg8eMVdc1OKoLxvjZ12ACXLoHshEERO4Gq7PlMj09sFYIOEBLrhYIH1B1QzDOkQancc4CBggooNRVgS2n1SVz-Y_wQp2WZhP0zsML6NoCewi4AHmKNvIgYp5bGhrF01lhdWi5z_F5_G-lhoXj4zSdT-FMzno");'></div>
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD1pQjyS8cL8ghNMqB1w98m3yyUDCrxdJPpHY0N7-m1pbW_LdYCx3T32oE-xeobGt1vurKL7Cu7fKCy0oBn6TZenlDO9OUty_WjDFolUBzgZvnKQIJWyMEA2yGM0ZKO34IHrofw7xLlAqjoCXMu7d17lUoEFm0XYECu1YTFVjrSjqLdLK8WRv46RVgzKTjAZaC46_6tyLaZPq8UP-Z5CEGQd1fWnZE3e4X2fxhaQej-7cs6QcMoY4XS115TC_D8iEA3KJ0-9w6_S0kH");'></div>
+</div>
+<div class="p-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+<button class="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary">
+<span class="material-symbols-outlined text-lg">thumb_up</span>
+<span>12</span>
+</button>
+<button class="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+<span>3</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-[#182430] rounded-lg shadow-sm overflow-hidden">
+<div class="p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="size-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAvTxF2C8mQF-dGXY-p4VFwRNLaH-G-tbMztT-RvKw-GCBDz5jP78gsb1OHAQWKFgO8q7uUKkaM1PrZniPcG_hzIh7GM4Jsn_m5Yi3136e4zN6So_2HMb3wmhtrBlQTdj2o9owrYp0vT2RTmWfoA4RWn-6t7NDmVXUffiQEdIc7dmscmcmTvwcrMke-eQI7q3gG98afZg1RZGmh893fNB4o28B1SZ5lX-oz0C-n0U3D_l7XCYQT6U4LGNd_ryA7Q9smHJdDKy0snS4t");'></div>
+<div>
+<p class="font-bold text-slate-800 dark:text-slate-200">David</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">5 小时前</p>
+</div>
+</div>
+<p class="mb-3 text-sm">Exploring the mountains and enjoying the breathtaking views. #travel #adventure</p>
+</div>
+<div class="aspect-video bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAvTxF2C8mQF-dGXY-p4VFwRNLaH-G-tbMztT-RvKw-GCBDz5jP78gsb1OHAQWKFgO8q7uUKkaM1PrZniPcG_hzIh7GM4Jsn_m5Yi3136e4zN6So_2HMb3wmhtrBlQTdj2o9owrYp0vT2RTmWfoA4RWn-6t7NDmVXUffiQEdIc7dmscmcmTvwcrMke-eQI7q3gG98afZg1RZGmh893fNB4o28B1SZ5lX-oz0C-n0U3D_l7XCYQT6U4LGNd_ryA7Q9smHJdDKy0snS4t");'></div>
+<div class="p-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+<button class="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary">
+<span class="material-symbols-outlined text-lg">thumb_up</span>
+<span>25</span>
+</button>
+<button class="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+<span>8</span>
+</button>
+</div>
+</div>
+<div class="bg-white dark:bg-[#182430] rounded-lg shadow-sm overflow-hidden">
+<div class="p-4">
+<div class="flex items-center gap-3 mb-3">
+<div class="size-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB5kgeuYgVe8M60qjfQgpPP_FOGC4EYU7oi1jspKxT0NembbxEh2Tl5ld4C6J_vB_DgWahqee50hwPEWYR6Q3uB9fT3621fadXnruuPQqCTcJYxnOvwLE6U_wP3ZcTM44SR2hfGxLEffWsWKhAvb8bWzUXCaivt4qIpICXasUBAhOGXbLWSX6esN6iXsbimmN5IIbM3DCg5mEnuiVHpIgvc--1Zuahh5J2WlQXE0LyW1R-LweCGBM673FTJb_VpE2-EzPDg1jsF8vgb");'></div>
+<div>
+<p class="font-bold text-slate-800 dark:text-slate-200">Olivia</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">1 天前</p>
+</div>
+</div>
+<p class="mb-3 text-sm">Meet my new furry friend! He's the cutest! #pets #doglover</p>
+</div>
+<div class="aspect-square bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB5kgeuYgVe8M60qjfQgpPP_FOGC4EYU7oi1jspKxT0NembbxEh2Tl5ld4C6J_vB_DgWahqee50hwPEWYR6Q3uB9fT3621fadXnruuPQqCTcJYxnOvwLE6U_wP3ZcTM44SR2hfGxLEffWsWKhAvb8bWzUXCaivt4qIpICXasUBAhOGXbLWSX6esN6iXsbimmN5IIbM3DCg5mEnuiVHpIgvc--1Zuahh5J2WlQXE0LyW1R-LweCGBM673FTJb_VpE2-EzPDg1jsF8vgb");'></div>
+<div class="p-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+<button class="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary">
+<span class="material-symbols-outlined text-lg">thumb_up</span>
+<span>52</span>
+</button>
+<button class="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+<span>15</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

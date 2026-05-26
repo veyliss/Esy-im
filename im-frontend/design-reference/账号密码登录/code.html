@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login/Registration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1173d4",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+<script defer="" src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden" style='font-family: Inter, "Noto Sans", sans-serif;' x-data="{ mainTab: 'login', loginTab: 'account' }">
+<div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-4 sm:p-8">
+<div class="layout-content-container flex flex-col flex-1">
+<div class="pb-3">
+<div class="flex border-b border-[#cfdbe7] dark:border-slate-700 px-4 gap-8">
+<a :class="{ 'border-b-primary text-primary': mainTab === 'login', 'border-b-transparent text-gray-500 dark:text-gray-400': mainTab !== 'login' }" @click="mainTab = 'login'" class="flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 flex-1 cursor-pointer">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">登录</p>
+</a>
+<a :class="{ 'border-b-primary text-primary': mainTab === 'register', 'border-b-transparent text-gray-500 dark:text-gray-400': mainTab !== 'register' }" @click="mainTab = 'register'; loginTab = null" class="flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 flex-1 cursor-pointer">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">注册</p>
+</a>
+</div>
+</div>
+<div x-cloak="" x-show="mainTab === 'login'">
+<div class="px-4 py-3 mt-5">
+<div class="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] dark:bg-slate-800 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-slate-950 has-[:checked]:shadow-[0_0_4px_rgba(0,0,0,0.1)] has-[:checked]:text-primary text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+<span class="truncate">账号密码登录</span>
+<input class="invisible w-0" name="login-type-account" type="radio" value="account" x-model="loginTab"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white has-[:checked]:dark:bg-slate-950 has-[:checked]:shadow-[0_0_4px_rgba(0,0,0,0.1)] has-[:checked]:text-primary text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">
+<span class="truncate">邮箱登录</span>
+<input class="invisible w-0" name="login-type-email" type="radio" value="email" x-model="loginTab"/>
+</label>
+</div>
+</div>
+<div x-cloak="" x-show="loginTab === 'account'">
+<div class="px-4 py-3 space-y-4">
+<label class="flex flex-col">
+<p class="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">账号</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="请输入您的账号" type="text" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">密码</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="请输入您的密码" type="password" value=""/>
+</label>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<input class="form-checkbox rounded text-primary focus:ring-primary/50 border-gray-300 dark:border-slate-600 bg-background-light dark:bg-slate-800 dark:checked:bg-primary" id="remember-me" type="checkbox"/>
+<label class="ml-2 text-sm text-gray-600 dark:text-gray-400" for="remember-me">记住密码</label>
+</div>
+<a class="text-sm text-primary hover:text-primary/90" href="#">忘记密码？</a>
+</div>
+<button class="w-full flex items-center justify-center rounded-lg bg-primary text-white h-14 px-4 text-base font-semibold hover:bg-primary/90 transition-colors mt-4">
+                                登录
+                            </button>
+</div>
+</div>
+<div x-cloak="" x-show="loginTab === 'email'">
+<div class="px-4 py-3 space-y-4">
+<label class="flex flex-col">
+<p class="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">邮箱地址</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="请输入您的邮箱地址" type="email" value=""/>
+</label>
+<div class="flex flex-col">
+<p class="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">验证码</p>
+<div class="relative">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="请输入验证码" value=""/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/90">发送验证码</button>
+</div>
+</div>
+<div class="flex justify-end mt-2">
+<a class="text-sm text-primary hover:text-primary/90" href="#">忘记密码？</a>
+</div>
+<button class="w-full flex items-center justify-center rounded-lg bg-primary text-white h-14 px-4 text-base font-semibold hover:bg-primary/90 transition-colors mt-4">
+                                登录
+                            </button>
+</div>
+</div>
+</div>
+<div x-cloak="" x-show="mainTab === 'register'">
+<div class="px-4 py-3 mt-5 space-y-4">
+<label class="flex flex-col">
+<p class="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">账号</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="请输入您的账号" type="text" value=""/>
+</label>
+<div class="flex flex-col">
+<p class="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">验证码</p>
+<div class="relative">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="请输入验证码" value=""/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/90">发送验证码</button>
+</div>
+</div>
+<button class="w-full flex items-center justify-center rounded-lg bg-primary text-white h-14 px-4 text-base font-semibold hover:bg-primary/90 transition-colors mt-4">
+                            注册
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

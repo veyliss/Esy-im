@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Connect - Contacts</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#137fec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+          },
+          fontFamily: {
+            "display": ["Plus Jakarta Sans", "Noto Sans", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+<div class="flex h-screen flex-col">
+<header class="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6">
+<div class="flex items-center gap-8">
+<nav class="flex items-center gap-6">
+<a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="#">聊天</a>
+<a class="text-sm font-medium text-primary" href="#">通讯录</a>
+<a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="#">朋友圈</a>
+<a class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary" href="#">我的</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative">
+<img alt="User avatar" class="h-8 w-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTAbEL0EnmxMo_-RrgEZqAS7nBdNtFrJjbYMpT4cGIPYBqsIBPXAUDvyjauvwqBuMFEy6VOqCdUKqN4DBAcN0beCP8Sau__h1dmH1Rz7Hp-iRDKgph4AeZidpJ4TlK2grL6cL8jidxY3O9uU32zwtaY5kXnXwhazLWAexpqfJl79M77mlFwRzm6VdrOn7O2OKzdUBni3D2u3OqoyLJ0sHFCOwLhbaSxInNa17WhugGhDWs-TyRg7WTAkvBKJxdAGo_GxCAnKSblJn2"/>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<aside class="w-80 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto">
+<div class="p-4">
+<details class="group" open="">
+<summary class="flex cursor-pointer items-center justify-between py-2 font-semibold text-slate-800 dark:text-slate-200">
+<span>群聊</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-90">chevron_right</span>
+</summary>
+<div class="mt-2 space-y-1">
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="flex-1 truncate text-sm">Tech Enthusiasts</span>
+</a>
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="flex-1 truncate text-sm">Book Club</span>
+</a>
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="flex-1 truncate text-sm">Travel Buddies</span>
+</a>
+</div>
+</details>
+</div>
+<div class="border-t border-slate-200 dark:border-slate-800 p-4">
+<details class="group" open="">
+<summary class="flex cursor-pointer items-center justify-between py-2 font-semibold text-slate-800 dark:text-slate-200">
+<span>我的好友</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-90">chevron_right</span>
+</summary>
+<div class="mt-2 space-y-1">
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="relative inline-block">
+<img class="size-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTAbEL0EnmxMo_-RrgEZqAS7nBdNtFrJjbYMpT4cGIPYBqsIBPXAUDvyjauvwqBuMFEy6VOqCdUKqN4DBAcN0beCP8Sau__h1dmH1Rz7Hp-iRDKgph4AeZidpJ4TlK2grL6cL8jidxY3O9uU32zwtaY5kXnXwhazLWAexpqfJl79M77mlFwRzm6VdrOn7O2OKzdUBni3D2u3OqoyLJ0sHFCOwLhbaSxInNa17WhugGhDWs-TyRg7WTAkvBKJxdAGo_GxCAnKSblJn2"/>
+<span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
+</div>
+<span class="flex-1 truncate text-sm">Sophia Chen</span>
+</a>
+<a class="flex items-center gap-3 rounded-lg p-2 bg-primary/10 dark:bg-primary/20 text-primary" href="#">
+<div class="relative inline-block">
+<img class="size-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-KQnATFLH0IYf0mIQ6_gHOWSZ5eTr2931XMx5RrmFi6MRWDZmKwEUR3kGGCObF0hGhdHCGT50detZgzkPu6gDFlm7fPIYltlMLA77jZMtwVnbxy8sDMiuFaVqQbOdVPB4Ymt_RndLJlei6AD-gkb-R5U_sGVs8-7AszRO1Fb-odYP8mNU_0JK-JaD2wueJwi2Fr38PWDRGflPgO9MJAtb3l7siwlthniDtOQOzpiq93-hzUx4uOTYEGgNwcE5Z-P48gV4w4AnVQDh"/>
+<span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
+</div>
+<span class="flex-1 truncate text-sm font-semibold">Ethan Lee</span>
+</a>
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="flex-1 truncate text-sm">Olivia Wang</span>
+</a>
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="relative inline-block">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-slate-900"></span>
+</div>
+<span class="flex-1 truncate text-sm">Noah Kim</span>
+</a>
+<a class="flex items-center gap-3 rounded-lg p-2 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+<span class="flex-1 truncate text-sm">Ava Patel</span>
+</a>
+</div>
+</details>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto p-8">
+<div class="mx-auto max-w-2xl">
+<div class="flex flex-col items-center gap-6 text-center">
+<div class="relative inline-block">
+<img alt="Ethan Lee's avatar" class="size-32 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-KQnATFLH0IYf0mIQ6_gHOWSZ5eTr2931XMx5RrmFi6MRWDZmKwEUR3kGGCObF0hGhdHCGT50detZgzkPu6gDFlm7fPIYltlMLA77jZMtwVnbxy8sDMiuFaVqQbOdVPB4Ymt_RndLJlei6AD-gkb-R5U_sGVs8-7AszRO1Fb-odYP8mNU_0JK-JaD2wueJwi2Fr38PWDRGflPgO9MJAtb3l7siwlthniDtOQOzpiq93-hzUx4uOTYEGgNwcE5Z-P48gV4w4AnVQDh"/>
+<span class="absolute bottom-2 right-2 block h-6 w-6 rounded-full bg-green-500 ring-4 ring-white dark:ring-background-light"></span>
+</div>
+<div>
+<h2 class="text-3xl font-bold text-slate-900 dark:text-white">Ethan Lee</h2>
+<p class="text-slate-500 dark:text-slate-400">昵称: Ethan Lee</p>
+</div>
+</div>
+<div class="mt-12 space-y-8">
+<div>
+<h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">基础信息</h3>
+<div class="space-y-3">
+<div class="flex">
+<p class="w-24 shrink-0 text-slate-500 dark:text-slate-400">User ID</p>
+<p class="text-slate-800 dark:text-slate-200">123456789</p>
+</div>
+<div class="flex">
+<p class="w-24 shrink-0 text-slate-500 dark:text-slate-400">地区</p>
+<p class="text-slate-800 dark:text-slate-200">San Francisco</p>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">备注信息</h3>
+<div>
+<label class="sr-only" for="contact-note">My Note for this contact</label>
+<input class="w-full rounded-lg border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary" id="contact-note" placeholder="添加备注" type="text"/>
+</div>
+</div>
+</div>
+<div class="mt-12 flex justify-center gap-4">
+<button class="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90">发送消息</button>
+<button class="rounded-lg bg-slate-200 dark:bg-slate-800 px-6 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700">删除联系人</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

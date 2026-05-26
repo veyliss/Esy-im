@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactStrictMode: true,
+  outputFileTracingRoot: projectRoot,
   // 配置允许的外部图片域名
   images: {
     remotePatterns: [
@@ -17,10 +21,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  // 添加 webpack 配置来处理水合错误
-  webpack: (config, { isServer }) => {
-    return config;
   },
 };
 
