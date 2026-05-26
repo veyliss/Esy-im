@@ -5,11 +5,13 @@ import { MomentItem } from "@/components/moments/MomentItem";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { ActionBar, EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
 import { useAuthStore } from "@/lib/store";
 import { useMomentStore } from "@/lib/store/moment";
 import { MomentAPI } from "@/lib/api/moment";
 import { UserAPI } from "@/lib/api/user";
+import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { User } from "@/lib/types/api";
 
 export default function MomentsPage() {
@@ -31,6 +33,7 @@ export default function MomentsPage() {
   const [content, setContent] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const visible: 0 | 1 | 2 = 0;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -97,7 +100,7 @@ export default function MomentsPage() {
   // 发布动态
   const handlePublish = async () => {
     if (!content.trim() && images.length === 0) {
-      alert("请输入内容或添加图片");
+      setError("请输入内容或添加图片");
       return;
     }
 
@@ -110,16 +113,14 @@ export default function MomentsPage() {
       });
 
       if (res.data.code === 0) {
-        alert("发布成功");
         setContent("");
         setImages([]);
         setLocation("");
-        // 重新加载时间线
         await loadTimeline();
       }
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "发布失败");
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
     }
   };
 
@@ -128,38 +129,34 @@ export default function MomentsPage() {
     try {
       const res = await MomentAPI.likeMoment(momentId);
       if (res.data.code === 0) {
-        // 重新加载对应的数据
         if (activeTab === "timeline") {
           await loadTimeline();
         } else {
           await loadMyMoments();
         }
       }
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "点赞失败");
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
     }
   };
 
-  // 取消点赞
   const handleUnlike = async (momentId: number) => {
     try {
       const res = await MomentAPI.unlikeMoment(momentId);
       if (res.data.code === 0) {
-        // 重新加载对应的数据
         if (activeTab === "timeline") {
           await loadTimeline();
         } else {
           await loadMyMoments();
         }
       }
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "取消点赞失败");
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
     }
   };
 
-  // 评论
   const handleComment = async (
     momentId: number,
     commentContent: string,
@@ -172,36 +169,32 @@ export default function MomentsPage() {
       });
 
       if (res.data.code === 0) {
-        // 重新加载对应的数据
         if (activeTab === "timeline") {
           await loadTimeline();
         } else {
           await loadMyMoments();
         }
       }
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "评论失败");
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
     }
   };
 
-  // 删除动态
   const handleDelete = async (momentId: number) => {
     if (!confirm("确定要删除这条动态吗？")) return;
 
     try {
       const res = await MomentAPI.deleteMoment(momentId);
       if (res.data.code === 0) {
-        alert("删除成功");
         removeMoment(momentId);
-        // 如果在"我的动态"页面，也需要更新
         if (activeTab === "my") {
           await loadMyMoments();
         }
       }
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "删除失败");
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
     }
   };
 
@@ -266,6 +259,7 @@ export default function MomentsPage() {
       main={
         <div className="h-full overflow-y-auto p-6">
           <div className="mx-auto max-w-3xl space-y-6">
+            <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
             <SectionCard>
               <div className="flex gap-4">
                 <UserAvatar

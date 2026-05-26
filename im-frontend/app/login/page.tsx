@@ -5,178 +5,20 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { handleApiError } from "@/lib/utils/errors";
+import {
+  MainTabButton,
+  ToggleTabButton,
+  UnderlineTabButton,
+  FormField,
+  AuthInput,
+  PrimaryButton,
+} from "@/components/login/LoginFormComponents";
 
 type MainTabKey = "login" | "register";
 type LoginTabKey = "email" | "account";
 
-type TabButtonProps = {
-  active: boolean;
-  children: React.ReactNode;
-  onClick: () => void;
-};
-
-type FieldProps = {
-  label: string;
-  children: React.ReactNode;
-};
-
-type PrimaryButtonProps = {
-  loading?: boolean;
-  loadingText: string;
-  text: string;
-  disabled?: boolean;
-  onClick: () => void;
-};
-
-type CodeButtonProps = {
-  disabled: boolean;
-  countdown: number;
-  onClick: () => void;
-};
-
-type AuthInputProps = {
-  placeholder: string;
-  type?: string;
-  name?: string;
-  autoComplete?: string;
-  value: string;
-  onChange: (value: string) => void;
-  onEnter?: () => void;
-  withCodeButton?: boolean;
-  codeButtonProps?: CodeButtonProps;
-};
-
 const cardClassName =
   "w-full max-w-md mx-4 sm:mx-0 rounded-xl bg-white p-4 shadow-lg dark:bg-slate-900 sm:p-8";
-
-const inputClassName =
-  "form-input flex h-14 w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-[#cfdbe7] bg-background-light p-[15px] text-base font-normal leading-normal text-gray-800 placeholder:text-gray-400 focus:border-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-200 dark:placeholder-gray-500";
-
-const primaryButtonClassName =
-  "mt-4 flex h-14 w-full items-center justify-center rounded-lg bg-primary px-4 text-base font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50";
-
-function MainTabButton({ active, children, onClick }: TabButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex flex-1 cursor-pointer flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 transition-colors ${
-        active
-          ? "border-b-primary text-primary"
-          : "border-b-transparent text-gray-500 dark:text-gray-400"
-      }`}
-    >
-      <p className="text-sm font-bold leading-normal tracking-[0.015em]">{children}</p>
-    </button>
-  );
-}
-
-function ToggleTabButton({ active, children, onClick }: TabButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-colors ${
-        active
-          ? "bg-white text-primary shadow-[0_0_4px_rgba(0,0,0,0.1)] dark:bg-slate-950"
-          : "text-gray-500 dark:text-gray-400"
-      }`}
-    >
-      <span className="truncate">{children}</span>
-    </button>
-  );
-}
-
-function UnderlineTabButton({ active, children, onClick }: TabButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-        active
-          ? "border-primary text-primary"
-          : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function FormField({ label, children }: FieldProps) {
-  return (
-    <label className="flex flex-col">
-      <p className="pb-2 text-base font-medium leading-normal text-gray-800 dark:text-slate-200">
-        {label}
-      </p>
-      {children}
-    </label>
-  );
-}
-
-function CodeButton({ disabled, countdown, onClick }: CodeButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {countdown > 0 ? `${countdown}秒` : "发送验证码"}
-    </button>
-  );
-}
-
-function AuthInput({
-  placeholder,
-  type = "text",
-  name,
-  autoComplete,
-  value,
-  onChange,
-  onEnter,
-  withCodeButton = false,
-  codeButtonProps,
-}: AuthInputProps) {
-  return (
-    <div className="relative">
-      <input
-        className={`${inputClassName} ${withCodeButton ? "pr-32" : ""}`.trim()}
-        placeholder={placeholder}
-        type={type}
-        name={name}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            onEnter?.();
-          }
-        }}
-      />
-      {withCodeButton && codeButtonProps ? <CodeButton {...codeButtonProps} /> : null}
-    </div>
-  );
-}
-
-function PrimaryButton({
-  loading,
-  loadingText,
-  text,
-  disabled,
-  onClick,
-}: PrimaryButtonProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={primaryButtonClassName}
-    >
-      {loading ? loadingText : text}
-    </button>
-  );
-}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -281,14 +123,12 @@ export default function LoginPage() {
           setErrorMsg("请输入账号与密码");
           return;
         }
-
         response = await AuthAPI.loginByPassword({ email: account, password });
       } else {
         if (!email || !code) {
           setErrorMsg("请输入邮箱与验证码");
           return;
         }
-
         response = await AuthAPI.loginByCode({ email, code });
       }
 
@@ -414,13 +254,7 @@ export default function LoginPage() {
         </a>
       </div>
 
-      <PrimaryButton
-        loading={loading}
-        loadingText="登录中..."
-        text="登录"
-        disabled={loading}
-        onClick={onLogin}
-      />
+      <PrimaryButton loading={loading} loadingText="登录中..." text="登录" disabled={loading} onClick={onLogin} />
     </div>
   );
 
@@ -442,12 +276,7 @@ export default function LoginPage() {
       </FormField>
 
       <FormField label="验证码">
-        <AuthInput
-          placeholder="请输入验证码"
-          value={code}
-          onChange={setCode}
-          onEnter={onLogin}
-        />
+        <AuthInput placeholder="请输入验证码" value={code} onChange={setCode} onEnter={onLogin} />
       </FormField>
 
       <div className="mt-2 flex justify-end">
@@ -456,33 +285,18 @@ export default function LoginPage() {
         </a>
       </div>
 
-      <PrimaryButton
-        loading={loading}
-        loadingText="登录中..."
-        text="登录"
-        disabled={loading}
-        onClick={onLogin}
-      />
+      <PrimaryButton loading={loading} loadingText="登录中..." text="登录" disabled={loading} onClick={onLogin} />
     </div>
   );
 
   const renderRegisterForm = () => (
     <div className="mt-5 space-y-4 px-4 py-3">
       <FormField label="账号/手机号">
-        <AuthInput
-          placeholder="请输入您的账号或手机号"
-          value={regUserId}
-          onChange={setRegUserId}
-        />
+        <AuthInput placeholder="请输入您的账号或手机号" value={regUserId} onChange={setRegUserId} />
       </FormField>
 
       <FormField label="邮箱">
-        <AuthInput
-          placeholder="请输入您的邮箱地址"
-          type="email"
-          value={regEmail}
-          onChange={setRegEmail}
-        />
+        <AuthInput placeholder="请输入您的邮箱地址" type="email" value={regEmail} onChange={setRegEmail} />
       </FormField>
 
       <FormField label="验证码">
@@ -499,20 +313,14 @@ export default function LoginPage() {
         />
       </FormField>
 
-      <PrimaryButton
-        loading={loading}
-        loadingText="注册中..."
-        text="注册"
-        disabled={loading}
-        onClick={onRegister}
-      />
+      <PrimaryButton loading={loading} loadingText="注册中..." text="注册" disabled={loading} onClick={onRegister} />
     </div>
   );
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-background-light font-display dark:bg-background-dark">
       <div className={cardClassName}>
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-1 flex-col">
           <div className="pb-3">
             <div className="flex gap-8 border-b border-[#cfdbe7] px-4 dark:border-slate-700">
               <MainTabButton active={mainTab === "login"} onClick={() => switchMainTab("login")}>

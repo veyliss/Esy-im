@@ -3,10 +3,12 @@
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { ActionBar, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { UserAPI } from "@/lib/api/user";
+import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import type { User } from "@/lib/types/api";
@@ -18,6 +20,7 @@ export default function MePage() {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // 表单状态
   const [nickname, setNickname] = useState("");
@@ -88,33 +91,30 @@ export default function MePage() {
   const handleSaveAll = async () => {
     if (saving) return;
 
-    // 验证个人信息
     if (!nickname.trim()) {
-      alert("昵称不能为空");
+      setError("昵称不能为空");
       return;
     }
 
-    // 如果输入了密码，验证密码
     if (newPassword || confirmPassword) {
       if (!newPassword.trim()) {
-        alert("新密码不能为空");
+        setError("新密码不能为空");
         return;
       }
 
       if (newPassword.length < 8) {
-        alert("密码长度不能少于8位");
+        setError("密码长度不能少于8位");
         return;
       }
 
       if (newPassword !== confirmPassword) {
-        alert("两次密码输入不一致");
+        setError("两次密码输入不一致");
         return;
       }
     }
 
     setSaving(true);
     try {
-      // 更新个人信息
       const profileRes = await UserAPI.updateProfile({
         nickname: nickname.trim(),
         avatar: avatar || undefined,
@@ -124,22 +124,18 @@ export default function MePage() {
         throw new Error(profileRes.data.msg || "个人信息更新失败");
       }
 
-      // 如果有密码修改，也执行密码修改
       if (newPassword && confirmPassword) {
         const passwordRes = await AuthAPI.setPassword({
           password: newPassword,
         });
 
         if (passwordRes.data.code === 0) {
-          alert("个人信息和密码修改成功，请重新登录");
           clearToken();
           router.push("/login");
           return;
         }
       }
 
-      alert("保存成功");
-      // 重新加载用户信息
       const userRes = await UserAPI.getMe();
       if (userRes.data.code === 0) {
         const user = userRes.data.data;
@@ -147,12 +143,12 @@ export default function MePage() {
         setNickname(user.nickname || "");
         setAvatar(user.avatar || "");
       }
-      // 清空密码输入
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      const errorMsg = (error as { response?: { data?: { msg?: string } } }).response?.data?.msg;
-      alert(errorMsg || "保存失败");
+      setError(null);
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
     } finally {
       setSaving(false);
     }
@@ -235,6 +231,7 @@ export default function MePage() {
       main={
         <div className="h-full overflow-y-auto p-8">
           <div className="mx-auto max-w-4xl space-y-6">
+            <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
             <SectionCard>
               <div className="py-4 text-center">
                 <div className="relative mx-auto inline-block">
