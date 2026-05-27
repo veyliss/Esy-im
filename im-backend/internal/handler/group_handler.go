@@ -43,7 +43,7 @@ func (h *GroupHandler) getCurrentUserID(r *http.Request) (string, error) {
 func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 		req.JoinApproval,
 	)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h *GroupHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) GetGroupInfo(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -105,7 +105,7 @@ func (h *GroupHandler) GetGroupInfo(w http.ResponseWriter, r *http.Request) {
 
 	group, err := h.groupController.GetGroupInfo(groupID, userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (h *GroupHandler) GetGroupInfo(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) UpdateGroupInfo(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -140,7 +140,7 @@ func (h *GroupHandler) UpdateGroupInfo(w http.ResponseWriter, r *http.Request) {
 
 	err = h.groupController.UpdateGroupInfo(groupID, userID, req.Name, req.Description, req.Avatar)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (h *GroupHandler) UpdateGroupInfo(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -164,7 +164,7 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 
 	err = h.groupController.DeleteGroup(groupID, userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -175,7 +175,7 @@ func (h *GroupHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -192,7 +192,7 @@ func (h *GroupHandler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := h.groupController.GetUserGroups(userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 5001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeDatabaseError)
 		return
 	}
 
@@ -216,7 +216,7 @@ func (h *GroupHandler) SearchGroups(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := h.groupController.SearchGroups(keyword, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 5001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeDatabaseError)
 		return
 	}
 
@@ -229,7 +229,7 @@ func (h *GroupHandler) SearchGroups(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -247,20 +247,20 @@ func (h *GroupHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.groupController.JoinGroup(req.GroupID, userID)
+	group, err := h.groupController.JoinGroup(req.GroupID, userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
-	pkg.Success(w, "加入群组成功")
+	pkg.Success(w, group)
 }
 
 // LeaveGroup 退出群组
 func (h *GroupHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -273,7 +273,7 @@ func (h *GroupHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 
 	err = h.groupController.LeaveGroup(groupID, userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -284,7 +284,7 @@ func (h *GroupHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) KickMember(w http.ResponseWriter, r *http.Request) {
 	operatorID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -311,7 +311,7 @@ func (h *GroupHandler) KickMember(w http.ResponseWriter, r *http.Request) {
 
 	err = h.groupController.KickMember(groupID, operatorID, req.TargetUserID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -322,7 +322,7 @@ func (h *GroupHandler) KickMember(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) SetMemberRole(w http.ResponseWriter, r *http.Request) {
 	operatorID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -350,7 +350,7 @@ func (h *GroupHandler) SetMemberRole(w http.ResponseWriter, r *http.Request) {
 
 	err = h.groupController.SetMemberRole(groupID, operatorID, req.TargetUserID, req.Role)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -361,7 +361,7 @@ func (h *GroupHandler) SetMemberRole(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) GetGroupMembers(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -385,7 +385,7 @@ func (h *GroupHandler) GetGroupMembers(w http.ResponseWriter, r *http.Request) {
 
 	members, err := h.groupController.GetGroupMembers(groupID, userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -398,7 +398,7 @@ func (h *GroupHandler) GetGroupMembers(w http.ResponseWriter, r *http.Request) {
 func (h *GroupHandler) SendGroupMessage(w http.ResponseWriter, r *http.Request) {
 	fromUserID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -433,7 +433,7 @@ func (h *GroupHandler) SendGroupMessage(w http.ResponseWriter, r *http.Request) 
 		req.AtUsers,
 	)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -444,7 +444,7 @@ func (h *GroupHandler) SendGroupMessage(w http.ResponseWriter, r *http.Request) 
 func (h *GroupHandler) GetGroupMessages(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -468,7 +468,7 @@ func (h *GroupHandler) GetGroupMessages(w http.ResponseWriter, r *http.Request) 
 
 	messages, err := h.groupController.GetGroupMessages(groupID, userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -479,7 +479,7 @@ func (h *GroupHandler) GetGroupMessages(w http.ResponseWriter, r *http.Request) 
 func (h *GroupHandler) RecallGroupMessage(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -493,7 +493,7 @@ func (h *GroupHandler) RecallGroupMessage(w http.ResponseWriter, r *http.Request
 
 	err = h.groupController.RecallGroupMessage(uint(messageID), userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -504,7 +504,7 @@ func (h *GroupHandler) RecallGroupMessage(w http.ResponseWriter, r *http.Request
 func (h *GroupHandler) MarkGroupMessagesAsRead(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -517,7 +517,7 @@ func (h *GroupHandler) MarkGroupMessagesAsRead(w http.ResponseWriter, r *http.Re
 
 	err = h.groupController.MarkGroupMessagesAsRead(groupID, userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 
@@ -528,7 +528,7 @@ func (h *GroupHandler) MarkGroupMessagesAsRead(w http.ResponseWriter, r *http.Re
 func (h *GroupHandler) GetUserUnreadGroupMessages(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	vars := mux.Vars(r)
@@ -541,7 +541,7 @@ func (h *GroupHandler) GetUserUnreadGroupMessages(w http.ResponseWriter, r *http
 
 	count, err := h.groupController.GetUserUnreadGroupMessages(groupID, userID)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
 		return
 	}
 

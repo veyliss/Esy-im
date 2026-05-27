@@ -47,7 +47,7 @@ func (c *GroupController) SearchGroups(keyword string, page, pageSize int) (inte
 // ==================== Group Member 管理 ====================
 
 // JoinGroup 加入群组
-func (c *GroupController) JoinGroup(groupID, userID string) error {
+func (c *GroupController) JoinGroup(groupID, userID string) (interface{}, error) {
 	return c.groupService.JoinGroup(groupID, userID)
 }
 

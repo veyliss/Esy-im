@@ -13,6 +13,15 @@ type FriendService struct {
 	userRepo   *repository.UserRepository
 }
 
+// FriendSearchResult 好友搜索结果，附带当前用户与目标用户的关系状态
+type FriendSearchResult struct {
+	UserID             string `json:"user_id"`
+	Email              string `json:"email"`
+	Nickname           string `json:"nickname"`
+	Avatar             string `json:"avatar"`
+	RelationshipStatus string `json:"relationship_status"` // self, friend, pending_sent, pending_received, none
+}
+
 func NewFriendService(friendRepo *repository.FriendRepository, userRepo *repository.UserRepository) *FriendService {
 	return &FriendService{
 		friendRepo: friendRepo,
@@ -296,11 +305,35 @@ func (s *FriendService) GetSentRequests(userID string, status int) ([]model.Frie
 	return s.friendRepo.GetSentRequests(userID, status)
 }
 
-// SearchFriend 搜索好友（根据用户ID或昵称）
-func (s *FriendService) SearchFriend(userID string) (*model.User, error) {
-	user, err := s.userRepo.FindByUserID(userID)
+// SearchFriend 搜索好友（根据用户ID、邮箱或昵称）
+func (s *FriendService) SearchFriend(currentUserID, keyword string) (*FriendSearchResult, error) {
+	user, err := s.userRepo.FindByKeyword(keyword)
 	if err != nil {
 		return nil, errors.New("用户不存在")
 	}
-	return user, nil
+
+	status := "none"
+	if user.UserID == currentUserID {
+		status = "self"
+	} else {
+		isFriend, err := s.friendRepo.IsFriend(currentUserID, user.UserID)
+		if err != nil {
+			return nil, err
+		}
+		if isFriend {
+			status = "friend"
+		} else if pendingSent, _ := s.friendRepo.FindPendingRequest(currentUserID, user.UserID); pendingSent != nil {
+			status = "pending_sent"
+		} else if pendingReceived, _ := s.friendRepo.FindPendingRequest(user.UserID, currentUserID); pendingReceived != nil {
+			status = "pending_received"
+		}
+	}
+
+	return &FriendSearchResult{
+		UserID:             user.UserID,
+		Email:              user.Email,
+		Nickname:           user.Nickname,
+		Avatar:             user.Avatar,
+		RelationshipStatus: status,
+	}, nil
 }

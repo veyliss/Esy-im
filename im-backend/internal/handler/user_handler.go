@@ -71,7 +71,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	// 调用 controller.Register（只返回 error）
 	if err := h.controller.Register(req.Email, req.Code, req.UserID, req.Nickname); err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeValidationFailed)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	data, err := h.controller.Login(req.Email, req.Code)
 	if err != nil {
-		pkg.Error(w, 4003, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -106,7 +106,7 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 
 	data, err := h.controller.Me(userID)
 	if err != nil {
-		pkg.Error(w, 4004, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeNotFound)
 		return
 	}
 
@@ -135,7 +135,7 @@ func (h *UserHandler) SendCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.SendCode(req.Email); err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeEmailError)
 		return
 	}
 
@@ -155,7 +155,7 @@ func (h *UserHandler) VerifyCode(w http.ResponseWriter, r *http.Request) {
 
 	ok, err := h.controller.VerifyCode(req.Email, req.Code)
 	if err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeCodeInvalid)
 		return
 	}
 	if !ok {
@@ -175,7 +175,7 @@ func (h *UserHandler) RegisterWithPassword(w http.ResponseWriter, r *http.Reques
 	}
 
 	if err := h.controller.RegisterWithPassword(req.Email, req.UserID, req.Nickname, req.Password); err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeValidationFailed)
 		return
 	}
 
@@ -198,7 +198,7 @@ func (h *UserHandler) LoginWithPassword(w http.ResponseWriter, r *http.Request) 
 	}
 	data, err := h.controller.LoginWithPassword(account, req.Password)
 	if err != nil {
-		pkg.Error(w, 4003, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -225,7 +225,7 @@ func (h *UserHandler) SetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.SetPassword(email, req.Password); err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeValidationFailed)
 		return
 	}
 
@@ -253,7 +253,7 @@ func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.UpdateProfile(email, req.Nickname, req.Avatar); err != nil {
-		pkg.Error(w, 4002, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeValidationFailed)
 		return
 	}
 

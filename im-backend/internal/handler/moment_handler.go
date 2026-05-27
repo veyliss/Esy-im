@@ -36,7 +36,7 @@ func (h *MomentHandler) CreateMoment(w http.ResponseWriter, r *http.Request) {
 	userID := pkg.GetUserIDFromContext(r.Context())
 
 	if err := h.controller.CreateMoment(userID, req.Content, req.Images, req.Location, req.Visible); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *MomentHandler) GetMomentByID(w http.ResponseWriter, r *http.Request) {
 
 	moment, err := h.controller.GetMomentByID(uint(momentID), userID)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *MomentHandler) GetMyMoments(w http.ResponseWriter, r *http.Request) {
 
 	moments, err := h.controller.GetMyMoments(userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -107,7 +107,7 @@ func (h *MomentHandler) GetFriendMoments(w http.ResponseWriter, r *http.Request)
 
 	moments, err := h.controller.GetFriendMoments(userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -129,7 +129,7 @@ func (h *MomentHandler) DeleteMoment(w http.ResponseWriter, r *http.Request) {
 	userID := pkg.GetUserIDFromContext(r.Context())
 
 	if err := h.controller.DeleteMoment(uint(momentID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (h *MomentHandler) LikeMoment(w http.ResponseWriter, r *http.Request) {
 	userID := pkg.GetUserIDFromContext(r.Context())
 
 	if err := h.controller.LikeMoment(uint(momentID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -173,7 +173,7 @@ func (h *MomentHandler) UnlikeMoment(w http.ResponseWriter, r *http.Request) {
 	userID := pkg.GetUserIDFromContext(r.Context())
 
 	if err := h.controller.UnlikeMoment(uint(momentID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -196,7 +196,7 @@ func (h *MomentHandler) GetLikeList(w http.ResponseWriter, r *http.Request) {
 
 	likes, err := h.controller.GetLikeList(uint(momentID), userID)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -233,7 +233,7 @@ func (h *MomentHandler) CommentMoment(w http.ResponseWriter, r *http.Request) {
 	userID := pkg.GetUserIDFromContext(r.Context())
 
 	if err := h.controller.CommentMoment(uint(momentID), userID, req.Content, req.ReplyToID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -255,7 +255,7 @@ func (h *MomentHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	userID := pkg.GetUserIDFromContext(r.Context())
 
 	if err := h.controller.DeleteComment(uint(commentID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -278,7 +278,7 @@ func (h *MomentHandler) GetCommentList(w http.ResponseWriter, r *http.Request) {
 
 	comments, err := h.controller.GetCommentList(uint(momentID), userID)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 

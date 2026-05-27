@@ -102,7 +102,7 @@ export const GroupAPI = {
    * 加入群组
    */
   joinGroup: (data: JoinGroupParams) =>
-    api.post<ApiResponse<string>>("/groups/join", data),
+    api.post<ApiResponse<Group>>("/groups/join", data),
 
   /**
    * 退出群组

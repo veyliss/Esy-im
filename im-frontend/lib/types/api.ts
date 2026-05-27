@@ -65,6 +65,16 @@ export interface FriendRequest {
   to_user?: User;
 }
 
+export type FriendRelationshipStatus = "self" | "friend" | "pending_sent" | "pending_received" | "none";
+
+export interface FriendSearchResult {
+  user_id: string;
+  email: string;
+  nickname: string;
+  avatar: string;
+  relationship_status: FriendRelationshipStatus;
+}
+
 // ============ 朋友圈相关类型 ============
 
 export interface Moment {

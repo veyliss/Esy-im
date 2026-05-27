@@ -129,7 +129,7 @@ func (h *MessageHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 	// 使用 user_id 作为业务标识
 	fromUserID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -145,7 +145,7 @@ func (h *MessageHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 
 	message, err := h.controller.SendMessage(fromUserID, req.ToUserID, req.MessageType, req.Content, req.MediaURL)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -162,7 +162,7 @@ func (h *MessageHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 func (h *MessageHandler) GetConversationList(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
@@ -176,7 +176,7 @@ func (h *MessageHandler) GetConversationList(w http.ResponseWriter, r *http.Requ
 
 	conversations, err := h.controller.GetConversationList(userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, conversations)
@@ -193,7 +193,7 @@ func (h *MessageHandler) GetConversationMessages(w http.ResponseWriter, r *http.
 	}
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
@@ -208,7 +208,7 @@ func (h *MessageHandler) GetConversationMessages(w http.ResponseWriter, r *http.
 
 	messages, err := h.controller.GetConversationMessages(uint(conversationID), userID, page, pageSize)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, messages)
@@ -225,12 +225,12 @@ func (h *MessageHandler) MarkConversationAsRead(w http.ResponseWriter, r *http.R
 	}
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
 	if err := h.controller.MarkConversationAsRead(uint(conversationID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, "已标记为已读")
@@ -247,12 +247,12 @@ func (h *MessageHandler) RecallMessage(w http.ResponseWriter, r *http.Request) {
 	}
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
 	if err := h.controller.RecallMessage(uint(messageID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, "消息已撤回")
@@ -269,12 +269,12 @@ func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 	}
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
 	if err := h.controller.DeleteMessage(uint(messageID), userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, "消息已删除")
@@ -284,12 +284,12 @@ func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 func (h *MessageHandler) GetUnreadMessageCount(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 	count, err := h.controller.GetUnreadMessageCount(userID)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, map[string]interface{}{"count": count})
@@ -307,13 +307,13 @@ func (h *MessageHandler) GetOrCreateConversation(w http.ResponseWriter, r *http.
 
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
-		pkg.Error(w, 4001, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
 
 	conversation, err := h.controller.GetOrCreateConversation(userID, req.FriendUserID)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 	pkg.Success(w, conversation)

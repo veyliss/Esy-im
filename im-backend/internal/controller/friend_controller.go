@@ -53,6 +53,6 @@ func (c *FriendController) GetSentRequests(userID string, status int) (interface
 }
 
 // SearchFriend 搜索好友
-func (c *FriendController) SearchFriend(userID string) (interface{}, error) {
-	return c.friendService.SearchFriend(userID)
+func (c *FriendController) SearchFriend(currentUserID, keyword string) (interface{}, error) {
+	return c.friendService.SearchFriend(currentUserID, keyword)
 }

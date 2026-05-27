@@ -1,5 +1,5 @@
 import api from "./index";
-import type { ApiResponse, User } from "@/lib/types/api";
+import type { ApiResponse, FriendSearchResult, User } from "@/lib/types/api";
 
 // ============ 请求参数类型 ============
 
@@ -26,6 +26,6 @@ export const UserAPI = {
   /**
    * 搜索用户
    */
-  searchUser: (userId: string) =>
-    api.get<ApiResponse<User>>(`/friends/search?user_id=${userId}`),
+  searchUser: (keyword: string) =>
+    api.get<ApiResponse<FriendSearchResult>>(`/friends/search?keyword=${encodeURIComponent(keyword)}`),
 };

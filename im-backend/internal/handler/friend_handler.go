@@ -52,7 +52,7 @@ func (h *FriendHandler) SendRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.SendRequest(userID, req.ToUserID, req.Message); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *FriendHandler) AcceptRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.AcceptRequest(req.RequestID, userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -102,7 +102,7 @@ func (h *FriendHandler) RejectRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.RejectRequest(req.RequestID, userID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -119,7 +119,7 @@ func (h *FriendHandler) GetFriendList(w http.ResponseWriter, r *http.Request) {
 
 	friends, err := h.controller.GetFriendList(userID)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -143,7 +143,7 @@ func (h *FriendHandler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.DeleteFriend(userID, friendID); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -169,7 +169,7 @@ func (h *FriendHandler) UpdateRemark(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.controller.UpdateRemark(userID, req.FriendID, req.Remark); err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -193,7 +193,7 @@ func (h *FriendHandler) GetReceivedRequests(w http.ResponseWriter, r *http.Reque
 
 	requests, err := h.controller.GetReceivedRequests(userID, status)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -217,7 +217,7 @@ func (h *FriendHandler) GetSentRequests(w http.ResponseWriter, r *http.Request) 
 
 	requests, err := h.controller.GetSentRequests(userID, status)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 
@@ -226,15 +226,24 @@ func (h *FriendHandler) GetSentRequests(w http.ResponseWriter, r *http.Request) 
 
 // SearchFriend 搜索好友
 func (h *FriendHandler) SearchFriend(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("user_id")
-	if userID == "" {
-		pkg.Error(w, 400, "用户ID不能为空")
+	keyword := r.URL.Query().Get("keyword")
+	if keyword == "" {
+		keyword = r.URL.Query().Get("user_id")
+	}
+	if keyword == "" {
+		pkg.Error(w, 400, "搜索关键词不能为空")
 		return
 	}
 
-	user, err := h.controller.SearchFriend(userID)
+	currentUserID, err := h.getUserID(r)
 	if err != nil {
-		pkg.Error(w, 500, err.Error())
+		pkg.Error(w, 401, "用户不存在")
+		return
+	}
+
+	user, err := h.controller.SearchFriend(currentUserID, keyword)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
 

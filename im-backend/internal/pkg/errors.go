@@ -1,6 +1,9 @@
 package pkg
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // ErrorCode 错误码定义
 type ErrorCode int
@@ -143,4 +146,38 @@ func (code ErrorCode) GetMessage() string {
 		return msg
 	}
 	return "未知错误"
+}
+
+// CodeFromMessage 根据业务错误文本推断错误码，兼容当前 service 层返回普通 error 的实现。
+func CodeFromMessage(message string, fallback ErrorCode) ErrorCode {
+	switch {
+	case strings.Contains(message, "参数") || strings.Contains(message, "不能为空"):
+		return CodeBadRequest
+	case strings.Contains(message, "密码长度"):
+		return CodeValidationFailed
+	case strings.Contains(message, "未认证") || strings.Contains(message, "未授权") || strings.Contains(message, "Token"):
+		return CodeUnauthorized
+	case strings.Contains(message, "无权") || strings.Contains(message, "权限") || strings.Contains(message, "不是该群组的成员"):
+		return CodePermissionDenied
+	case strings.Contains(message, "邮箱已被注册") || strings.Contains(message, "用户ID已存在"):
+		return CodeUserExists
+	case strings.Contains(message, "不存在"):
+		return CodeNotFound
+	case strings.Contains(message, "密码错误"):
+		return CodeWrongPassword
+	case strings.Contains(message, "验证码错误"):
+		return CodeCodeInvalid
+	case strings.Contains(message, "验证码") && strings.Contains(message, "过期"):
+		return CodeCodeExpired
+	case strings.Contains(message, "已经是好友"):
+		return CodeFriendExists
+	case strings.Contains(message, "已发送过好友请求") || strings.Contains(message, "好友请求已存在"):
+		return CodeRequestExists
+	case strings.Contains(message, "已经是该群组的成员"):
+		return CodeConflict
+	case strings.Contains(message, "已被处理"):
+		return CodeConflict
+	default:
+		return fallback
+	}
 }

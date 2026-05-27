@@ -6,6 +6,8 @@ import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/erro
 import type { Group } from "@/lib/types/api";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { CommandDialog } from "@/components/ui/command-dialog";
+import { useAppInteractions } from "@/components/ui/app-interactions";
 
 export function JoinGroupModal({
   onClose,
@@ -21,19 +23,11 @@ export function JoinGroupModal({
   const [searching, setSearching] = useState(false);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useAppInteractions();
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose]);
 
   const handleKeywordChange = (value: string) => {
     setKeyword(value);
@@ -75,6 +69,7 @@ export function JoinGroupModal({
       setJoiningId(groupId);
       const res = await GroupAPI.joinGroup({ group_id: groupId });
       if (res.data.code === 0) {
+        toast(`已加入 ${res.data.data?.name || "群聊"}`, { tone: "success" });
         onSuccess();
       }
     } catch (e) {
@@ -86,143 +81,112 @@ export function JoinGroupModal({
   };
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
-        onClick={onClose}
-      />
+    <CommandDialog
+      title="加入群聊"
+      description="搜索群号或关键词，找到后加入公开群聊"
+      icon="group_add"
+      labelledBy="join-group-title"
+      onClose={onClose}
+    >
+      <div className="space-y-4">
+        <ErrorAlert error={error} onClose={() => setError(null)} />
 
-      {/* Dialog */}
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        <div
-          className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-fade-in-scale"
-          onClick={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="join-group-title"
-        >
-          {/* Header */}
-          <div className="p-6 pb-2">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-primary shrink-0">
-                  <span className="material-symbols-outlined text-xl">group_add</span>
-                </div>
-                <div>
-                  <h2 id="join-group-title" className="text-lg font-semibold text-slate-900 dark:text-white">加入群聊</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">搜索群号或关键词，找到后加入公开群聊</p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="flex items-center justify-center w-8 h-8 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0"
-                aria-label="关闭"
-                title="关闭"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Body */}
-          <div className="p-6 pt-4 space-y-4">
-            <ErrorAlert error={error} onClose={() => setError(null)} />
-
-            {/* Search section */}
-            <div>
-              <label htmlFor="join-group-keyword" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                搜索群聊
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    ref={inputRef}
-                    id="join-group-keyword"
-                    type="text"
-                    value={keyword}
-                    onChange={(e) => handleKeywordChange(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
-                    placeholder="输入群组关键词或群号"
-                    className="w-full h-11 rounded-lg border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-colors"
-                  />
-                  {keyword ? (
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                      onClick={() => handleKeywordChange("")}
-                      aria-label="清空搜索"
-                      title="清空搜索"
-                    >
-                      <span className="material-symbols-outlined text-base">close</span>
-                    </button>
-                  ) : null}
-                </div>
+        <div>
+          <label htmlFor="join-group-keyword" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+            搜索群聊
+          </label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                id="join-group-keyword"
+                type="text"
+                value={keyword}
+                onChange={(e) => handleKeywordChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
+                placeholder="输入群组关键词或群号"
+                className="h-11 w-full rounded-lg border border-slate-300 bg-background-light px-4 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              />
+              {keyword ? (
                 <button
                   type="button"
-                  onClick={handleSearch}
-                  disabled={searching}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+                  className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                  onClick={() => handleKeywordChange("")}
+                  aria-label="清空搜索"
+                  title="清空搜索"
                 >
-                  {searching ? "搜索中" : "搜索"}
+                  <span className="material-symbols-outlined text-base">close</span>
                 </button>
-              </div>
+              ) : null}
             </div>
-
-            {/* Results / States */}
-            {searching ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 animate-spin mb-3">sync</span>
-                <p className="text-sm text-slate-500 dark:text-slate-400">正在搜索群聊</p>
-              </div>
-            ) : results.length > 0 ? (
-              <div className="space-y-3">
-                {results.map((group) => (
-                  <div
-                    key={group.group_id}
-                    className="flex items-center gap-3 rounded-lg border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-950/20 p-3"
-                  >
-                    <UserAvatar
-                      src={group.avatar || "/default-group-avatar.png"}
-                      name={group.name}
-                      size="md"
-                      shape="rounded"
-                      border
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{group.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{group.member_count} 人 · 群号 {group.group_id}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleJoin(group.group_id)}
-                      disabled={Boolean(joiningId)}
-                      className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {joiningId === group.group_id ? "加入中" : "加入"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : searched ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-3">group_search</span>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">没有找到匹配群聊</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">请尝试更换关键词或输入完整群号</p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-3">manage_search</span>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">输入关键词后按 Enter 搜索</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">找到群聊后即可加入</p>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={handleSearch}
+              disabled={searching}
+              className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {searching ? "搜索中" : "搜索"}
+            </button>
           </div>
         </div>
+
+        {searching ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <span className="material-symbols-outlined mb-3 animate-spin text-4xl text-slate-300 dark:text-slate-600">sync</span>
+            <p className="text-sm text-slate-500 dark:text-slate-400">正在搜索群聊</p>
+          </div>
+        ) : results.length > 0 ? (
+          <div className="space-y-3">
+            {results.map((group) => (
+              <div
+                key={group.group_id}
+                className="rounded-lg border border-blue-100 bg-blue-50/50 p-3 dark:border-blue-900/30 dark:bg-blue-950/20"
+              >
+                <div className="flex items-center gap-3">
+                  <UserAvatar
+                    src={group.avatar || "/default-group-avatar.png"}
+                    name={group.name}
+                    size="md"
+                    shape="rounded"
+                    border
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{group.name}</p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                      {group.member_count} 人 · 群号 {group.group_id}
+                    </p>
+                    {group.description ? (
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-400 dark:text-slate-500">{group.description}</p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleJoin(group.group_id)}
+                    disabled={Boolean(joiningId)}
+                    className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {joiningId === group.group_id ? "加入中" : "加入"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : searched ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <span className="material-symbols-outlined mb-3 text-4xl text-slate-300 dark:text-slate-600">group_search</span>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">没有找到匹配群聊</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">请尝试更换关键词或输入完整群号</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <span className="material-symbols-outlined mb-3 text-4xl text-slate-300 dark:text-slate-600">manage_search</span>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">输入关键词后按 Enter 搜索</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">找到群聊后即可加入</p>
+          </div>
+        )}
       </div>
-    </>
+    </CommandDialog>
   );
 }

@@ -37,6 +37,17 @@ func (r *UserRepository) FindByUserID(userID string) (*model.User, error) {
 	return &user, nil
 }
 
+// FindByKeyword 根据用户号、邮箱或昵称查询用户
+func (r *UserRepository) FindByKeyword(keyword string) (*model.User, error) {
+	var user model.User
+	if err := r.db.
+		Where("user_id = ? OR email = ? OR nickname = ?", keyword, keyword, keyword).
+		First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // Update 更新用户（用于修改密码/昵称等）
 func (r *UserRepository) Update(user *model.User) error {
 	return r.db.Save(user).Error

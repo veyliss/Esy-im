@@ -34,6 +34,15 @@ func Error(w http.ResponseWriter, code int, msg string) {
 	})
 }
 
+// ServiceError 根据普通业务错误返回标准错误响应
+func ServiceError(w http.ResponseWriter, err error, fallback ErrorCode) {
+	if err == nil {
+		return
+	}
+	code := CodeFromMessage(err.Error(), fallback)
+	Error(w, int(code), err.Error())
+}
+
 // ErrorWithAppError 使用AppError响应
 func ErrorWithAppError(w http.ResponseWriter, err *AppError, showDetail bool) {
 	w.Header().Set("Content-Type", "application/json")

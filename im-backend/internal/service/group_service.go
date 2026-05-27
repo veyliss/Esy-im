@@ -146,30 +146,30 @@ func (s *GroupService) SearchGroups(keyword string, page, pageSize int) ([]model
 // ==================== Group Member 管理 ====================
 
 // JoinGroup 加入群组
-func (s *GroupService) JoinGroup(groupID, userID string) error {
+func (s *GroupService) JoinGroup(groupID, userID string) (*model.Group, error) {
 	// 检查群组是否存在
 	group, err := s.groupRepo.GetGroupByID(groupID)
 	if err != nil {
-		return errors.New("群组不存在")
+		return nil, errors.New("群组不存在")
 	}
 
 	// 检查是否已经是成员
 	isMember, err := s.groupRepo.IsGroupMember(groupID, userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if isMember {
-		return errors.New("您已经是该群组的成员")
+		return nil, errors.New("您已经是该群组的成员")
 	}
 
 	// 检查群组是否已满
 	if group.MemberCount >= group.MaxMembers {
-		return errors.New("群组人数已满")
+		return nil, errors.New("群组人数已满")
 	}
 
 	// 如果是私有群组且需要审批，这里应该创建加入申请而不是直接加入
 	if !group.IsPublic || group.JoinApproval {
-		return errors.New("该群组需要审批才能加入")
+		return nil, errors.New("该群组需要审批才能加入")
 	}
 
 	// 添加成员
@@ -182,11 +182,15 @@ func (s *GroupService) JoinGroup(groupID, userID string) error {
 	}
 
 	if err := s.groupRepo.AddGroupMember(member); err != nil {
-		return err
+		return nil, err
 	}
 
 	// 更新群成员数量
-	return s.groupRepo.UpdateMemberCount(groupID, 1)
+	if err := s.groupRepo.UpdateMemberCount(groupID, 1); err != nil {
+		return nil, err
+	}
+
+	return s.groupRepo.GetGroupByID(groupID)
 }
 
 // LeaveGroup 退出群组
