@@ -7,7 +7,7 @@ import { AuthAPI } from "@/lib/api/auth";
 import { handleApiError } from "@/lib/utils/errors";
 import {
   MainTabButton,
-  UnderlineTabButton,
+  SegmentedTab,
   FormField,
   AuthInput,
   PrimaryButton,
@@ -15,9 +15,6 @@ import {
 
 type MainTabKey = "login" | "register";
 type LoginTabKey = "email" | "account";
-
-const cardClassName =
-  "auth-card";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -191,21 +188,21 @@ export default function LoginPage() {
 
   const renderLoginSwitcher = () => {
     return (
-      <div className="auth-login-switcher compact">
-        <div className="auth-underline-group">
-          <UnderlineTabButton active={loginTab === "email"} onClick={() => switchLoginTab("email")}>
-            邮箱登录
-          </UnderlineTabButton>
-          <UnderlineTabButton active={loginTab === "account"} onClick={() => switchLoginTab("account")}>
-            账号密码登录
-          </UnderlineTabButton>
-        </div>
+      <div className="px-4 py-3 mt-5">
+        <SegmentedTab
+          options={[
+            { key: "email", label: "邮箱登录" },
+            { key: "account", label: "账号密码登录" },
+          ]}
+          active={loginTab}
+          onChange={(key) => switchLoginTab(key as LoginTabKey)}
+        />
       </div>
     );
   };
 
   const renderAccountLoginForm = () => (
-    <div className="auth-form-stack">
+    <div className="flex flex-col gap-5 px-4 pb-5">
       <FormField label="账号">
         <AuthInput
           placeholder="请输入您的账号"
@@ -230,19 +227,19 @@ export default function LoginPage() {
       </FormField>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <input
             id="remember-me"
             type="checkbox"
             checked={remember}
             onChange={(event) => setRemember(event.target.checked)}
-            className="auth-checkbox"
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/50"
           />
-          <label htmlFor="remember-me" className="auth-checkbox-label">
+          <label htmlFor="remember-me" className="text-sm text-gray-600 dark:text-gray-400">
             记住密码
           </label>
         </div>
-        <a className="auth-link" href="#">
+        <a className="text-sm text-primary hover:text-primary/90" href="#">
           忘记密码？
         </a>
       </div>
@@ -252,7 +249,7 @@ export default function LoginPage() {
   );
 
   const renderEmailLoginForm = () => (
-    <div className="auth-form-stack">
+    <div className="flex flex-col gap-5 px-4 pb-5">
       <FormField label="邮箱">
         <AuthInput
           placeholder="请输入您的邮箱"
@@ -273,7 +270,7 @@ export default function LoginPage() {
       </FormField>
 
       <div className="mt-2 flex justify-end">
-        <a className="auth-link" href="#">
+        <a className="text-sm text-primary hover:text-primary/90" href="#">
           忘记密码？
         </a>
       </div>
@@ -283,7 +280,7 @@ export default function LoginPage() {
   );
 
   const renderRegisterForm = () => (
-    <div className="auth-form-stack">
+    <div className="flex flex-col gap-5 px-4 pb-5">
       <FormField label="账号/手机号">
         <AuthInput placeholder="请输入您的账号或手机号" value={regUserId} onChange={setRegUserId} />
       </FormField>
@@ -311,11 +308,19 @@ export default function LoginPage() {
   );
 
   return (
-    <main className="auth-page">
-      <div className={cardClassName}>
+    <main
+      className="min-h-screen w-full flex flex-col items-center justify-center overflow-x-hidden px-4 py-8 bg-background-light dark:bg-background-dark"
+      style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
+    >
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-extrabold text-primary">Esy-IM</h1>
+        <p className="text-sm text-slate-500 mt-1">即时通讯系统</p>
+      </div>
+
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-4 sm:p-8">
         <div className="flex flex-1 flex-col">
           <div className="pb-3">
-            <div className="auth-main-tabs">
+            <div className="flex border-b border-[#cfdbe7] dark:border-slate-700 px-4 gap-8">
               <MainTabButton active={mainTab === "login"} onClick={() => switchMainTab("login")}>
                 登录
               </MainTabButton>
@@ -326,13 +331,13 @@ export default function LoginPage() {
           </div>
 
           {errorMsg && (
-            <div className="auth-alert auth-alert-error">
+            <div className="mx-4 mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               {errorMsg}
             </div>
           )}
 
           {successMsg && (
-            <div className="auth-alert auth-alert-success">
+            <div className="mx-4 mb-4 rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 px-4 py-3 text-sm text-green-600 dark:text-green-400">
               {successMsg}
             </div>
           )}

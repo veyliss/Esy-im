@@ -61,8 +61,8 @@ export function MomentItem({
   };
 
   return (
-    <article className="moment-card overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div className="moment-card-body p-5">
+    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_16px_42px_-36px_rgba(15,23,42,0.42)] dark:border-slate-800 dark:bg-slate-900">
+      <div className="p-5">
         <div className="mb-3 flex items-start justify-between">
           <div className="flex items-center gap-3">
             <UserAvatar
@@ -72,7 +72,7 @@ export function MomentItem({
               border
             />
             <div>
-              <p className="moment-author font-bold text-slate-800 dark:text-slate-200">
+              <p className="font-bold text-slate-800 dark:text-slate-200">
                 {moment.user?.nickname}
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -93,7 +93,7 @@ export function MomentItem({
           )}
         </div>
 
-        <p className="moment-content mb-4 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
+        <p className="mb-4 whitespace-pre-wrap text-[15px] leading-6 text-slate-700 dark:text-slate-300">
           {moment.content}
         </p>
 
@@ -106,23 +106,23 @@ export function MomentItem({
       </div>
 
       {images.length > 0 && (
-        <div className={`moment-image-grid grid gap-1 bg-slate-100 dark:bg-slate-800 ${images.length === 1 ? "" : "grid-cols-3"}`}>
+        <div className={`grid gap-1 bg-slate-100 p-px dark:bg-slate-800 ${images.length === 1 ? "" : "grid-cols-3"}`}>
           {images.map((img: string, index: number) => (
             <div
               key={index}
-              className={`${images.length === 1 ? "aspect-video" : "aspect-square"} bg-cover bg-center`}
+              className={`${images.length === 1 ? "aspect-video" : "aspect-square"} overflow-hidden bg-cover bg-center`}
               style={{ backgroundImage: `url(${img})` }}
             />
           ))}
         </div>
       )}
 
-      <div className="moment-actions border-t border-slate-200 p-2 dark:border-slate-800">
+      <div className="border-t border-slate-200 p-2 dark:border-slate-800">
         <div className="flex justify-end gap-2">
           <button
             type="button"
             onClick={handleLikeClick}
-            className={`moment-action-button flex items-center gap-1.5 text-sm py-1 px-3 rounded-full transition-colors ${
+            className={`flex items-center gap-1.5 text-sm py-1 px-3 rounded-full transition-colors hover:bg-primary/8 hover:text-primary ${
               isLiked
                 ? "text-primary"
                 : "text-slate-600 dark:text-slate-300 hover:text-primary"
@@ -136,7 +136,7 @@ export function MomentItem({
           <button
             type="button"
             onClick={() => setShowCommentInput(!showCommentInput)}
-            className="moment-action-button flex items-center gap-1.5 text-sm py-1 px-3 rounded-full text-slate-600 transition-colors dark:text-slate-300"
+            className="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full text-slate-600 transition-colors hover:bg-primary/8 hover:text-primary dark:text-slate-300"
           >
             <span className="material-symbols-outlined text-lg">chat_bubble</span>
             <span>{moment.comment_count || 0}</span>
@@ -159,7 +159,7 @@ export function MomentItem({
         )}
 
         {moment.comments && moment.comments.length > 0 && (
-          <div className="moment-comments mt-3 space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
+          <div className="mt-3 space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
             {moment.comments.map((comment: MomentComment) => (
               <div key={comment.id} className="text-sm">
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
@@ -189,7 +189,7 @@ export function MomentItem({
         )}
 
         {showCommentInput && (
-          <div className="moment-comment-editor mt-3 border-t border-slate-200 pt-3 dark:border-slate-800">
+          <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800">
             {replyTo && (
               <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                 回复 @{replyTo.user?.nickname}

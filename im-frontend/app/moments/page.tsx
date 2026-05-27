@@ -266,7 +266,7 @@ export default function MomentsPage() {
       sidebar={
         <WorkspaceSidebar>
           <SidebarToolbar>
-            <div className="moments-profile-card">
+            <div className="flex items-center gap-3">
               <UserAvatar
                 src={currentUser?.avatar || "/default-avatar.png"}
                 name={currentUser?.nickname || "我"}
@@ -274,8 +274,8 @@ export default function MomentsPage() {
                 border
               />
               <div className="min-w-0">
-                <p>{currentUser?.nickname || "我"}</p>
-                <span>分享近况与朋友动态</span>
+                <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">{currentUser?.nickname || "我"}</p>
+                <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">分享近况与朋友动态</span>
               </div>
             </div>
           </SidebarToolbar>
@@ -300,10 +300,10 @@ export default function MomentsPage() {
         </WorkspaceSidebar>
       }
       main={
-        <div className="moments-main h-full overflow-y-auto">
+        <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-50 to-white px-8 py-[30px] dark:from-[#101922] dark:to-[#0f172a] max-sm:px-[18px] max-sm:py-5">
           <div className="mx-auto max-w-3xl space-y-7">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
-            <SectionCard className="moments-composer">
+            <SectionCard className="border-slate-200 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.35)] dark:border-slate-700">
               <div className="flex gap-4">
                 <UserAvatar
                   src={currentUser?.avatar || "/default-avatar.png"}
@@ -314,7 +314,7 @@ export default function MomentsPage() {
                 />
                 <div className="flex-1">
                   <textarea
-                    className="ui-textarea moments-composer-textarea w-full resize-none rounded-lg p-4 text-sm"
+                    className="ui-textarea min-h-[104px] w-full resize-none rounded-lg border-transparent bg-slate-50 p-4 text-sm shadow-none dark:bg-slate-800/60"
                     placeholder="分享这一刻"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
@@ -322,7 +322,7 @@ export default function MomentsPage() {
                   <div className="mt-3 flex items-center gap-2">
                     <span className="material-symbols-outlined text-base text-slate-400">location_on</span>
                     <input
-                      className="moments-location-input"
+                      className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-slate-700 outline-none placeholder:text-slate-400 dark:text-slate-300"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       placeholder="添加位置"
@@ -348,11 +348,11 @@ export default function MomentsPage() {
                   </ActionBar>
 
                   {images.length > 0 ? (
-                    <div className="moments-preview-grid mt-3 grid grid-cols-3 gap-2">
+                    <div className="mt-3 grid grid-cols-3 gap-2">
                       {images.map((img, index) => (
                         <div
                           key={index}
-                          className="relative aspect-square rounded-lg bg-cover bg-center"
+                          className="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-cover bg-center dark:border-slate-700"
                           style={{ backgroundImage: `url(${img})` }}
                         >
                           <button

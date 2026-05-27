@@ -78,10 +78,10 @@ export function AppInteractionProvider({ children }: { children: ReactNode }) {
       </div>
 
       {confirmState ? (
-        <div className="app-confirm-overlay" role="presentation" onMouseDown={(event) => {
+        <div className="app-confirm-overlay transition-opacity duration-200" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) closeConfirm(false);
         }}>
-          <div className="app-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="app-confirm-title">
+          <div className="app-confirm-dialog animate-fade-in-scale" role="dialog" aria-modal="true" aria-labelledby="app-confirm-title">
             <div className={clsx("app-confirm-icon", confirmState.tone === "danger" && "is-danger")}>
               <span className="material-symbols-outlined">
                 {confirmState.tone === "danger" ? "report" : "help"}

@@ -192,7 +192,7 @@ export default function MePage() {
         sidebar={<div className="h-full bg-white/60 dark:bg-slate-900/40" />}
         main={
           <div className="h-full overflow-y-auto px-8 py-8">
-            <div className="me-loading-panel mx-auto max-w-4xl rounded-lg border border-slate-200 bg-white/85 px-6 py-12 dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="mx-auto max-w-4xl rounded-lg border border-slate-200 bg-white/85 px-6 py-12 shadow-[0_18px_48px_-40px_rgba(15,23,42,0.5)] dark:border-slate-800 dark:bg-slate-900/70">
               <PageLoading message="加载中..." size="md" />
             </div>
           </div>
@@ -236,11 +236,11 @@ export default function MePage() {
         </WorkspaceSidebar>
       }
       main={
-        <div className="workspace-main-panel">
-          <div className="me-main mx-auto max-w-5xl px-9 py-8">
+        <div className="p-11 max-sm:p-6 workspace-main-panel">
+          <div className="mx-auto max-w-5xl px-9 py-8 pb-0">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
 
-            <section className="me-profile-hero border-b border-slate-200 dark:border-slate-800">
+            <section className="flex items-center gap-6 border-b border-slate-200 pb-[36px] pt-[34px] dark:border-slate-800 max-sm:gap-4 max-sm:pb-[26px] max-sm:pt-[22px] max-[430px]:flex-col">
               <div className="relative shrink-0">
                 <div className="relative inline-block">
                   <UserAvatar
@@ -269,10 +269,10 @@ export default function MePage() {
             </section>
 
             <div className="mt-8 space-y-10">
-              <section id="profile-section" className="settings-section">
+              <section id="profile-section" className="scroll-mt-6">
                 <SectionTitle title="个人信息" />
-                <div className="settings-grid mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="setting-label flex flex-col gap-1.5">
+                <div className="rounded-lg mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
                     <span>昵称</span>
                     <input
                       className="ui-input w-full rounded-lg px-4 py-3"
@@ -282,8 +282,8 @@ export default function MePage() {
                     />
                   </label>
 
-                  <label className="setting-label flex flex-col gap-1.5">
-                    <span>头像</span>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">头像</span>
                     <button
                       type="button"
                       onClick={handleAvatarClick}
@@ -296,11 +296,11 @@ export default function MePage() {
                 </div>
               </section>
 
-              <section className="settings-section">
+              <section className="scroll-mt-6">
                 <SectionTitle title="账号信息" />
-                <div className="settings-grid mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="setting-label flex flex-col gap-1.5">
-                    <span>用户 ID</span>
+                <div className="rounded-lg mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">用户 ID</span>
                     <input
                       className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
                       value={currentUser?.user_id || ""}
@@ -308,8 +308,8 @@ export default function MePage() {
                     />
                   </label>
 
-                  <label className="setting-label flex flex-col gap-1.5">
-                    <span>邮箱</span>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">邮箱</span>
                     <input
                       className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
                       value={currentUser?.email || ""}
@@ -319,10 +319,10 @@ export default function MePage() {
                 </div>
               </section>
 
-              <section id="security-section" className="settings-section">
+              <section id="security-section" className="scroll-mt-6">
                 <SectionTitle title="账号与安全" description="设置新密码后需要重新登录。" />
-                <div className="settings-grid mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="setting-label flex flex-col gap-1.5">
+                <div className="rounded-lg mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
                     <span>新密码</span>
                     <input
                       type="password"
@@ -333,8 +333,8 @@ export default function MePage() {
                     />
                   </label>
 
-                  <label className="setting-label flex flex-col gap-1.5">
-                    <span>确认密码</span>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">确认密码</span>
                     <input
                       type="password"
                       className="ui-input w-full rounded-lg px-4 py-3"

@@ -128,7 +128,7 @@ export function SidebarItem({
       type={type}
       aria-current={active ? "true" : undefined}
       className={clsx(
-        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-slate-700 transition-colors hover:bg-slate-100 active:scale-[0.98] dark:text-slate-300 dark:hover:bg-slate-800",
         active && "is-active bg-primary/10 text-primary dark:bg-primary/20",
         className,
       )}

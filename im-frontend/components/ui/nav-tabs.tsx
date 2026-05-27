@@ -9,15 +9,15 @@ export type NavKey = "chat" | "contacts" | "groups" | "moments" | "me";
 export interface NavTabsProps {
   active: NavKey;
   className?: string;
-  // 视觉风格：light 更醒目；muted 更低对比度；modern 现代化风格
+  /** 视觉风格：light 更醒目；muted 更低对比度；classic 经典下划线；modern 现代化风格（默认） */
   variant?: "light" | "muted" | "classic" | "modern";
-  // 右侧插槽（头像、图标按钮等）
+  /** 右侧插槽（头像、图标按钮等） */
   rightSlot?: ReactNode;
-  // 是否显示图标
+  /** 是否显示图标 */
   showIcons?: boolean;
-  // 是否显示未读数量
+  /** 是否显示未读数量徽标 */
   showBadges?: boolean;
-  // 未读数量数据
+  /** 未读数量数据 */
   badges?: Partial<Record<NavKey, number>>;
 }
 
@@ -65,6 +65,31 @@ const items: Array<{
   },
 ];
 
+const styles = {
+  light: {
+    container:
+      "rounded-lg border border-slate-200/80 bg-white/92 p-1 shadow-sm dark:border-slate-800 dark:bg-slate-950/80",
+    link: "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100",
+    active: "bg-primary text-white shadow-sm dark:bg-primary",
+  },
+  muted: {
+    container:
+      "rounded-lg border border-slate-200/70 bg-slate-50/85 p-1 dark:border-slate-800 dark:bg-slate-950/60",
+    link: "text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200",
+    active: "bg-white text-primary shadow-sm dark:bg-slate-900 dark:text-primary-light",
+  },
+  classic: {
+    container: "",
+    link: "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
+    active: "border-b-2 border-primary text-primary",
+  },
+  modern: {
+    container: "bg-transparent p-0",
+    link: "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
+    active: "text-primary font-bold border-b-2 border-primary",
+  },
+} as const;
+
 export function NavTabs({
   active,
   className,
@@ -74,38 +99,17 @@ export function NavTabs({
   showBadges = false,
   badges = {},
 }: NavTabsProps) {
-  const styles = {
-    light: {
-      container:
-        "rounded-lg border border-slate-200/80 bg-white/92 p-1 shadow-sm dark:border-slate-800 dark:bg-slate-950/80",
-      link: "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100",
-      active: "bg-primary text-white shadow-sm dark:bg-primary",
-    },
-    muted: {
-      container:
-        "rounded-lg border border-slate-200/70 bg-slate-50/85 p-1 dark:border-slate-800 dark:bg-slate-950/60",
-      link: "text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200",
-      active: "bg-white text-primary shadow-sm dark:bg-slate-900 dark:text-primary-light",
-    },
-    classic: {
-      container:
-        "rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-950",
-      link: "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
-      active: "border-b-2 border-primary text-primary",
-    },
-    modern: {
-      container: "bg-transparent p-0",
-      link: "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
-      active: "text-primary dark:text-primary-light",
-    },
-  } as const;
-
   const tone = styles[variant] ?? styles.modern;
 
   return (
     <div className={clsx("flex min-w-0 items-center gap-3", className)}>
       <nav aria-label="主导航" className={clsx("min-w-0 overflow-x-auto", tone.container)}>
-        <ul className={clsx("flex items-center whitespace-nowrap", variant === "modern" ? "gap-7" : "gap-2")}>
+        <ul
+          className={clsx(
+            "flex items-center whitespace-nowrap",
+            variant === "modern" ? "gap-6 sm:gap-8" : "gap-2",
+          )}
+        >
           {items.map((item) => {
             const isActive = item.key === active;
             const badgeCount = badges[item.key] || 0;
@@ -117,44 +121,48 @@ export function NavTabs({
                   title={item.description}
                   aria-current={isActive ? "page" : undefined}
                   className={clsx(
-                    "relative inline-flex items-center justify-center gap-1.5 px-0 py-5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                    // Base: shared across all variants
+                    "relative inline-flex items-center justify-center gap-1.5 text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                    // Modern variant: spacious padding + bottom border indicator
+                    variant === "modern"
+                      ? "px-2 pt-5 pb-[calc(1.25rem-2px)] border-b-2 border-transparent font-medium"
+                      : "px-0 py-5 font-medium",
+                    // Variant-specific link tone
                     tone.link,
+                    // Active state override
                     isActive && tone.active,
+                    // Classic variant needs the border-base for its tab design
                     variant === "classic" && "rounded-b-none border-b-2 border-transparent",
                   )}
                 >
                   {showIcons ? (
-                    <span
-                      className={clsx(
-                        "material-symbols-outlined text-[18px] transition-transform duration-200",
-                        isActive && variant === "modern" && "scale-105",
-                      )}
-                    >
-                      {item.icon}
-                    </span>
+                    <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
                   ) : null}
 
-                  <span className={clsx(showIcons ? "text-[13px] sm:text-sm" : "text-sm", isActive && "font-semibold")}>
+                  <span
+                    className={clsx(
+                      showIcons ? "text-[13px] sm:text-sm" : "text-sm",
+                      isActive && variant !== "modern" && "font-semibold",
+                    )}
+                  >
                     {item.label}
                   </span>
 
-                  {variant === "modern" && isActive ? (
-                    <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary" />
+                  {showBadges && badgeCount > 0 ? (
+                    <span className="bg-primary text-white text-xs font-semibold rounded-full px-1.5 py-0.5 min-w-[20px] text-center leading-none">
+                      {badgeCount > 99 ? "99+" : badgeCount}
+                    </span>
                   ) : null}
                 </Link>
-
-                {showBadges && badgeCount > 0 ? (
-                  <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
-                    {badgeCount > 99 ? "99+" : badgeCount}
-                  </span>
-                ) : null}
               </li>
             );
           })}
         </ul>
       </nav>
 
-      {rightSlot ? <div className="flex shrink-0 items-center gap-2 sm:gap-3">{rightSlot}</div> : null}
+      {rightSlot ? (
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">{rightSlot}</div>
+      ) : null}
     </div>
   );
 }

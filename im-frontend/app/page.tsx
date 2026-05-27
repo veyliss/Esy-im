@@ -23,8 +23,8 @@ export default function WelcomePage() {
 
       <div className="welcome-shell">
         <header className="welcome-header">
-          <div />
-          <button className="welcome-header-button" type="button" onClick={() => router.push("/login")}>
+          <span className="text-sm font-extrabold text-primary tracking-wide">ESY-IM</span>
+          <button className="welcome-header-button active:scale-[0.97] cursor-pointer" type="button" onClick={() => router.push("/login")}>
             登录
           </button>
         </header>
@@ -32,16 +32,16 @@ export default function WelcomePage() {
         <section className={`welcome-hero ${mounted ? "is-mounted" : ""}`}>
           <div className="welcome-copy">
             <p className="welcome-eyebrow">CHAT · CONTACTS · MOMENTS</p>
-            <h1>欢迎使用即时通讯系统</h1>
+            <h1 className="gradient-text">欢迎使用即时通讯系统</h1>
             <p className="welcome-description">
               登录后进入你的聊天工作台，继续会话、管理通讯录、加入群聊并查看朋友圈动态。
             </p>
 
             <div className="welcome-actions">
-              <button className="welcome-primary" type="button" onClick={() => router.push("/login")}>
+              <button className="welcome-primary active:scale-[0.97] cursor-pointer" type="button" onClick={() => router.push("/login")}>
                 登录账号
               </button>
-              <button className="welcome-secondary" type="button" onClick={() => router.push("/login?tab=register")}>
+              <button className="welcome-secondary active:scale-[0.97] cursor-pointer" type="button" onClick={() => router.push("/login?tab=register")}>
                 注册新账号
               </button>
             </div>

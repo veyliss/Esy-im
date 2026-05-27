@@ -507,7 +507,7 @@ export default function ChatPage() {
           ) : null}
         </TopBarActions>
       }
-      mainClassName="chat-workspace-main"
+      mainClassName="bg-gradient-to-b from-slate-50/80 to-white dark:from-[#0f172a] dark:to-[#0f172a]"
       sidebar={
         <WorkspaceSidebar>
           <SidebarToolbar>
@@ -537,7 +537,7 @@ export default function ChatPage() {
                         key={chatItem.id}
                         onClick={() => handleSelectChat(chatItem)}
                         active={isActive}
-                        className="chat-list-item"
+                        className="min-h-[72px]"
                       >
                         <div className="relative">
                           <UserAvatar
@@ -585,8 +585,8 @@ export default function ChatPage() {
       }
       main={
         currentChat ? (
-          <div className="chat-thread flex h-full min-w-0 flex-1 flex-col">
-            <div className="chat-thread-header flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800">
+          <div className="flex h-full min-w-0 flex-1 flex-col bg-white dark:bg-slate-900">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 min-h-[76px] px-8 max-sm:px-4 bg-white/92 dark:bg-slate-900/86 backdrop-blur-md">
               <div className="flex min-w-0 items-center gap-3">
                 <button
                   type="button"
@@ -649,12 +649,12 @@ export default function ChatPage() {
 
                   if (isMyMessage) {
                     return (
-                      <div key={message.id} className="chat-message-row is-mine flex justify-end gap-3">
-                        <div className="chat-message-stack items-end">
-                          <div className="chat-message-bubble is-mine">
+                      <div key={message.id} className="flex justify-end gap-3 items-start">
+                        <div className="flex max-w-[72%] min-w-0 flex-col items-end">
+                          <div className="w-fit max-w-full rounded-lg rounded-tr-[2px] bg-primary px-4 py-3 text-white text-sm leading-relaxed shadow-[0_12px_28px_-22px_rgba(19,127,236,0.8)]">
                             {message.content}
                           </div>
-                          {messageTime ? <span className="chat-message-time">{messageTime}</span> : null}
+                          {messageTime ? <span className="mt-[5px] text-[11px] text-slate-400 dark:text-slate-500">{messageTime}</span> : null}
                         </div>
                         <UserAvatar
                           src={messageUser?.avatar}
@@ -668,7 +668,7 @@ export default function ChatPage() {
                   }
 
                   return (
-                    <div key={message.id} className="chat-message-row flex gap-3">
+                    <div key={message.id} className="flex gap-3 items-start">
                       <UserAvatar
                         src={messageUser?.avatar}
                         name={messageUser?.nickname || `用户${message.from_user_id}`}
@@ -676,16 +676,16 @@ export default function ChatPage() {
                         border
                         className="shrink-0"
                       />
-                      <div className="chat-message-stack">
+                      <div className="flex max-w-[72%] min-w-0 flex-col">
                         {currentChat.type === "group" ? (
-                          <p className="chat-message-author">
+                          <p className="mb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">
                             {messageUser?.nickname || `用户${message.from_user_id}`}
                           </p>
                         ) : null}
-                        <div className="chat-message-bubble">
+                        <div className="w-fit max-w-full rounded-lg rounded-tl-[2px] bg-slate-100 dark:bg-slate-800 px-4 py-3 text-slate-800 dark:text-slate-200 text-sm leading-relaxed shadow-[0_1px_0_rgba(15,23,42,0.06),0_10px_26px_-24px_rgba(15,23,42,0.45)]">
                           {message.content}
                         </div>
-                        {messageTime ? <span className="chat-message-time">{messageTime}</span> : null}
+                        {messageTime ? <span className="mt-[5px] text-[11px] text-slate-400 dark:text-slate-500">{messageTime}</span> : null}
                       </div>
                     </div>
                   );
@@ -694,11 +694,11 @@ export default function ChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="chat-composer shrink-0 border-t border-slate-200 dark:border-slate-800">
+            <div className="shrink-0 border-t border-slate-200 dark:border-slate-800 bg-slate-50/94 dark:bg-slate-900/92 px-8 py-[18px] max-sm:px-4 backdrop-blur-md">
               <div className="flex items-center gap-3">
                 <div className="relative flex-1">
                   <input
-                    className="chat-composer-input form-input w-full rounded-full border-transparent py-3 pl-5 pr-20 text-sm shadow-none"
+                    className="form-input w-full rounded-full border-transparent py-3 pl-5 pr-20 text-sm shadow-none bg-white dark:bg-slate-800 shadow-[0_1px_1px_rgba(15,23,42,0.04),0_10px_28px_-26px_rgba(15,23,42,0.5)]"
                     placeholder="输入消息"
                     type="text"
                     value={messageInput}
@@ -713,11 +713,11 @@ export default function ChatPage() {
                     }}
                     disabled={sendingMessage}
                   />
-                  <span className="chat-composer-count">{messageInput.length}/1000</span>
+                  <span className="absolute right-[18px] top-1/2 -translate-y-1/2 text-[11px] text-slate-400 pointer-events-none">{messageInput.length}/1000</span>
                 </div>
 
                 <button
-                  className="chat-send-button flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-all hover:bg-primary/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_12px_26px_-18px_rgba(19,127,236,0.8)]"
                   onClick={handleSendMessage}
                   disabled={sendingMessage || !messageInput.trim()}
                   aria-label="发送消息"
@@ -729,8 +729,8 @@ export default function ChatPage() {
             </div>
 
             {inspectorOpen ? (
-              <aside className="chat-inspector">
-                <div className="chat-inspector-head">
+              <aside className="absolute right-[18px] top-[88px] z-20 w-[300px] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white/96 dark:bg-slate-900/96 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.76)] backdrop-blur-md">
+                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-4 py-[14px]">
                   <strong>{currentChat.type === "group" ? "群聊资料" : "联系人资料"}</strong>
                   <button
                     type="button"
@@ -742,7 +742,7 @@ export default function ChatPage() {
                     <span className="material-symbols-outlined text-xl">close</span>
                   </button>
                 </div>
-                <div className="chat-inspector-profile">
+                <div className="grid justify-items-center px-[18px] py-[22px] text-center">
                   <UserAvatar
                     src={currentChat.avatar}
                     name={currentChat.name}
@@ -757,7 +757,7 @@ export default function ChatPage() {
                       : "私聊会话"}
                   </p>
                 </div>
-                <div className="chat-inspector-list">
+                <div className="grid border-t border-slate-100 dark:border-slate-800">
                   <div>
                     <span>类型</span>
                     <strong>{currentChat.type === "group" ? "群聊" : "私聊"}</strong>
@@ -777,7 +777,7 @@ export default function ChatPage() {
             ) : null}
           </div>
         ) : (
-          <div className="workspace-empty-wrap chat-empty-stage">
+          <div className="workspace-empty-wrap">
             <EmptyPanel title="选择一个聊天开始交流" description="支持私聊与群聊" className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900" />
           </div>
         )

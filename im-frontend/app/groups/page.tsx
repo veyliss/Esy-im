@@ -109,34 +109,34 @@ export default function GroupsPage() {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
               />
-              <div className="contacts-action-list">
+              <div className="grid gap-2 mt-3">
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(true)}
-                  className="contacts-action-card"
+                  className="flex min-h-[58px] w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-160 border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-px dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
                 >
-                  <span className="contacts-action-icon">
+                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
                     <span className="material-symbols-outlined text-xl">group_add</span>
                   </span>
-                  <span className="contacts-action-copy">
+                  <span className="min-w-0 flex-1">
                     <span>加入群聊</span>
                     <small>搜索群号或关键词</small>
                   </span>
-                  <span className="material-symbols-outlined contacts-action-arrow">chevron_right</span>
+                  <span className="material-symbols-outlined shrink-0 text-slate-400">chevron_right</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(true)}
-                  className="contacts-action-card is-primary"
+                  className="flex min-h-[58px] w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-160 border-primary/32 bg-blue-50 text-primary-dark hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-px dark:border-primary/38 dark:bg-primary/16 dark:text-blue-200 dark:hover:border-slate-700 dark:hover:bg-slate-800"
                 >
-                  <span className="contacts-action-icon">
+                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
                     <span className="material-symbols-outlined text-xl">add</span>
                   </span>
-                  <span className="contacts-action-copy">
+                  <span className="min-w-0 flex-1">
                     <span>创建群聊</span>
                     <small>发起新的多人会话</small>
                   </span>
-                  <span className="material-symbols-outlined contacts-action-arrow">chevron_right</span>
+                  <span className="material-symbols-outlined shrink-0 text-slate-400">chevron_right</span>
                 </button>
               </div>
             </SidebarToolbar>

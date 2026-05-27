@@ -250,18 +250,17 @@ export default function ContactsPage() {
         sidebar={
           <WorkspaceSidebar>
             <SidebarToolbar>
-              <div className="contacts-search-field">
+              <div className="relative">
                 <SidebarSearch
                   type="text"
                   placeholder="搜索好友"
                   value={contactFilter}
                   onChange={(e) => setContactFilter(e.target.value)}
-                  className={contactFilter ? "contacts-search-has-value" : undefined}
                 />
                 {contactFilter ? (
                   <button
                     type="button"
-                    className="contacts-search-clear"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex size-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                     onClick={() => setContactFilter("")}
                     aria-label="清空搜索"
                     title="清空搜索"
@@ -271,20 +270,20 @@ export default function ContactsPage() {
                 ) : null}
               </div>
 
-              <div className="contacts-action-list">
+              <div className="grid gap-2 mt-3">
                 <button
                   type="button"
                   onClick={() => setShowAddFriend(true)}
-                  className="contacts-action-card is-primary"
+                  className="flex min-h-[58px] w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-160 border-primary/32 bg-blue-50 text-primary-dark hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-px dark:border-primary/38 dark:bg-primary/16 dark:text-blue-200 dark:hover:border-slate-700 dark:hover:bg-slate-800"
                 >
-                  <span className="contacts-action-icon">
+                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
                     <span className="material-symbols-outlined text-xl">person_add</span>
                   </span>
-                  <span className="contacts-action-copy">
+                  <span className="min-w-0 flex-1">
                     <span>添加好友</span>
                     <small>通过账号、手机号或邮箱查找</small>
                   </span>
-                  <span className="material-symbols-outlined contacts-action-arrow">chevron_right</span>
+                  <span className="material-symbols-outlined shrink-0 text-slate-400">chevron_right</span>
                 </button>
               </div>
             </SidebarToolbar>
@@ -313,7 +312,7 @@ export default function ContactsPage() {
                 </SidebarItem>
               </div>
 
-              <SidebarSection title="我的好友" className="contacts-section">
+              <SidebarSection title="我的好友">
                 {filteredFriends.length === 0 ? (
                   <EmptyPanel
                     title={filterKeyword ? "未找到相关好友" : "暂无好友"}
@@ -355,17 +354,17 @@ export default function ContactsPage() {
           </WorkspaceSidebar>
         }
         main={
-          <div className="contacts-main-surface workspace-main-panel">
+          <div className="p-11 max-sm:p-6 workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
 
             {activeRightTab === "requests" ? (
-              <div className="contacts-content contacts-requests mx-auto max-w-3xl space-y-8">
-                <div className="contacts-page-head border-b border-slate-200 pb-4 dark:border-slate-800">
+              <div className="w-full max-w-3xl mx-auto space-y-8">
+                <div className="border-b border-slate-200 pb-4 dark:border-slate-800">
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white">新的朋友</h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">处理收到的好友请求，或查看已发出的申请。</p>
                 </div>
 
-                <section className="contacts-request-section">
+                <section>
                   <SectionTitle title="收到的请求" className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800" />
                   <div className="space-y-3">
                     {receivedRequests.length === 0 ? (
@@ -384,7 +383,7 @@ export default function ContactsPage() {
                   </div>
                 </section>
 
-                <section className="contacts-request-section">
+                <section>
                   <SectionTitle title="我发出的请求" className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800" />
                   <div className="space-y-3">
                     {sentRequests.length === 0 ? (
@@ -398,8 +397,8 @@ export default function ContactsPage() {
                 </section>
               </div>
             ) : selectedFriend && friendUser ? (
-              <div className="contacts-content contacts-detail mx-auto max-w-3xl">
-                <section className="contacts-profile border-b border-slate-200 pb-10 text-center dark:border-slate-800">
+              <div className="mx-auto max-w-3xl">
+                <section className="border-b border-slate-200 pb-10 text-center dark:border-slate-800 pt-2">
                   <div className="relative mx-auto inline-block">
                     <UserAvatar
                       src={friendUser.avatar || "/default-avatar.png"}
@@ -417,9 +416,9 @@ export default function ContactsPage() {
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">用户 ID：{friendUser.user_id}</p>
                 </section>
 
-                <section className="contacts-info-section mt-8">
+                <section className="mt-8">
                   <SectionTitle title="基础信息" className="mb-4" />
-                  <div className="contacts-info-table divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+                  <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800 overflow-hidden bg-white dark:bg-transparent">
                     <div className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm">
                       <p className="text-slate-500 dark:text-slate-400">用户 ID</p>
                       <p className="text-slate-900 dark:text-slate-100">{friendUser.user_id}</p>
@@ -435,7 +434,7 @@ export default function ContactsPage() {
                   </div>
                 </section>
 
-                <section className="contacts-remark-section mt-8">
+                <section className="mt-8">
                   <SectionTitle title="备注信息" className="mb-4" />
                   <input
                     className="ui-input w-full rounded-lg px-4 py-3 text-sm"
@@ -446,7 +445,7 @@ export default function ContactsPage() {
                   />
                 </section>
 
-                <div className="contacts-detail-actions mt-10 flex flex-wrap justify-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
+                <div className="mt-10 flex flex-wrap justify-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={handleSendMessage}
@@ -477,7 +476,7 @@ export default function ContactsPage() {
               <EmptyPanel
                 title="从左侧选择好友查看详情"
                 description="也可以使用上方入口添加新的好友"
-                className="contacts-empty-state min-h-[520px] border-0 bg-white dark:bg-slate-900"
+                className="min-h-[calc(100vh-220px)] border-0 bg-white dark:bg-slate-900"
               />
             )}
           </div>
