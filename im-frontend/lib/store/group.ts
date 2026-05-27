@@ -41,7 +41,7 @@ interface GroupStore {
   setError: (error: string | null) => void;
 }
 
-export const useGroupStore = create<GroupStore>((set, get) => ({
+export const useGroupStore = create<GroupStore>((set) => ({
   // 群组列表
   groups: [],
   setGroups: (groups) => set({ groups }),

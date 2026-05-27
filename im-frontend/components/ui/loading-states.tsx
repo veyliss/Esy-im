@@ -316,7 +316,7 @@ export function ContentLoading({
   );
 }
 
-export default {
+const loadingStates = {
   LoadingSpinner,
   LoadingPulse,
   LoadingWave,
@@ -328,3 +328,5 @@ export default {
   ButtonLoading,
   ContentLoading
 };
+
+export default loadingStates;

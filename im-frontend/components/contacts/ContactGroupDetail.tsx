@@ -35,6 +35,8 @@ export function ContactGroupDetail({ group, onLeave }: { group: Group; onLeave?:
 
   useEffect(() => {
     loadMembers();
+    // Member list refreshes when the selected group changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group.group_id]);
 
   const handleLeave = async () => {

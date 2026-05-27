@@ -99,6 +99,8 @@ export default function GroupsPage() {
     if (token) {
       loadUserGroups();
     }
+    // Group list bootstrap is tied to auth token changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   useEffect(() => {
@@ -122,6 +124,8 @@ export default function GroupsPage() {
     }, 500);
 
     return () => clearTimeout(timer);
+    // Search is intentionally debounced by keyword.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchKeyword]);
 
   return (

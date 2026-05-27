@@ -134,6 +134,8 @@ export default function ContactsPage() {
         wsClient.offFriendAccepted(handleFriendAccepted);
       };
     }
+    // Contacts bootstrap and realtime subscriptions are tied to auth token changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   useEffect(() => {

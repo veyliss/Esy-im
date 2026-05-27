@@ -183,6 +183,8 @@ export default function ChatPage() {
       wsClient.offGroupMessage(handleGroupMessage);
       wsClient.offError(handleError);
     };
+    // WebSocket handlers intentionally resubscribe only when token or active chat changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, currentChat]);
 
   // 加载私聊会话列表
@@ -290,6 +292,8 @@ export default function ChatPage() {
       loadGroups();
       loadPrivateUnreadCount();
     }
+    // Initial data bootstrap is tied to auth token changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   // 加载群聊未读数
@@ -297,6 +301,8 @@ export default function ChatPage() {
     if (groups.length > 0) {
       loadGroupUnreadCounts();
     }
+    // Unread counts refresh when the group list changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groups]);
 
   // 选择聊天

@@ -35,6 +35,8 @@ export function GroupDetail({ group }: { group: Group }) {
 
   useEffect(() => {
     loadGroupMembers();
+    // Member list refreshes when the selected group changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group.group_id]);
 
   return (

@@ -146,6 +146,7 @@ export function UserAvatar({
         shouldShowImage ? "bg-gray-100 dark:bg-gray-800" : `${backgroundColor} text-white`
       )}>
         {shouldShowImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={src}
             alt={name}

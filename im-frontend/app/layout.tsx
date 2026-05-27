@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/google-font-display, @next/next/no-page-custom-font */
 import "./globals.css";
 
 export const metadata = {
@@ -9,7 +10,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh">
       <head>
-        <link rel="stylesheet" href="/auth.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=block" rel="stylesheet" />
