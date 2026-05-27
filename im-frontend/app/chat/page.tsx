@@ -16,6 +16,7 @@ import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
 import { EmptyPanel, SidebarItem, SidebarScrollArea, SidebarSearch, SidebarSection, SidebarToolbar, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { useAppInteractions } from "@/components/ui/app-interactions";
 
 // 聊天项目类型（私聊或群聊）
 type ChatItem = {
@@ -30,6 +31,7 @@ type ChatItem = {
 };
 
 export default function ChatPage() {
+  const { toast } = useAppInteractions();
   const token = useAuthStore((state) => state.token);
   const {
     conversations,
@@ -60,6 +62,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [chatFilter, setChatFilter] = useState("");
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 加载当前用户信息
@@ -309,6 +312,7 @@ export default function ChatPage() {
   const handleSelectChat = async (chatItem: ChatItem) => {
     setError(null);
     setCurrentChat(chatItem);
+    setInspectorOpen(false);
     
     if (chatItem.type === 'private' && 'id' in chatItem.data) {
       await loadPrivateMessages(chatItem.data.id);
@@ -392,6 +396,7 @@ export default function ChatPage() {
       } else {
         setError(userMessage);
       }
+      toast(userMessage, { tone: "error", title: "发送失败" });
     } finally {
       setSendingMessage(false);
     }
@@ -483,6 +488,7 @@ export default function ChatPage() {
     <WorkspaceShell
       active="chat"
       navVariant="modern"
+      mobileDetailActive={Boolean(currentChat)}
       rightSlot={
         <TopBarActions
           avatarSrc={currentUser?.avatar}
@@ -582,6 +588,18 @@ export default function ChatPage() {
           <div className="chat-thread flex h-full min-w-0 flex-1 flex-col">
             <div className="chat-thread-header flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800">
               <div className="flex min-w-0 items-center gap-3">
+                <button
+                  type="button"
+                  className="chat-mobile-back workspace-icon-button"
+                  onClick={() => {
+                    setCurrentChat(null);
+                    setInspectorOpen(false);
+                  }}
+                  aria-label="返回会话列表"
+                  title="返回"
+                >
+                  <span className="material-symbols-outlined text-xl">arrow_back</span>
+                </button>
                 <UserAvatar
                   src={currentChat.avatar}
                   name={currentChat.name}
@@ -596,6 +614,15 @@ export default function ChatPage() {
                   </p>
                 </div>
               </div>
+              <button
+                type="button"
+                className="workspace-icon-button"
+                onClick={() => setInspectorOpen((value) => !value)}
+                aria-label="查看资料"
+                title="查看资料"
+              >
+                <span className="material-symbols-outlined text-xl">info</span>
+              </button>
             </div>
 
             <ErrorAlert
@@ -700,6 +727,54 @@ export default function ChatPage() {
                 </button>
               </div>
             </div>
+
+            {inspectorOpen ? (
+              <aside className="chat-inspector">
+                <div className="chat-inspector-head">
+                  <strong>{currentChat.type === "group" ? "群聊资料" : "联系人资料"}</strong>
+                  <button
+                    type="button"
+                    className="workspace-icon-button"
+                    onClick={() => setInspectorOpen(false)}
+                    aria-label="关闭资料"
+                    title="关闭"
+                  >
+                    <span className="material-symbols-outlined text-xl">close</span>
+                  </button>
+                </div>
+                <div className="chat-inspector-profile">
+                  <UserAvatar
+                    src={currentChat.avatar}
+                    name={currentChat.name}
+                    size="2xl"
+                    shape={currentChat.type === "group" ? "rounded" : "circle"}
+                    border
+                  />
+                  <h3>{currentChat.name}</h3>
+                  <p>
+                    {currentChat.type === "group" && "group_id" in currentChat.data
+                      ? `群号：${currentChat.data.group_id}`
+                      : "私聊会话"}
+                  </p>
+                </div>
+                <div className="chat-inspector-list">
+                  <div>
+                    <span>类型</span>
+                    <strong>{currentChat.type === "group" ? "群聊" : "私聊"}</strong>
+                  </div>
+                  <div>
+                    <span>未读</span>
+                    <strong>{currentChat.unreadCount > 0 ? currentChat.unreadCount : "无"}</strong>
+                  </div>
+                  {currentChat.type === "group" && "member_count" in currentChat.data ? (
+                    <div>
+                      <span>成员</span>
+                      <strong>{currentChat.data.member_count} 人</strong>
+                    </div>
+                  ) : null}
+                </div>
+              </aside>
+            ) : null}
           </div>
         ) : (
           <div className="workspace-empty-wrap chat-empty-stage">

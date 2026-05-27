@@ -13,6 +13,7 @@ interface WorkspaceShellProps {
   frameClassName?: string;
   sidebarClassName?: string;
   mainClassName?: string;
+  mobileDetailActive?: boolean;
 }
 
 export function WorkspaceShell({
@@ -26,6 +27,7 @@ export function WorkspaceShell({
   frameClassName,
   sidebarClassName,
   mainClassName,
+  mobileDetailActive = false,
 }: WorkspaceShellProps) {
   return (
     <div
@@ -54,6 +56,7 @@ export function WorkspaceShell({
             className={clsx(
               "im-workspace-frame flex h-full overflow-hidden",
               headerDescription ? "h-[calc(100%-49px)]" : "h-full",
+              mobileDetailActive && "is-mobile-detail-active",
               frameClassName,
             )}
           >

@@ -25,10 +25,12 @@ import {
 } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { useAppInteractions } from "@/components/ui/app-interactions";
 import { FriendRequestItem } from "@/components/contacts/FriendRequestItem";
 import { AddFriendModal } from "@/components/contacts/AddFriendModal";
 
 export default function ContactsPage() {
+  const { confirm, toast } = useAppInteractions();
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
 
@@ -164,7 +166,10 @@ export default function ContactsPage() {
         friend_id: selectedFriend.friend_id,
         remark: remark.trim(),
       });
-      if (res.data.code === 0) await loadFriends();
+      if (res.data.code === 0) {
+        await loadFriends();
+        toast("备注已保存", { tone: "success" });
+      }
     } catch (e) {
       const apiError = handleApiError(e);
       setError(createUserFriendlyErrorMessage(apiError));
@@ -172,12 +177,21 @@ export default function ContactsPage() {
   };
 
   const handleDeleteFriend = async () => {
-    if (!selectedFriend || !confirm("确定要删除该好友吗？")) return;
+    if (!selectedFriend) return;
+    const confirmed = await confirm({
+      title: "删除联系人",
+      message: "删除后将从通讯录移除该好友，聊天记录不会自动清空。",
+      confirmText: "删除",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
     try {
       const res = await FriendAPI.deleteFriend(selectedFriend.friend_id);
       if (res.data.code === 0) {
         setSelectedFriend(null);
         await loadFriends();
+        toast("联系人已删除", { tone: "success" });
       }
     } catch (e) {
       const apiError = handleApiError(e);

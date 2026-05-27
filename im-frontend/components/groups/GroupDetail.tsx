@@ -9,8 +9,10 @@ import { ActionBar, EmptyPanel, SectionTitle } from "@/components/workspace/sect
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
+import { useAppInteractions } from "@/components/ui/app-interactions";
 
 export function GroupDetail({ group, onLeave }: { group: Group; onLeave?: () => void }) {
+  const { confirm, toast } = useAppInteractions();
   const { groupMembers, setGroupMembers } = useGroupStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +43,19 @@ export function GroupDetail({ group, onLeave }: { group: Group; onLeave?: () => 
   }, [group.group_id]);
 
   const handleLeave = async () => {
-    if (!confirm("确定要退出该群聊吗？")) return;
+    const confirmed = await confirm({
+      title: "退出群聊",
+      message: "退出后你将不再接收该群的新消息，需要重新加入才能恢复。",
+      confirmText: "退出",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
     try {
       const res = await GroupAPI.leaveGroup(group.group_id);
       if (res.data.code === 0) {
         onLeave?.();
+        toast("已退出群聊", { tone: "success" });
       }
     } catch (error) {
       const apiError = handleApiError(error);

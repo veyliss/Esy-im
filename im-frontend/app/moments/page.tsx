@@ -8,6 +8,7 @@ import { ActionBar, EmptyPanel, SectionCard, SidebarItem, SidebarSection, Sideba
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
+import { useAppInteractions } from "@/components/ui/app-interactions";
 import { useAuthStore } from "@/lib/store";
 import { useMomentStore } from "@/lib/store/moment";
 import { MomentAPI } from "@/lib/api/moment";
@@ -16,6 +17,7 @@ import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/erro
 import type { User } from "@/lib/types/api";
 
 export default function MomentsPage() {
+  const { confirm, toast } = useAppInteractions();
   const token = useAuthStore((state) => state.token);
   const {
     timeline,
@@ -126,6 +128,7 @@ export default function MomentsPage() {
         setImages([]);
         setLocation("");
         await loadTimeline();
+        toast("动态已发布", { tone: "success" });
       }
     } catch (e) {
       const apiError = handleApiError(e);
@@ -191,7 +194,13 @@ export default function MomentsPage() {
   };
 
   const handleDelete = async (momentId: number) => {
-    if (!confirm("确定要删除这条动态吗？")) return;
+    const confirmed = await confirm({
+      title: "删除动态",
+      message: "删除后这条动态及其评论将不再显示。",
+      confirmText: "删除",
+      tone: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       const res = await MomentAPI.deleteMoment(momentId);
@@ -200,6 +209,7 @@ export default function MomentsPage() {
         if (activeTab === "my") {
           await loadMyMoments();
         }
+        toast("动态已删除", { tone: "success" });
       }
     } catch (e) {
       const apiError = handleApiError(e);

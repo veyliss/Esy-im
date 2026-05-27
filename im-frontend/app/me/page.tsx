@@ -6,6 +6,7 @@ import { ActionBar, SectionTitle, SidebarItem, SidebarSection, WorkspaceSidebar 
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
+import { useAppInteractions } from "@/components/ui/app-interactions";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { UserAPI } from "@/lib/api/user";
@@ -15,6 +16,7 @@ import { useState, useEffect, useRef } from "react";
 import type { User } from "@/lib/types/api";
 
 export default function MePage() {
+  const { confirm, toast } = useAppInteractions();
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const { clearToken } = useAuthStore();
@@ -147,6 +149,7 @@ export default function MePage() {
       setNewPassword("");
       setConfirmPassword("");
       setError(null);
+      toast("资料已保存", { tone: "success" });
     } catch (e) {
       const apiError = handleApiError(e);
       setError(createUserFriendlyErrorMessage(apiError));
@@ -158,7 +161,12 @@ export default function MePage() {
   const handleLogout = async () => {
     if (logoutLoading) return;
     
-    const confirmed = confirm("确定要退出登录吗？");
+    const confirmed = await confirm({
+      title: "退出登录",
+      message: "退出后需要重新登录才能继续使用即时通讯系统。",
+      confirmText: "退出",
+      tone: "danger",
+    });
     if (!confirmed) return;
 
     setLogoutLoading(true);
