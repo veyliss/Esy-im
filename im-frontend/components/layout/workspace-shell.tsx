@@ -54,7 +54,7 @@ export function WorkspaceShell({
 
           <div
             className={clsx(
-              "flex h-full overflow-hidden",
+              "im-workspace-frame flex h-full overflow-hidden",
               headerDescription ? "h-[calc(100%-49px)]" : "h-full",
               mobileDetailActive && "is-mobile-detail-active",
               frameClassName,
@@ -62,7 +62,7 @@ export function WorkspaceShell({
           >
             <aside
               className={clsx(
-                "flex shrink-0 flex-col border-r border-slate-200 dark:border-slate-800 w-[352px] bg-background-light dark:bg-background-dark",
+                "im-workspace-sidebar flex w-[352px] shrink-0 flex-col border-r border-slate-200 bg-background-light dark:border-slate-800 dark:bg-background-dark",
                 sidebarClassName,
               )}
             >
@@ -71,7 +71,7 @@ export function WorkspaceShell({
 
             <main
               className={clsx(
-                "min-w-0 flex-1 overflow-y-auto bg-white dark:bg-slate-900",
+                "im-workspace-main min-w-0 flex-1 overflow-y-auto bg-white dark:bg-slate-900",
                 mainClassName,
               )}
             >

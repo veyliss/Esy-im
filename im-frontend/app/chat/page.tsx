@@ -30,6 +30,34 @@ type ChatItem = {
   data: Conversation | Group;
 };
 
+type ChatFilterMode = "all" | "private" | "group" | "unread";
+
+function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function formatChatDate(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (isSameDay(date, today)) return "今天";
+  if (isSameDay(date, yesterday)) return "昨天";
+  return date.toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" });
+}
+
+function formatListTime(value?: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  const today = new Date();
+  if (isSameDay(date, today)) {
+    return date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  }
+  return date.toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" });
+}
+
 export default function ChatPage() {
   const { toast } = useAppInteractions();
   const token = useAuthStore((state) => state.token);
@@ -63,6 +91,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [chatFilter, setChatFilter] = useState("");
+  const [chatMode, setChatMode] = useState<ChatFilterMode>("all");
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -473,25 +502,130 @@ export default function ChatPage() {
   // 过滤聊天列表
   const filteredChatList = useMemo(() => {
     const keyword = chatFilter.trim().toLowerCase();
-    if (!keyword) return chatList;
-    return chatList.filter(item => 
-      item.name.toLowerCase().includes(keyword) ||
-      (item.lastMessage && item.lastMessage.toLowerCase().includes(keyword))
-    );
-  }, [chatFilter, chatList]);
+    return chatList.filter((item) => {
+      if (chatMode === "private" && item.type !== "private") return false;
+      if (chatMode === "group" && item.type !== "group") return false;
+      if (chatMode === "unread" && item.unreadCount <= 0) return false;
+      if (!keyword) return true;
+
+      return (
+        item.name.toLowerCase().includes(keyword) ||
+        (item.lastMessage && item.lastMessage.toLowerCase().includes(keyword))
+      );
+    });
+  }, [chatFilter, chatList, chatMode]);
+
+  const chatModeItems = useMemo(
+    () => [
+      { key: "all" as const, label: "全部", count: chatList.length },
+      { key: "private" as const, label: "私聊", count: chatList.filter((item) => item.type === "private").length },
+      { key: "group" as const, label: "群聊", count: chatList.filter((item) => item.type === "group").length },
+      { key: "unread" as const, label: "未读", count: chatList.filter((item) => item.unreadCount > 0).length },
+    ],
+    [chatList],
+  );
 
   // 获取当前消息列表
   const currentMessages = useMemo(() => {
     if (!currentChat) return [];
-    
+
     if (currentChat.type === 'private' && 'id' in currentChat.data) {
       return privateMessages;
     } else if (currentChat.type === 'group' && 'group_id' in currentChat.data) {
       return groupMessages[currentChat.data.group_id] || [];
     }
-    
+
     return [];
   }, [currentChat, privateMessages, groupMessages]);
+
+  const messageTimeline = useMemo(() => {
+    let lastDateLabel = "";
+    return currentMessages.flatMap((message) => {
+      const dateLabel = formatChatDate(message.created_at);
+      const entries: Array<{ type: "date"; id: string; label: string } | { type: "message"; id: string; message: typeof message }> = [];
+      if (dateLabel && dateLabel !== lastDateLabel) {
+        entries.push({ type: "date", id: `date-${dateLabel}-${message.id}`, label: dateLabel });
+        lastDateLabel = dateLabel;
+      }
+      entries.push({ type: "message", id: `message-${message.id}`, message });
+      return entries;
+    });
+  }, [currentMessages]);
+
+  const composerHint = useMemo(() => {
+    if (!currentChat) return "选择一个会话后开始输入";
+    if (!wsConnected) return "连接恢复后消息可能延迟送达";
+    if (messageInput.length > 900) return "消息接近长度上限";
+    return "Enter 发送，Shift + Enter 换行";
+  }, [currentChat, messageInput.length, wsConnected]);
+
+  const firstAvailableChat = filteredChatList[0] || chatList[0] || null;
+
+  const handlePickFirstChat = () => {
+    if (firstAvailableChat) {
+      handleSelectChat(firstAvailableChat);
+    }
+  };
+
+  const handleComposerChange = (value: string) => {
+    if (value.length <= 1000) {
+      setMessageInput(value);
+    } else {
+      setMessageInput(value.slice(0, 1000));
+      toast("消息最多 1000 个字符", { tone: "warning" });
+    }
+  };
+
+  const renderMessage = (message: (typeof currentMessages)[number]) => {
+    const isMyMessage = message.from_user_id === currentUser?.user_id;
+    const messageUser = isMyMessage ? currentUser : message.from_user;
+    const messageTime = message.created_at
+      ? new Date(message.created_at).toLocaleTimeString("zh-CN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
+
+    if (isMyMessage) {
+      return (
+        <div key={message.id} className="chat-bubble-row is-me">
+          <div className="chat-bubble-stack is-me">
+            <div className="chat-bubble is-me">{message.content}</div>
+            <span className="chat-message-meta">
+              {messageTime}
+              <span className="material-symbols-outlined">done_all</span>
+            </span>
+          </div>
+          <UserAvatar
+            src={messageUser?.avatar}
+            name={messageUser?.nickname || "我"}
+            size="md"
+            border
+            className="chat-message-avatar"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div key={message.id} className="chat-bubble-row">
+        <UserAvatar
+          src={messageUser?.avatar}
+          name={messageUser?.nickname || `用户${message.from_user_id}`}
+          size="md"
+          border
+          className="chat-message-avatar"
+        />
+        <div className="chat-bubble-stack">
+          {currentChat?.type === "group" ? (
+            <p className="chat-message-sender">{messageUser?.nickname || `用户${message.from_user_id}`}</p>
+          ) : null}
+          <div className="chat-bubble">{message.content}</div>
+          {messageTime ? <span className="chat-message-meta">{messageTime}</span> : null}
+        </div>
+      </div>
+    );
+  };
 
   // 计算总未读数
   const totalUnreadCount = useMemo(() => {
@@ -525,13 +659,28 @@ export default function ChatPage() {
       mainClassName="bg-gradient-to-b from-slate-50/80 to-white dark:from-[#0f172a] dark:to-[#0f172a]"
       sidebar={
         <WorkspaceSidebar>
-          <SidebarToolbar>
+          <SidebarToolbar className="space-y-3">
             <SidebarSearch
               type="text"
               placeholder="搜索聊天"
               value={chatFilter}
               onChange={(e) => setChatFilter(e.target.value)}
             />
+            <div className="chat-filter-row" role="tablist" aria-label="会话筛选">
+              {chatModeItems.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={chatMode === item.key}
+                  className={`chat-filter-chip ${chatMode === item.key ? "is-active" : ""}`}
+                  onClick={() => setChatMode(item.key)}
+                >
+                  <span>{item.label}</span>
+                  <strong>{item.count}</strong>
+                </button>
+              ))}
+            </div>
           </SidebarToolbar>
 
           <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col py-4" bodyClassName="flex-1">
@@ -573,12 +722,7 @@ export default function ChatPage() {
                           <div className="flex items-center justify-between gap-2">
                             <p className={`truncate text-sm ${isActive ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>{chatItem.name}</p>
                             <p className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
-                              {chatItem.lastMessageTime
-                                ? new Date(chatItem.lastMessageTime).toLocaleTimeString("zh-CN", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })
-                                : ""}
+                              {formatListTime(chatItem.lastMessageTime)}
                             </p>
                           </div>
                           <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
@@ -650,74 +794,43 @@ export default function ChatPage() {
 
             <div className="chat-message-list flex-1 space-y-6 overflow-y-auto">
               {currentMessages.length === 0 ? (
-                <EmptyPanel title="暂无消息" description="开始发送第一条消息吧" className="min-h-[420px] border-0 bg-transparent" />
+                <div className="chat-empty-state">
+                  <span className="material-symbols-outlined">forum</span>
+                  <strong>还没有消息</strong>
+                  <p>发一条简短消息，让这个会话开始流动起来。</p>
+                </div>
               ) : (
-                currentMessages.map((message) => {
-                  const isMyMessage = message.from_user_id === currentUser?.user_id;
-                  const messageUser = isMyMessage ? currentUser : message.from_user;
-                  const messageTime = message.created_at
-                    ? new Date(message.created_at).toLocaleTimeString("zh-CN", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "";
-
-                  if (isMyMessage) {
+                messageTimeline.map((entry) => {
+                  if (entry.type === "date") {
                     return (
-                      <div key={message.id} className="flex justify-end gap-3 items-start">
-                        <div className="flex max-w-[72%] min-w-0 flex-col items-end">
-                          <div className="w-fit max-w-full rounded-lg rounded-tr-[2px] bg-primary px-4 py-3 text-white text-sm leading-relaxed shadow-[0_12px_28px_-22px_rgba(19,127,236,0.8)]">
-                            {message.content}
-                          </div>
-                          {messageTime ? <span className="mt-[5px] text-[11px] text-slate-400 dark:text-slate-500">{messageTime}</span> : null}
-                        </div>
-                        <UserAvatar
-                          src={messageUser?.avatar}
-                          name={messageUser?.nickname || "我"}
-                          size="md"
-                          border
-                          className="shrink-0"
-                        />
+                      <div key={entry.id} className="chat-date-divider">
+                        <span>{entry.label}</span>
                       </div>
                     );
                   }
-
-                  return (
-                    <div key={message.id} className="flex gap-3 items-start">
-                      <UserAvatar
-                        src={messageUser?.avatar}
-                        name={messageUser?.nickname || `用户${message.from_user_id}`}
-                        size="md"
-                        border
-                        className="shrink-0"
-                      />
-                      <div className="flex max-w-[72%] min-w-0 flex-col">
-                        {currentChat.type === "group" ? (
-                          <p className="mb-1 text-xs font-semibold text-slate-400 dark:text-slate-500">
-                            {messageUser?.nickname || `用户${message.from_user_id}`}
-                          </p>
-                        ) : null}
-                        <div className="w-fit max-w-full rounded-lg rounded-tl-[2px] bg-slate-100 dark:bg-slate-800 px-4 py-3 text-slate-800 dark:text-slate-200 text-sm leading-relaxed shadow-[0_1px_0_rgba(15,23,42,0.06),0_10px_26px_-24px_rgba(15,23,42,0.45)]">
-                          {message.content}
-                        </div>
-                        {messageTime ? <span className="mt-[5px] text-[11px] text-slate-400 dark:text-slate-500">{messageTime}</span> : null}
-                      </div>
-                    </div>
-                  );
+                  return renderMessage(entry.message);
                 })
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="shrink-0 border-t border-slate-200 dark:border-slate-800 bg-slate-50/94 dark:bg-slate-900/92 px-8 py-[18px] max-sm:px-4 backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input
-                    className="form-input w-full rounded-full border-transparent py-3 pl-5 pr-20 text-sm shadow-none bg-white dark:bg-slate-800 shadow-[0_1px_1px_rgba(15,23,42,0.04),0_10px_28px_-26px_rgba(15,23,42,0.5)]"
-                    placeholder="输入消息"
-                    type="text"
+            <div className="chat-composer-shell">
+              <div className="chat-composer">
+                <button
+                  type="button"
+                  className="chat-composer-tool"
+                  onClick={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
+                  aria-label="添加附件"
+                  title="添加附件"
+                >
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+                <div className="chat-composer-input-wrap">
+                  <textarea
+                    className="chat-composer-input"
+                    placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
                     value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
+                    onChange={(e) => handleComposerChange(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -727,18 +840,22 @@ export default function ChatPage() {
                       }
                     }}
                     disabled={sendingMessage}
+                    rows={1}
                   />
-                  <span className="absolute right-[18px] top-1/2 -translate-y-1/2 text-[11px] text-slate-400 pointer-events-none">{messageInput.length}/1000</span>
+                  <div className="chat-composer-meta">
+                    <span>{composerHint}</span>
+                    <strong className={messageInput.length > 900 ? "text-amber-500" : ""}>{messageInput.length}/1000</strong>
+                  </div>
                 </div>
 
                 <button
-                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-all hover:bg-primary/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_12px_26px_-18px_rgba(19,127,236,0.8)]"
+                  className="chat-send-button"
                   onClick={handleSendMessage}
                   disabled={sendingMessage || !messageInput.trim()}
                   aria-label="发送消息"
                   title="发送消息"
                 >
-                  <span className="material-symbols-outlined text-xl">send</span>
+                  <span className="material-symbols-outlined text-xl">{sendingMessage ? "sync" : "send"}</span>
                 </button>
               </div>
             </div>
@@ -793,7 +910,16 @@ export default function ChatPage() {
           </div>
         ) : (
           <div className="workspace-empty-wrap">
-            <EmptyPanel title="选择一个聊天开始交流" description="支持私聊与群聊" className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900" />
+            <div className="chat-start-panel">
+              <span className="material-symbols-outlined">chat</span>
+              <h2>选择一个聊天开始交流</h2>
+              <p>会话、群聊和未读消息都在左侧统一管理，进入后可以继续查看资料和发送消息。</p>
+              {firstAvailableChat ? (
+                <button type="button" onClick={handlePickFirstChat}>
+                  打开最近会话
+                </button>
+              ) : null}
+            </div>
           </div>
         )
       }
