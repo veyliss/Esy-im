@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { MomentItem } from "@/components/moments/MomentItem";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
-import { ActionBar, EmptyPanel, SectionCard, SidebarItem, SidebarSection, WorkspaceSidebar } from "@/components/workspace/section";
+import { ActionBar, EmptyPanel, SectionCard, SidebarItem, SidebarSection, SidebarToolbar, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -238,14 +238,37 @@ export default function MomentsPage() {
       navVariant="modern"
       rightSlot={
         <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
-          <TopIconButton icon="search" label="搜索" />
           <TopIconButton icon="add_photo_alternate" label="发布图片" onClick={handleImageSelect} />
-          <TopIconButton icon="notifications" label="通知" />
+          <TopIconButton
+            icon="refresh"
+            label="刷新动态"
+            onClick={() => {
+              if (activeTab === "timeline") {
+                loadTimeline();
+              } else {
+                loadMyMoments();
+              }
+            }}
+          />
         </TopBarActions>
       }
       mainClassName="bg-background-light dark:bg-background-dark"
       sidebar={
         <WorkspaceSidebar>
+          <SidebarToolbar>
+            <div className="moments-profile-card">
+              <UserAvatar
+                src={currentUser?.avatar || "/default-avatar.png"}
+                name={currentUser?.nickname || "我"}
+                size="md"
+                border
+              />
+              <div className="min-w-0">
+                <p>{currentUser?.nickname || "我"}</p>
+                <span>分享近况与朋友动态</span>
+              </div>
+            </div>
+          </SidebarToolbar>
           <SidebarSection title="时间流视图" className="flex-1">
             <SidebarItem
               type="button"
@@ -267,10 +290,10 @@ export default function MomentsPage() {
         </WorkspaceSidebar>
       }
       main={
-        <div className="h-full overflow-y-auto px-8 py-7">
+        <div className="moments-main h-full overflow-y-auto">
           <div className="mx-auto max-w-3xl space-y-7">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
-            <SectionCard className="shadow-sm">
+            <SectionCard className="moments-composer">
               <div className="flex gap-4">
                 <UserAvatar
                   src={currentUser?.avatar || "/default-avatar.png"}
@@ -281,11 +304,20 @@ export default function MomentsPage() {
                 />
                 <div className="flex-1">
                   <textarea
-                    className="ui-textarea w-full resize-none rounded-lg p-4 text-sm"
-                    placeholder="想说的话"
+                    className="ui-textarea moments-composer-textarea w-full resize-none rounded-lg p-4 text-sm"
+                    placeholder="分享这一刻"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                   />
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base text-slate-400">location_on</span>
+                    <input
+                      className="moments-location-input"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="添加位置"
+                    />
+                  </div>
                   <ActionBar className="mt-3 justify-between">
                     <button
                       onClick={handleImageSelect}
@@ -298,14 +330,15 @@ export default function MomentsPage() {
                     <button
                       type="button"
                       onClick={handlePublish}
-                      className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                      disabled={!content.trim() && images.length === 0}
+                      className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       发布
                     </button>
                   </ActionBar>
 
                   {images.length > 0 ? (
-                    <div className="mt-3 grid grid-cols-3 gap-2">
+                    <div className="moments-preview-grid mt-3 grid grid-cols-3 gap-2">
                       {images.map((img, index) => (
                         <div
                           key={index}

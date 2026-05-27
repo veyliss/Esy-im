@@ -12,7 +12,7 @@ import { UserAPI } from "@/lib/api/user";
 import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { TopBarActions, TopIconButton, TopStatusPill } from "@/components/layout/top-actions";
+import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
 import { EmptyPanel, SidebarItem, SidebarScrollArea, SidebarSearch, SidebarSection, SidebarToolbar, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -499,10 +499,9 @@ export default function ChatPage() {
               未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
             </TopStatusPill>
           ) : null}
-          <TopIconButton icon="search" label="搜索" />
-          <TopIconButton icon="notifications" label="通知" badge={totalUnreadCount} />
         </TopBarActions>
       }
+      mainClassName="chat-workspace-main"
       sidebar={
         <WorkspaceSidebar>
           <SidebarToolbar>
@@ -532,6 +531,7 @@ export default function ChatPage() {
                         key={chatItem.id}
                         onClick={() => handleSelectChat(chatItem)}
                         active={isActive}
+                        className="chat-list-item"
                       >
                         <div className="relative">
                           <UserAvatar
@@ -579,8 +579,8 @@ export default function ChatPage() {
       }
       main={
         currentChat ? (
-          <div className="flex h-full min-w-0 flex-1 flex-col">
-            <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200 px-8 dark:border-slate-800">
+          <div className="chat-thread flex h-full min-w-0 flex-1 flex-col">
+            <div className="chat-thread-header flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800">
               <div className="flex min-w-0 items-center gap-3">
                 <UserAvatar
                   src={currentChat.avatar}
@@ -592,18 +592,10 @@ export default function ChatPage() {
                 <div className="min-w-0">
                   <h2 className="truncate text-lg font-bold text-slate-900 dark:text-white">{currentChat.name}</h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {currentChat.type === "group" && "member_count" in currentChat.data ? `${currentChat.data.member_count} 人` : "当前会话"}
+                    {currentChat.type === "group" && "member_count" in currentChat.data ? `${currentChat.data.member_count} 位成员` : wsConnected ? "在线" : "连接中"}
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                className="workspace-icon-button"
-                aria-label="更多"
-                title="更多"
-              >
-                <span className="material-symbols-outlined text-xl">more_vert</span>
-              </button>
             </div>
 
             <ErrorAlert
@@ -614,19 +606,28 @@ export default function ChatPage() {
             />
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-3" />
 
-            <div className="flex-1 space-y-6 overflow-y-auto bg-white px-8 py-7 dark:bg-slate-900">
+            <div className="chat-message-list flex-1 space-y-6 overflow-y-auto">
               {currentMessages.length === 0 ? (
                 <EmptyPanel title="暂无消息" description="开始发送第一条消息吧" className="min-h-[420px] border-0 bg-transparent" />
               ) : (
                 currentMessages.map((message) => {
                   const isMyMessage = message.from_user_id === currentUser?.user_id;
                   const messageUser = isMyMessage ? currentUser : message.from_user;
+                  const messageTime = message.created_at
+                    ? new Date(message.created_at).toLocaleTimeString("zh-CN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "";
 
                   if (isMyMessage) {
                     return (
-                      <div key={message.id} className="flex justify-end gap-4">
-                        <div className="chat-message-bubble rounded-lg rounded-tr-none bg-primary px-4 py-3 text-sm leading-6 text-white shadow-sm">
-                          {message.content}
+                      <div key={message.id} className="chat-message-row is-mine flex justify-end gap-3">
+                        <div className="chat-message-stack items-end">
+                          <div className="chat-message-bubble is-mine">
+                            {message.content}
+                          </div>
+                          {messageTime ? <span className="chat-message-time">{messageTime}</span> : null}
                         </div>
                         <UserAvatar
                           src={messageUser?.avatar}
@@ -640,7 +641,7 @@ export default function ChatPage() {
                   }
 
                   return (
-                    <div key={message.id} className="flex gap-4">
+                    <div key={message.id} className="chat-message-row flex gap-3">
                       <UserAvatar
                         src={messageUser?.avatar}
                         name={messageUser?.nickname || `用户${message.from_user_id}`}
@@ -648,15 +649,16 @@ export default function ChatPage() {
                         border
                         className="shrink-0"
                       />
-                      <div className="chat-message-bubble">
+                      <div className="chat-message-stack">
                         {currentChat.type === "group" ? (
-                          <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
+                          <p className="chat-message-author">
                             {messageUser?.nickname || `用户${message.from_user_id}`}
                           </p>
                         ) : null}
-                        <div className="rounded-lg rounded-tl-none bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-800 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+                        <div className="chat-message-bubble">
                           {message.content}
                         </div>
+                        {messageTime ? <span className="chat-message-time">{messageTime}</span> : null}
                       </div>
                     </div>
                   );
@@ -665,11 +667,11 @@ export default function ChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="shrink-0 border-t border-slate-200 bg-background-light px-8 py-5 dark:border-slate-800 dark:bg-background-dark">
-              <div className="flex items-center gap-2">
+            <div className="chat-composer shrink-0 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-3">
                 <div className="relative flex-1">
                   <input
-                    className="chat-composer-input form-input w-full rounded-full border-transparent bg-slate-100 py-3 pl-5 pr-24 text-sm shadow-none dark:bg-slate-800"
+                    className="chat-composer-input form-input w-full rounded-full border-transparent py-3 pl-5 pr-20 text-sm shadow-none"
                     placeholder="输入消息"
                     type="text"
                     value={messageInput}
@@ -684,28 +686,11 @@ export default function ChatPage() {
                     }}
                     disabled={sendingMessage}
                   />
-                  <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-3">
-                    <button
-                      type="button"
-                      className="flex size-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                      aria-label="表情"
-                      title="表情"
-                    >
-                      <span className="material-symbols-outlined text-xl">mood</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="flex size-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
-                      aria-label="附件"
-                      title="附件"
-                    >
-                      <span className="material-symbols-outlined text-xl">attach_file</span>
-                    </button>
-                  </div>
+                  <span className="chat-composer-count">{messageInput.length}/1000</span>
                 </div>
 
                 <button
-                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="chat-send-button flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={handleSendMessage}
                   disabled={sendingMessage || !messageInput.trim()}
                   aria-label="发送消息"
@@ -717,7 +702,7 @@ export default function ChatPage() {
             </div>
           </div>
         ) : (
-          <div className="workspace-empty-wrap">
+          <div className="workspace-empty-wrap chat-empty-stage">
             <EmptyPanel title="选择一个聊天开始交流" description="支持私聊与群聊" className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900" />
           </div>
         )

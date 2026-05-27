@@ -1,7 +1,7 @@
 "use client";
 
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
+import { TopBarActions } from "@/components/layout/top-actions";
 import { ActionBar, SectionTitle, SidebarItem, SidebarSection, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -184,7 +184,7 @@ export default function MePage() {
         sidebar={<div className="h-full bg-white/60 dark:bg-slate-900/40" />}
         main={
           <div className="h-full overflow-y-auto px-8 py-8">
-            <div className="mx-auto max-w-4xl rounded-lg border border-slate-200 bg-white/85 px-6 py-12 dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="me-loading-panel mx-auto max-w-4xl rounded-lg border border-slate-200 bg-white/85 px-6 py-12 dark:border-slate-800 dark:bg-slate-900/70">
               <PageLoading message="加载中..." size="md" />
             </div>
           </div>
@@ -199,19 +199,24 @@ export default function MePage() {
       navVariant="modern"
       rightSlot={
         <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
-          <TopIconButton icon="notifications" label="通知" />
-          <TopIconButton icon="settings" label="设置" />
         </TopBarActions>
       }
       sidebar={
         <WorkspaceSidebar>
           <SidebarSection title="设置" className="flex-1" bodyClassName="space-y-1">
-            <SidebarItem active leading={<span className="material-symbols-outlined text-lg">person</span>} title="我的资料" />
-            <SidebarItem leading={<span className="material-symbols-outlined text-lg">security</span>} title="账号与安全" />
-            <SidebarItem leading={<span className="material-symbols-outlined text-lg">visibility</span>} title="隐私设置" />
-            <SidebarItem leading={<span className="material-symbols-outlined text-lg">notifications</span>} title="通知设置" />
-            <SidebarItem leading={<span className="material-symbols-outlined text-lg">settings</span>} title="通用设置" />
-            <SidebarItem leading={<span className="material-symbols-outlined text-lg">info</span>} title="关于我们" />
+            <SidebarItem
+              active
+              leading={<span className="material-symbols-outlined text-lg">person</span>}
+              title="我的资料"
+              description="头像、昵称、账号信息"
+              onClick={() => document.getElementById("profile-section")?.scrollIntoView({ behavior: "smooth" })}
+            />
+            <SidebarItem
+              leading={<span className="material-symbols-outlined text-lg">security</span>}
+              title="账号与安全"
+              description="修改密码与登录安全"
+              onClick={() => document.getElementById("security-section")?.scrollIntoView({ behavior: "smooth" })}
+            />
           </SidebarSection>
 
           <SidebarItem
@@ -224,41 +229,43 @@ export default function MePage() {
       }
       main={
         <div className="workspace-main-panel">
-          <div className="mx-auto max-w-5xl px-9 py-8">
+          <div className="me-main mx-auto max-w-5xl px-9 py-8">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
 
-            <section className="border-b border-slate-200 py-8 text-center dark:border-slate-800">
-              <div className="relative mx-auto inline-block">
-                <UserAvatar
-                  src={avatar || currentUser?.avatar || "/default-avatar.png"}
-                  name={currentUser?.nickname || "我"}
-                  size="3xl"
-                  border
-                />
-                <button
-                  type="button"
-                  onClick={handleAvatarClick}
-                  className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-white shadow-sm"
-                  aria-label="修改头像"
-                  title="修改头像"
-                >
-                  <span className="material-symbols-outlined text-lg">edit</span>
-                </button>
+            <section className="me-profile-hero border-b border-slate-200 dark:border-slate-800">
+              <div className="relative shrink-0">
+                <div className="relative inline-block">
+                  <UserAvatar
+                    src={avatar || currentUser?.avatar || "/default-avatar.png"}
+                    name={currentUser?.nickname || "我"}
+                    size="3xl"
+                    border
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAvatarClick}
+                    className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-white shadow-sm"
+                    aria-label="修改头像"
+                    title="修改头像"
+                  >
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                </div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
               </div>
-              <div className="mt-4">
-                <h2 className="text-2xl font-bold text-slate-950 dark:text-white">{currentUser?.nickname || "未设置昵称"}</h2>
+              <div className="min-w-0">
+                <h2 className="truncate text-2xl font-bold text-slate-950 dark:text-white">{currentUser?.nickname || "未设置昵称"}</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">用户 ID：{currentUser?.user_id}</p>
                 <p className="text-sm text-slate-500 dark:text-slate-400">邮箱：{currentUser?.email || "未绑定"}</p>
               </div>
             </section>
 
             <div className="mt-8 space-y-10">
-              <section>
+              <section id="profile-section" className="settings-section">
                 <SectionTitle title="个人信息" />
-                <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">昵称</span>
+                <div className="settings-grid mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="setting-label flex flex-col gap-1.5">
+                    <span>昵称</span>
                     <input
                       className="ui-input w-full rounded-lg px-4 py-3"
                       value={nickname}
@@ -267,8 +274,8 @@ export default function MePage() {
                     />
                   </label>
 
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">头像</span>
+                  <label className="setting-label flex flex-col gap-1.5">
+                    <span>头像</span>
                     <button
                       type="button"
                       onClick={handleAvatarClick}
@@ -281,11 +288,11 @@ export default function MePage() {
                 </div>
               </section>
 
-              <section>
+              <section className="settings-section">
                 <SectionTitle title="账号信息" />
-                <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">用户 ID</span>
+                <div className="settings-grid mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="setting-label flex flex-col gap-1.5">
+                    <span>用户 ID</span>
                     <input
                       className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
                       value={currentUser?.user_id || ""}
@@ -293,8 +300,8 @@ export default function MePage() {
                     />
                   </label>
 
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">邮箱</span>
+                  <label className="setting-label flex flex-col gap-1.5">
+                    <span>邮箱</span>
                     <input
                       className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
                       value={currentUser?.email || ""}
@@ -304,11 +311,11 @@ export default function MePage() {
                 </div>
               </section>
 
-              <section>
+              <section id="security-section" className="settings-section">
                 <SectionTitle title="账号与安全" description="设置新密码后需要重新登录。" />
-                <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">新密码</span>
+                <div className="settings-grid mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="setting-label flex flex-col gap-1.5">
+                    <span>新密码</span>
                     <input
                       type="password"
                       className="ui-input w-full rounded-lg px-4 py-3"
@@ -318,8 +325,8 @@ export default function MePage() {
                     />
                   </label>
 
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">确认密码</span>
+                  <label className="setting-label flex flex-col gap-1.5">
+                    <span>确认密码</span>
                     <input
                       type="password"
                       className="ui-input w-full rounded-lg px-4 py-3"
