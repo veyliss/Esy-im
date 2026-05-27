@@ -84,13 +84,11 @@ interface SidebarSearchProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export function SidebarSearch({ icon = "search", className, ...props }: SidebarSearchProps) {
   return (
-    <div className="relative">
-      <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">
-        {icon}
-      </span>
+    <div className="workspace-search relative">
+      <span className="workspace-search-icon" aria-hidden="true" data-icon={icon} />
       <input
         {...props}
-        className={clsx("ui-input h-11 w-full rounded-full py-2.5 pl-10 pr-4 text-sm shadow-none", className)}
+        className={clsx("workspace-search-input ui-input h-11 w-full rounded-full py-2.5 pr-4 text-sm shadow-none", className)}
       />
     </div>
   );
@@ -158,26 +156,6 @@ export function SidebarItem({
   );
 }
 
-interface SidebarItemSurfaceProps extends HTMLAttributes<HTMLDivElement> {
-  active?: boolean;
-  children: ReactNode;
-}
-
-export function SidebarItemSurface({ active = false, children, className, ...props }: SidebarItemSurfaceProps) {
-  return (
-    <div
-      className={clsx(
-        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
-        active && "is-active bg-primary/10 text-primary dark:bg-primary/20",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
 interface EmptyPanelProps {
   title: string;
   description?: string;
@@ -188,7 +166,7 @@ export function EmptyPanel({ title, description, className }: EmptyPanelProps) {
   return (
     <div
       className={clsx(
-        "flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-950",
+        "workspace-empty-panel flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-950",
         className,
       )}
     >

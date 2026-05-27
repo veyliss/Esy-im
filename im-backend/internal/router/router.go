@@ -116,11 +116,11 @@ func InitRouter() *mux.Router {
 
 	// groups 群聊系统
 	api.HandleFunc("/groups/create", pkg.AuthMiddleware(pkg.RDB, groupHandler.CreateGroup)).Methods("POST")
+	api.HandleFunc("/groups/my-list", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetUserGroups)).Methods("GET")
+	api.HandleFunc("/groups/search", pkg.AuthMiddleware(pkg.RDB, groupHandler.SearchGroups)).Methods("GET")
 	api.HandleFunc("/groups/{group_id}", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetGroupInfo)).Methods("GET")
 	api.HandleFunc("/groups/{group_id}", pkg.AuthMiddleware(pkg.RDB, groupHandler.UpdateGroupInfo)).Methods("PUT")
 	api.HandleFunc("/groups/{group_id}", pkg.AuthMiddleware(pkg.RDB, groupHandler.DeleteGroup)).Methods("DELETE")
-	api.HandleFunc("/groups/my-list", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetUserGroups)).Methods("GET")
-	api.HandleFunc("/groups/search", pkg.AuthMiddleware(pkg.RDB, groupHandler.SearchGroups)).Methods("GET")
 
 	// 群成员管理
 	api.HandleFunc("/groups/join", pkg.AuthMiddleware(pkg.RDB, groupHandler.JoinGroup)).Methods("POST")

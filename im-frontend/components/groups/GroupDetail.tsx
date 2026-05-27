@@ -10,7 +10,7 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
 
-export function GroupDetail({ group }: { group: Group }) {
+export function GroupDetail({ group, onLeave }: { group: Group; onLeave?: () => void }) {
   const { groupMembers, setGroupMembers } = useGroupStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export function GroupDetail({ group }: { group: Group }) {
       if (res.data.code === 0) {
         setGroupMembers(group.group_id, res.data.data);
       }
+      setError(null);
     } catch (error) {
       console.error("加载群成员失败:", error);
       const apiError = handleApiError(error);
@@ -38,6 +39,19 @@ export function GroupDetail({ group }: { group: Group }) {
     // Member list refreshes when the selected group changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group.group_id]);
+
+  const handleLeave = async () => {
+    if (!confirm("确定要退出该群聊吗？")) return;
+    try {
+      const res = await GroupAPI.leaveGroup(group.group_id);
+      if (res.data.code === 0) {
+        onLeave?.();
+      }
+    } catch (error) {
+      const apiError = handleApiError(error);
+      setError(createUserFriendlyErrorMessage(apiError));
+    }
+  };
 
   return (
     <div className="flex min-h-[520px] flex-col bg-white dark:bg-slate-900">
@@ -63,8 +77,12 @@ export function GroupDetail({ group }: { group: Group }) {
           <button type="button" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
             发消息
           </button>
-          <button type="button" className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-            管理
+          <button
+            type="button"
+            onClick={handleLeave}
+            className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            退出群聊
           </button>
         </ActionBar>
       </div>

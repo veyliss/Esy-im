@@ -1,27 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FriendAPI } from "@/lib/api/friend";
+import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
-import type { User } from "@/lib/types/api";
+import type { Group } from "@/lib/types/api";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 
-export function AddFriendModal({
+export function JoinGroupModal({
   onClose,
   onSuccess,
-  currentUserNickname,
 }: {
   onClose: () => void;
   onSuccess: () => void;
-  currentUserNickname?: string;
 }) {
-  const [searchInput, setSearchInput] = useState("");
-  const [searchResult, setSearchResult] = useState<User | null>(null);
+  const [keyword, setKeyword] = useState("");
+  const [results, setResults] = useState<Group[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [searching, setSearching] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -38,8 +36,8 @@ export function AddFriendModal({
   }, [onClose]);
 
   const handleKeywordChange = (value: string) => {
-    setSearchInput(value);
-    setSearchResult(null);
+    setKeyword(value);
+    setResults([]);
     setSearched(false);
     setError(null);
   };
@@ -47,9 +45,10 @@ export function AddFriendModal({
   const handleSearch = async () => {
     if (searching) return;
 
-    const keyword = searchInput.trim();
-    if (!keyword) {
-      setError("请输入用户账号、手机号或邮箱");
+    const query = keyword.trim();
+    if (!query) {
+      setResults([]);
+      setError("请输入群组关键词或群号");
       return;
     }
 
@@ -57,9 +56,9 @@ export function AddFriendModal({
       setError(null);
       setSearching(true);
       setSearched(true);
-      const res = await FriendAPI.searchFriend(keyword);
+      const res = await GroupAPI.searchGroups(query);
       if (res.data.code === 0) {
-        setSearchResult(res.data.data || null);
+        setResults(res.data.data);
       }
     } catch (e) {
       const apiError = handleApiError(e);
@@ -69,15 +68,12 @@ export function AddFriendModal({
     }
   };
 
-  const handleSendRequest = async () => {
-    if (!searchResult || sending) return;
+  const handleJoin = async (groupId: string) => {
+    if (joiningId) return;
     try {
       setError(null);
-      setSending(true);
-      const res = await FriendAPI.sendRequest({
-        to_user_id: searchResult.user_id,
-        message: "我是 " + (currentUserNickname || "用户"),
-      });
+      setJoiningId(groupId);
+      const res = await GroupAPI.joinGroup({ group_id: groupId });
       if (res.data.code === 0) {
         onSuccess();
       }
@@ -85,7 +81,7 @@ export function AddFriendModal({
       const apiError = handleApiError(e);
       setError(createUserFriendlyErrorMessage(apiError));
     } finally {
-      setSending(false);
+      setJoiningId(null);
     }
   };
 
@@ -93,15 +89,15 @@ export function AddFriendModal({
     <div className="contact-command-overlay" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) onClose();
     }}>
-      <div className="contact-command-dialog" role="dialog" aria-modal="true" aria-labelledby="add-friend-title">
+      <div className="contact-command-dialog contact-command-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="join-group-title">
         <div className="contact-command-head">
           <div className="contact-command-title">
             <span className="contact-command-icon">
-              <span className="material-symbols-outlined text-xl">person_add</span>
+              <span className="material-symbols-outlined text-xl">group_add</span>
             </span>
             <span>
-              <h2 id="add-friend-title">添加好友</h2>
-              <p>通过账号、手机号或邮箱查找用户</p>
+              <h2 id="join-group-title">加入群聊</h2>
+              <p>搜索群号或关键词，找到后加入公开群聊</p>
             </span>
           </div>
           <button
@@ -118,21 +114,21 @@ export function AddFriendModal({
         <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
 
         <div className="contact-command-search">
-          <label htmlFor="add-friend-keyword">搜索用户</label>
+          <label htmlFor="join-group-keyword">搜索群聊</label>
           <div className="contact-command-search-row">
             <div className="contact-command-input-wrap">
               <span className="contact-command-search-icon" aria-hidden="true" />
               <input
                 ref={inputRef}
-                id="add-friend-keyword"
+                id="join-group-keyword"
                 type="text"
-                value={searchInput}
+                value={keyword}
                 onChange={(e) => handleKeywordChange(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
-                placeholder="输入用户账号、手机号或邮箱"
+                placeholder="输入群组关键词或群号"
                 className="contact-command-input"
               />
-              {searchInput ? (
+              {keyword ? (
                 <button
                   type="button"
                   className="contact-command-clear"
@@ -159,40 +155,48 @@ export function AddFriendModal({
           {searching ? (
             <div className="contact-command-empty">
               <span className="material-symbols-outlined contact-command-spinner">sync</span>
-              <p>正在查找用户</p>
+              <p>正在搜索群聊</p>
             </div>
-          ) : searchResult ? (
-            <div className="contact-command-result">
-              <UserAvatar
-                src={searchResult.avatar}
-                name={searchResult.nickname}
-                size="lg"
-                border
-              />
-              <div className="contact-command-result-main">
-                <strong>{searchResult.nickname || "未设置昵称"}</strong>
-                <span>用户 ID：{searchResult.user_id}</span>
-              </div>
-              <button
-                type="button"
-                onClick={handleSendRequest}
-                disabled={sending}
-                className="contact-command-submit"
-              >
-                {sending ? "发送中" : "发送申请"}
-              </button>
+          ) : results.length > 0 ? (
+            <div className="contact-command-result-list">
+              {results.map((group) => (
+                <div
+                  key={group.group_id}
+                  className="contact-command-result"
+                >
+                  <UserAvatar
+                    src={group.avatar || "/default-group-avatar.png"}
+                    name={group.name}
+                    size="md"
+                    shape="rounded"
+                    border
+                  />
+                  <div className="contact-command-result-main">
+                    <strong>{group.name}</strong>
+                    <span>{group.member_count} 人 · 群号 {group.group_id}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleJoin(group.group_id)}
+                    disabled={Boolean(joiningId)}
+                    className="contact-command-submit"
+                  >
+                    {joiningId === group.group_id ? "加入中" : "加入"}
+                  </button>
+                </div>
+              ))}
             </div>
           ) : searched ? (
             <div className="contact-command-empty">
-              <span className="material-symbols-outlined">person_search</span>
-              <p>没有找到匹配用户</p>
-              <small>请检查账号、手机号或邮箱是否正确</small>
+              <span className="material-symbols-outlined">group_search</span>
+              <p>没有找到匹配群聊</p>
+              <small>请尝试更换关键词或输入完整群号</small>
             </div>
           ) : (
             <div className="contact-command-empty">
               <span className="material-symbols-outlined">manage_search</span>
               <p>输入关键词后按 Enter 搜索</p>
-              <small>找到用户后即可发送好友申请</small>
+              <small>找到群聊后即可加入</small>
             </div>
           )}
         </div>

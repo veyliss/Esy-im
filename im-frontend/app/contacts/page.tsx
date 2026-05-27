@@ -4,13 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/lib/store";
 import { useContactStore } from "@/lib/store/contact";
 import { useChatStore } from "@/lib/store/chat";
-import { useGroupStore } from "@/lib/store/group";
 import { FriendAPI } from "@/lib/api/friend";
 import { MessageAPI } from "@/lib/api/message";
 import { UserAPI } from "@/lib/api/user";
-import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
-import type { User, Group } from "@/lib/types/api";
+import type { User } from "@/lib/types/api";
 import { useRouter } from "next/navigation";
 import { wsClient } from "@/lib/websocket/client";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
@@ -28,9 +26,7 @@ import {
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { FriendRequestItem } from "@/components/contacts/FriendRequestItem";
-import { ContactGroupDetail } from "@/components/contacts/ContactGroupDetail";
 import { AddFriendModal } from "@/components/contacts/AddFriendModal";
-import { JoinGroupModal } from "@/components/contacts/JoinGroupModal";
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -49,13 +45,11 @@ export default function ContactsPage() {
     setPendingRequestCount,
   } = useContactStore();
 
-  const { groups, setGroups, currentGroup, setCurrentGroup } = useGroupStore();
   const { setCurrentConversation } = useChatStore();
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeRightTab, setActiveRightTab] = useState<"detail" | "requests">("detail");
   const [showAddFriend, setShowAddFriend] = useState(false);
-  const [showJoinGroup, setShowJoinGroup] = useState(false);
   const [remark, setRemark] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [contactFilter, setContactFilter] = useState("");
@@ -98,21 +92,11 @@ export default function ContactsPage() {
     }
   };
 
-  const loadUserGroups = async () => {
-    try {
-      const res = await GroupAPI.getUserGroups();
-      if (res.data.code === 0) setGroups(res.data.data);
-    } catch (e) {
-      console.error("加载群组列表失败:", e);
-    }
-  };
-
   useEffect(() => {
     if (token) {
       loadFriends();
       loadReceivedRequests();
       loadSentRequests();
-      loadUserGroups();
 
       wsClient.connect(token);
 
@@ -143,10 +127,10 @@ export default function ContactsPage() {
   }, [selectedFriend]);
 
   useEffect(() => {
-    if (!selectedFriend && !currentGroup && pendingRequestCount > 0) {
+    if (!selectedFriend && pendingRequestCount > 0) {
       setActiveRightTab("requests");
     }
-  }, [pendingRequestCount, selectedFriend, currentGroup]);
+  }, [pendingRequestCount, selectedFriend]);
 
   const handleAcceptRequest = async (requestId: number) => {
     try {
@@ -219,23 +203,11 @@ export default function ContactsPage() {
 
   const selectFriend = (friend: (typeof friends)[number]) => {
     setSelectedFriend(friend);
-    setCurrentGroup(null);
-    setActiveRightTab("detail");
-  };
-
-  const selectGroup = (group: Group) => {
-    setCurrentGroup(group);
-    setSelectedFriend(null);
     setActiveRightTab("detail");
   };
 
   const friendUser = selectedFriend?.friend_user;
   const filterKeyword = contactFilter.trim().toLowerCase();
-
-  const filteredGroups = useMemo(() => {
-    if (!filterKeyword) return groups;
-    return groups.filter((group) => group.name.toLowerCase().includes(filterKeyword));
-  }, [filterKeyword, groups]);
 
   const filteredFriends = useMemo(() => {
     if (!filterKeyword) return friends;
@@ -248,7 +220,6 @@ export default function ContactsPage() {
 
   const openRequests = () => {
     setSelectedFriend(null);
-    setCurrentGroup(null);
     setActiveRightTab("requests");
   };
 
@@ -265,28 +236,41 @@ export default function ContactsPage() {
         sidebar={
           <WorkspaceSidebar>
             <SidebarToolbar>
-              <SidebarSearch
-                type="text"
-                placeholder="搜索联系人或群聊"
-                value={contactFilter}
-                onChange={(e) => setContactFilter(e.target.value)}
-              />
-              <div className="contacts-action-grid mt-3 grid grid-cols-2 gap-2">
+              <div className="contacts-search-field">
+                <SidebarSearch
+                  type="text"
+                  placeholder="搜索好友"
+                  value={contactFilter}
+                  onChange={(e) => setContactFilter(e.target.value)}
+                  className={contactFilter ? "contacts-search-has-value" : undefined}
+                />
+                {contactFilter ? (
+                  <button
+                    type="button"
+                    className="contacts-search-clear"
+                    onClick={() => setContactFilter("")}
+                    aria-label="清空搜索"
+                    title="清空搜索"
+                  >
+                    <span className="material-symbols-outlined text-base">close</span>
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="contacts-action-list">
                 <button
                   type="button"
                   onClick={() => setShowAddFriend(true)}
-                  className="contacts-action-button contacts-action-primary flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90"
+                  className="contacts-action-card is-primary"
                 >
-                  <span className="material-symbols-outlined text-lg">person_add</span>
-                  添加好友
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowJoinGroup(true)}
-                  className="contacts-action-button flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-800 dark:hover:bg-slate-800"
-                >
-                  <span className="material-symbols-outlined text-lg">group_add</span>
-                  加入群聊
+                  <span className="contacts-action-icon">
+                    <span className="material-symbols-outlined text-xl">person_add</span>
+                  </span>
+                  <span className="contacts-action-copy">
+                    <span>添加好友</span>
+                    <small>通过账号、手机号或邮箱查找</small>
+                  </span>
+                  <span className="material-symbols-outlined contacts-action-arrow">chevron_right</span>
                 </button>
               </div>
             </SidebarToolbar>
@@ -314,43 +298,6 @@ export default function ContactsPage() {
                   ) : null}
                 </SidebarItem>
               </div>
-
-              <SidebarSection title="群聊" className="contacts-section">
-                {filteredGroups.length === 0 ? (
-                  <EmptyPanel
-                    title={filterKeyword ? "未找到相关群聊" : "暂无群聊"}
-                    description={filterKeyword ? "尝试其他关键词" : "点击上方加入群聊"}
-                    className="min-h-[120px] border-0 bg-transparent"
-                  />
-                ) : (
-                  filteredGroups.map((group) => {
-                    const isActive = currentGroup?.group_id === group.group_id;
-                    return (
-                      <SidebarItem
-                        key={group.group_id}
-                        type="button"
-                        active={isActive}
-                        onClick={() => selectGroup(group)}
-                      >
-                        <UserAvatar
-                          src={group.avatar || "/default-group-avatar.png"}
-                          name={group.name}
-                          size="md"
-                          shape="rounded"
-                          border
-                        />
-                        <span className={`flex-1 truncate text-sm ${isActive ? "font-semibold text-primary" : "text-slate-800 dark:text-slate-100"}`}>
-                          <span className="block truncate">{group.name}</span>
-                          <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
-                            群聊 · {group.member_count || 0} 人
-                          </span>
-                        </span>
-                        <span className="material-symbols-outlined text-base text-slate-300">chevron_right</span>
-                      </SidebarItem>
-                    );
-                  })
-                )}
-              </SidebarSection>
 
               <SidebarSection title="我的好友" className="contacts-section">
                 {filteredFriends.length === 0 ? (
@@ -512,18 +459,10 @@ export default function ContactsPage() {
                   </button>
                 </div>
               </div>
-            ) : currentGroup ? (
-              <ContactGroupDetail
-                group={currentGroup}
-                onLeave={async () => {
-                  await loadUserGroups();
-                  setCurrentGroup(null);
-                }}
-              />
             ) : (
               <EmptyPanel
-                title="从左侧选择群聊或联系人查看详情"
-                description="也可以使用右上角按钮添加好友或加入群聊"
+                title="从左侧选择好友查看详情"
+                description="也可以使用上方入口添加新的好友"
                 className="contacts-empty-state min-h-[520px] border-0 bg-white dark:bg-slate-900"
               />
             )}
@@ -539,16 +478,6 @@ export default function ContactsPage() {
             setShowAddFriend(false);
             await loadSentRequests();
             setActiveRightTab("requests");
-          }}
-        />
-      )}
-
-      {showJoinGroup && (
-        <JoinGroupModal
-          onClose={() => setShowJoinGroup(false)}
-          onSuccess={async () => {
-            setShowJoinGroup(false);
-            await loadUserGroups();
           }}
         />
       )}
