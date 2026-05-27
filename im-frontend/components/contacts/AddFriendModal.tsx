@@ -6,6 +6,7 @@ import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/erro
 import type { User } from "@/lib/types/api";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
+import { CommandDialog } from "@/components/ui/command-dialog";
 
 export function AddFriendModal({
   onClose,
@@ -27,15 +28,6 @@ export function AddFriendModal({
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose]);
 
   const handleKeywordChange = (value: string) => {
     setSearchInput(value);
@@ -90,50 +82,14 @@ export function AddFriendModal({
   };
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
-        onClick={onClose}
-      />
-
-      {/* Dialog */}
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        onClick={onClose}
-      >
-        <div
-          className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-fade-in-scale"
-          onClick={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="add-friend-title"
-        >
-          {/* Header */}
-          <div className="p-6 pb-2">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-primary shrink-0">
-                  <span className="material-symbols-outlined text-xl">person_add</span>
-                </div>
-                <div>
-                  <h2 id="add-friend-title" className="text-lg font-semibold text-slate-900 dark:text-white">添加好友</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">通过账号、手机号或邮箱查找用户</p>
-                </div>
-              </div>
-              <button
-                onClick={onClose}
-                className="flex items-center justify-center w-8 h-8 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0"
-                aria-label="关闭"
-                title="关闭"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Body */}
-          <div className="p-6 pt-4 space-y-4">
+    <CommandDialog
+      title="添加好友"
+      description="通过账号、手机号或邮箱查找用户"
+      icon="person_add"
+      labelledBy="add-friend-title"
+      onClose={onClose}
+    >
+          <div className="space-y-4">
             <ErrorAlert error={error} onClose={() => setError(null)} />
 
             {/* Search section */}
@@ -217,8 +173,6 @@ export function AddFriendModal({
               </div>
             )}
           </div>
-        </div>
-      </div>
-    </>
+    </CommandDialog>
   );
 }

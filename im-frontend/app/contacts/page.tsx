@@ -23,6 +23,7 @@ import {
   SidebarToolbar,
   WorkspaceSidebar,
 } from "@/components/workspace/section";
+import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { useAppInteractions } from "@/components/ui/app-interactions";
@@ -140,6 +141,7 @@ export default function ContactsPage() {
       if (res.data.code === 0) {
         await loadFriends();
         await loadReceivedRequests();
+        toast("已接受好友申请", { tone: "success" });
       }
     } catch (e) {
       const apiError = handleApiError(e);
@@ -152,6 +154,7 @@ export default function ContactsPage() {
       const res = await FriendAPI.rejectRequest({ request_id: requestId });
       if (res.data.code === 0) {
         await loadReceivedRequests();
+        toast("已拒绝好友申请", { tone: "success" });
       }
     } catch (e) {
       const apiError = handleApiError(e);
@@ -237,11 +240,17 @@ export default function ContactsPage() {
     setActiveRightTab("requests");
   };
 
+  const backToList = () => {
+    setSelectedFriend(null);
+    setActiveRightTab("detail");
+  };
+
   return (
     <>
       <WorkspaceShell
         active="contacts"
         navVariant="modern"
+        mobileDetailActive={activeRightTab === "requests" || Boolean(selectedFriend)}
         rightSlot={
           <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
             <TopIconButton icon="notifications" label="好友请求" badge={pendingRequestCount} onClick={openRequests} />
@@ -359,6 +368,11 @@ export default function ContactsPage() {
 
             {activeRightTab === "requests" ? (
               <div className="w-full max-w-3xl mx-auto space-y-8">
+                <MobileDetailHeader
+                  title="新的朋友"
+                  description="好友申请与记录"
+                  onBack={backToList}
+                />
                 <div className="border-b border-slate-200 pb-4 dark:border-slate-800">
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white">新的朋友</h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">处理收到的好友请求，或查看已发出的申请。</p>
@@ -398,6 +412,11 @@ export default function ContactsPage() {
               </div>
             ) : selectedFriend && friendUser ? (
               <div className="mx-auto max-w-3xl">
+                <MobileDetailHeader
+                  title={selectedFriend.remark || friendUser.nickname || "好友详情"}
+                  description={`用户 ID：${friendUser.user_id}`}
+                  onBack={backToList}
+                />
                 <section className="border-b border-slate-200 pb-10 text-center dark:border-slate-800 pt-2">
                   <div className="relative mx-auto inline-block">
                     <UserAvatar

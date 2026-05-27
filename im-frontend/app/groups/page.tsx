@@ -94,6 +94,7 @@ export default function GroupsPage() {
       <WorkspaceShell
         active="groups"
         navVariant="modern"
+        mobileDetailActive={Boolean(currentGroup)}
         rightSlot={
           <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
             <TopIconButton icon="group_add" label="加入群聊" onClick={() => setShowJoinModal(true)} />
@@ -191,6 +192,7 @@ export default function GroupsPage() {
             {currentGroup ? (
               <GroupDetail
                 group={currentGroup}
+                onBack={() => setCurrentGroup(null)}
                 onLeave={async () => {
                   setCurrentGroup(null);
                   await loadUserGroups();

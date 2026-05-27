@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { Group } from "@/lib/types/api";
 import { ActionBar, EmptyPanel, SectionTitle } from "@/components/workspace/section";
+import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 
-export function GroupDetail({ group, onLeave }: { group: Group; onLeave?: () => void }) {
+export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?: () => void; onBack?: () => void }) {
   const { confirm, toast } = useAppInteractions();
+  const router = useRouter();
   const { groupMembers, setGroupMembers } = useGroupStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,9 +66,21 @@ export function GroupDetail({ group, onLeave }: { group: Group; onLeave?: () => 
     }
   };
 
+  const handleSendMessage = () => {
+    toast("正在打开群聊", { tone: "info" });
+    router.push("/chat");
+  };
+
   return (
     <div className="flex min-h-[520px] flex-col bg-white dark:bg-slate-900">
       <div className="border-b border-slate-200 px-8 py-8 dark:border-slate-800">
+        {onBack ? (
+          <MobileDetailHeader
+            title={group.name}
+            description={`群号：${group.group_id}`}
+            onBack={onBack}
+          />
+        ) : null}
         <div className="flex items-start gap-5">
           <UserAvatar
             src={group.avatar || "/default-group-avatar.png"}
@@ -84,7 +99,7 @@ export function GroupDetail({ group, onLeave }: { group: Group; onLeave?: () => 
         </div>
 
         <ActionBar className="mt-8 justify-start">
-          <button type="button" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
+          <button type="button" onClick={handleSendMessage} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
             发消息
           </button>
           <button

@@ -48,6 +48,7 @@ export default function ChatPage() {
   const {
     groups,
     setGroups,
+    currentGroup: selectedGroup,
     groupMessages,
     setGroupMessages,
     addGroupMessage,
@@ -454,6 +455,20 @@ export default function ChatPage() {
       return timeB - timeA;
     });
   }, [conversations, groups, currentUser, groupUnreadCounts]);
+
+  useEffect(() => {
+    if (!selectedGroup) return;
+    const targetChat = chatList.find((item) =>
+      item.type === "group" &&
+      "group_id" in item.data &&
+      item.data.group_id === selectedGroup.group_id
+    );
+    if (targetChat && currentChat?.id !== targetChat.id) {
+      handleSelectChat(targetChat);
+    }
+    // Selecting a group from the Groups page should open its chat once the list is ready.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroup, chatList, currentChat?.id]);
 
   // 过滤聊天列表
   const filteredChatList = useMemo(() => {
