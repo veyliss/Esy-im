@@ -41,7 +41,7 @@ export function FriendRequestItem({
       <div className="relative">
         <Image
           className="size-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
-          src={user?.avatar || "https://via.placeholder.com/48"}
+          src={user?.avatar || "/default-avatar.png"}
           alt={user?.nickname || "用户"}
           width={48}
           height={48}
@@ -77,12 +77,14 @@ export function FriendRequestItem({
       {type === "received" && isPending && (
         <div className="flex flex-col gap-2 shrink-0">
           <button
+            type="button"
             onClick={() => onAccept?.(request.id)}
             className="px-5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 hover:shadow-md transition-all"
           >
             同意
           </button>
           <button
+            type="button"
             onClick={() => onReject?.(request.id)}
             className="px-5 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
           >

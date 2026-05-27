@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { MomentItem } from "@/components/moments/MomentItem";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { ActionBar, EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
+import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
+import { ActionBar, EmptyPanel, SectionCard, SidebarItem, SidebarSection, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -36,6 +37,14 @@ export default function MomentsPage() {
   const [error, setError] = useState<string | null>(null);
   const visible: 0 | 1 | 2 = 0;
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const readImageAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
 
   // 加载当前用户信息
   useEffect(() => {
@@ -198,22 +207,23 @@ export default function MomentsPage() {
     }
   };
 
-  // 处理图片上传（模拟）
   const handleImageSelect = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    // 这里应该上传图片到服务器，返回URL
-    // 目前使用占位符
-    const newImages = Array.from(files).map((file, index) => {
-      return `https://via.placeholder.com/400?text=Image${images.length + index + 1}`;
-    });
-
-    setImages([...images, ...newImages].slice(0, 9));
+    try {
+      const remainingSlots = Math.max(0, 9 - images.length);
+      const pickedFiles = Array.from(files).slice(0, remainingSlots);
+      const newImages = await Promise.all(pickedFiles.map(readImageAsDataUrl));
+      setImages([...images, ...newImages].slice(0, 9));
+      e.target.value = "";
+    } catch {
+      setError("图片读取失败，请重新选择");
+    }
   };
 
   const removeImage = (index: number) => {
@@ -226,41 +236,41 @@ export default function MomentsPage() {
     <WorkspaceShell
       active="moments"
       navVariant="modern"
-      headerDescription="统一朋友圈导航与发布入口，保留动态流业务逻辑。"
-      rightSlot={<UserAvatar src={currentUser?.avatar} name={currentUser?.nickname || "我"} size="sm" border />}
+      rightSlot={
+        <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
+          <TopIconButton icon="search" label="搜索" />
+          <TopIconButton icon="add_photo_alternate" label="发布图片" onClick={handleImageSelect} />
+          <TopIconButton icon="notifications" label="通知" />
+        </TopBarActions>
+      }
+      mainClassName="bg-background-light dark:bg-background-dark"
       sidebar={
-        <div className="flex h-full flex-col p-4">
+        <WorkspaceSidebar>
           <SidebarSection title="时间流视图" className="flex-1">
-            <button
+            <SidebarItem
               type="button"
-              className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
-                activeTab === "my"
-                  ? "bg-primary/10 text-primary dark:bg-primary/20"
-                  : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-              }`}
+              active={activeTab === "my"}
+              leading={<span className="material-symbols-outlined text-lg">account_circle</span>}
+              title="我的朋友圈"
+              description="查看我发布的动态"
               onClick={() => setActiveTab("my")}
-            >
-              我的朋友圈
-            </button>
-            <button
+            />
+            <SidebarItem
               type="button"
-              className={`w-full rounded-lg px-4 py-3 text-left text-sm font-medium transition-colors ${
-                activeTab === "timeline"
-                  ? "bg-primary/10 text-primary dark:bg-primary/20"
-                  : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-              }`}
+              active={activeTab === "timeline"}
+              leading={<span className="material-symbols-outlined text-lg">dynamic_feed</span>}
+              title="朋友动态"
+              description="查看好友分享"
               onClick={() => setActiveTab("timeline")}
-            >
-              朋友动态
-            </button>
+            />
           </SidebarSection>
-        </div>
+        </WorkspaceSidebar>
       }
       main={
-        <div className="h-full overflow-y-auto p-6">
-          <div className="mx-auto max-w-3xl space-y-6">
+        <div className="h-full overflow-y-auto px-8 py-7">
+          <div className="mx-auto max-w-3xl space-y-7">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
-            <SectionCard>
+            <SectionCard className="shadow-sm">
               <div className="flex gap-4">
                 <UserAvatar
                   src={currentUser?.avatar || "/default-avatar.png"}
@@ -270,11 +280,6 @@ export default function MomentsPage() {
                   className="shrink-0"
                 />
                 <div className="flex-1">
-                  <SectionTitle
-                    title={activeTab === "timeline" ? "发布动态" : "记录此刻"}
-                    description={activeTab === "timeline" ? "分享给朋友可见的内容" : "管理你自己的动态内容"}
-                    className="mb-4"
-                  />
                   <textarea
                     className="ui-textarea w-full resize-none rounded-lg p-4 text-sm"
                     placeholder="想说的话"
@@ -285,13 +290,15 @@ export default function MomentsPage() {
                     <button
                       onClick={handleImageSelect}
                       type="button"
-                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800"
                     >
-                      添加图片 {images.length > 0 ? `(${images.length}/9)` : ""}
+                      <span className="material-symbols-outlined text-xl">image</span>
+                      {images.length > 0 ? `${images.length}/9` : "图片"}
                     </button>
                     <button
+                      type="button"
                       onClick={handlePublish}
-                      className="rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                      className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
                     >
                       发布
                     </button>
@@ -338,7 +345,7 @@ export default function MomentsPage() {
                 <EmptyPanel
                   title={activeTab === "timeline" ? "暂无朋友动态" : "还没有发布任何动态"}
                   description={activeTab === "timeline" ? "稍后再来看看" : "发布第一条动态吧"}
-                  className="min-h-[240px] border-solid bg-white/80 dark:bg-slate-900/70"
+                  className="min-h-[240px] border-0 bg-white dark:bg-slate-900"
                 />
               ) : (
                 moments.map((moment) => (

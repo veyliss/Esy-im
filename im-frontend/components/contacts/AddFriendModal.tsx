@@ -60,8 +60,11 @@ export function AddFriendModal({
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">添加好友</h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="关闭"
+            title="关闭"
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -86,6 +89,7 @@ export function AddFriendModal({
               />
             </div>
             <button
+              type="button"
               onClick={handleSearch}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
             >
@@ -108,6 +112,7 @@ export function AddFriendModal({
                 <p className="text-sm text-slate-500 dark:text-slate-400">ID: {searchResult.user_id}</p>
               </div>
               <button
+                type="button"
                 onClick={handleSendRequest}
                 className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
               >

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { HTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
 
 interface SectionCardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -9,7 +9,7 @@ export function SectionCard({ children, className, ...props }: SectionCardProps)
   return (
     <div
       className={clsx(
-        "rounded-lg border border-slate-200/80 bg-white/86 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/56",
+        "rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950",
         className,
       )}
       {...props}
@@ -49,10 +49,132 @@ interface SidebarSectionProps {
 
 export function SidebarSection({ title, children, className, bodyClassName }: SidebarSectionProps) {
   return (
-    <section className={clsx("rounded-lg border border-slate-200/80 bg-white/70 p-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/44", className)}>
+    <section className={clsx("border-b border-slate-200 px-4 py-5 last:border-b-0 dark:border-slate-800", className)}>
       <h3 className="px-1 pb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{title}</h3>
       <div className={clsx("space-y-2", bodyClassName)}>{children}</div>
     </section>
+  );
+}
+
+interface WorkspaceSidebarProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function WorkspaceSidebar({ children, className }: WorkspaceSidebarProps) {
+  return <div className={clsx("workspace-sidebar flex h-full flex-col overflow-hidden", className)}>{children}</div>;
+}
+
+interface SidebarToolbarProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function SidebarToolbar({ children, className }: SidebarToolbarProps) {
+  return (
+    <div className={clsx("workspace-sidebar-toolbar border-b border-slate-200 px-5 py-5 dark:border-slate-800", className)}>
+      {children}
+    </div>
+  );
+}
+
+interface SidebarSearchProps extends InputHTMLAttributes<HTMLInputElement> {
+  icon?: string;
+}
+
+export function SidebarSearch({ icon = "search", className, ...props }: SidebarSearchProps) {
+  return (
+    <div className="relative">
+      <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">
+        {icon}
+      </span>
+      <input
+        {...props}
+        className={clsx("ui-input h-11 w-full rounded-full py-2.5 pl-10 pr-4 text-sm shadow-none", className)}
+      />
+    </div>
+  );
+}
+
+interface SidebarScrollAreaProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function SidebarScrollArea({ children, className }: SidebarScrollAreaProps) {
+  return <div className={clsx("workspace-sidebar-scroll flex-1 overflow-y-auto", className)}>{children}</div>;
+}
+
+interface SidebarItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> {
+  active?: boolean;
+  leading?: ReactNode;
+  title?: ReactNode;
+  description?: ReactNode;
+  trailing?: ReactNode;
+  children?: ReactNode;
+}
+
+export function SidebarItem({
+  active = false,
+  leading,
+  title,
+  description,
+  trailing,
+  children,
+  className,
+  type = "button",
+  ...props
+}: SidebarItemProps) {
+  return (
+    <button
+      type={type}
+      aria-current={active ? "true" : undefined}
+      className={clsx(
+        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+        active && "is-active bg-primary/10 text-primary dark:bg-primary/20",
+        className,
+      )}
+      {...props}
+    >
+      {children ? (
+        children
+      ) : (
+        <>
+          {leading ? <span className="shrink-0">{leading}</span> : null}
+          <span className="min-w-0 flex-1">
+            {title ? (
+              <span className={clsx("block truncate text-sm", active ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100")}>
+                {title}
+              </span>
+            ) : null}
+            {description ? (
+              <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">{description}</span>
+            ) : null}
+          </span>
+          {trailing ? <span className="shrink-0">{trailing}</span> : null}
+        </>
+      )}
+    </button>
+  );
+}
+
+interface SidebarItemSurfaceProps extends HTMLAttributes<HTMLDivElement> {
+  active?: boolean;
+  children: ReactNode;
+}
+
+export function SidebarItemSurface({ active = false, children, className, ...props }: SidebarItemSurfaceProps) {
+  return (
+    <div
+      className={clsx(
+        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+        active && "is-active bg-primary/10 text-primary dark:bg-primary/20",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -66,7 +188,7 @@ export function EmptyPanel({ title, description, className }: EmptyPanelProps) {
   return (
     <div
       className={clsx(
-        "flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300/80 bg-white/58 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-950/42",
+        "flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-950",
         className,
       )}
     >

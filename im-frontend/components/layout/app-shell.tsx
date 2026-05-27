@@ -23,20 +23,24 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <div
-      className={clsx(
-        "flex min-h-screen w-full items-center justify-center bg-[linear-gradient(180deg,#fbfcfb_0%,#f1f5f3_100%)] px-4 py-5 font-display text-[#16211f] dark:bg-[linear-gradient(180deg,#0d1412_0%,#090f0e_100%)] dark:text-slate-200 sm:px-6 sm:py-6 lg:px-8",
-        className,
-      )}
+      className={clsx("min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-200", className)}
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 lg:gap-6">
-        <header className="rounded-lg border border-slate-200/80 bg-white/82 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/70 sm:px-5 sm:py-4">
-          <NavTabs active={active} variant={navVariant} rightSlot={rightSlot} />
-          {headerDescription ? (
-            <div className="mt-3 px-1 text-sm text-slate-500 dark:text-slate-400">{headerDescription}</div>
-          ) : null}
+      <div className="flex min-h-screen flex-col">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-background-light px-6 dark:border-slate-800 dark:bg-background-dark">
+          <div className="flex min-w-0 flex-1 items-center">
+            <NavTabs active={active} variant={navVariant} showIcons={false} />
+          </div>
+
+          <div className="flex shrink-0 items-center justify-end">{rightSlot}</div>
         </header>
 
-        <section className={clsx("min-h-0", contentClassName)}>{children}</section>
+        {headerDescription ? (
+          <div className="border-b border-slate-200 bg-white px-6 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+            {headerDescription}
+          </div>
+        ) : null}
+
+        <section className={clsx("min-h-0 flex-1", contentClassName)}>{children}</section>
       </div>
     </div>
   );

@@ -95,7 +95,7 @@ export function NavTabs({
     },
     modern: {
       container: "bg-transparent p-0",
-      link: "text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary-light",
+      link: "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
       active: "text-primary dark:text-primary-light",
     },
   } as const;
@@ -103,9 +103,9 @@ export function NavTabs({
   const tone = styles[variant] ?? styles.modern;
 
   return (
-    <div className={clsx("flex w-full items-center gap-3", className)}>
-      <nav aria-label="主导航" className={clsx("min-w-0 flex-1 overflow-x-auto", tone.container)}>
-        <ul className={clsx("flex items-center whitespace-nowrap", variant === "modern" ? "gap-1" : "gap-2")}>
+    <div className={clsx("flex min-w-0 items-center gap-3", className)}>
+      <nav aria-label="主导航" className={clsx("min-w-0 overflow-x-auto", tone.container)}>
+        <ul className={clsx("flex items-center whitespace-nowrap", variant === "modern" ? "gap-7" : "gap-2")}>
           {items.map((item) => {
             const isActive = item.key === active;
             const badgeCount = badges[item.key] || 0;
@@ -117,11 +117,10 @@ export function NavTabs({
                   title={item.description}
                   aria-current={isActive ? "page" : undefined}
                   className={clsx(
-                    "relative inline-flex items-center justify-center gap-1.5 px-1 py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                    "relative inline-flex items-center justify-center gap-1.5 px-0 py-5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                     tone.link,
                     isActive && tone.active,
                     variant === "classic" && "rounded-b-none border-b-2 border-transparent",
-                    variant === "modern" && "min-w-[64px]",
                   )}
                 >
                   {showIcons ? (
@@ -140,7 +139,7 @@ export function NavTabs({
                   </span>
 
                   {variant === "modern" && isActive ? (
-                    <span className="absolute inset-x-1 -bottom-0.5 h-0.5 rounded-full bg-primary" />
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-primary" />
                   ) : null}
                 </Link>
 

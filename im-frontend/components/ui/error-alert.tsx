@@ -54,7 +54,7 @@ export function ErrorAlert({
   };
 
   return (
-    <div className={`flex-shrink-0 mx-6 mt-4 p-3 border rounded-lg ${getStyles()} ${className}`}>
+    <div className={`flex-shrink-0 p-3 border rounded-lg ${getStyles()} ${className}`}>
       <div className="flex items-start">
         <div className="flex-shrink-0">
           {getIcon()}
@@ -68,6 +68,7 @@ export function ErrorAlert({
           <div className="ml-auto pl-3">
             <div className="-mx-1.5 -my-1.5">
               <button
+                type="button"
                 onClick={onClose}
                 className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   type === 'warning' 

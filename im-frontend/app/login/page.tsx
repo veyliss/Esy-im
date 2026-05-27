@@ -312,18 +312,10 @@ export default function LoginPage() {
 
   return (
     <main className="auth-page">
-      <div className="auth-brand-block">
-        <div className="auth-logo">
-          E
-        </div>
-        <h1>Esy-IM</h1>
-        <p>即时通讯系统</p>
-      </div>
-
       <div className={cardClassName}>
-            <div className="flex flex-1 flex-col">
-              <div className="pb-3">
-                <div className="auth-main-tabs">
+        <div className="flex flex-1 flex-col">
+          <div className="pb-3">
+            <div className="auth-main-tabs">
               <MainTabButton active={mainTab === "login"} onClick={() => switchMainTab("login")}>
                 登录
               </MainTabButton>
@@ -353,7 +345,7 @@ export default function LoginPage() {
           ) : (
             renderRegisterForm()
           )}
-      </div>
+        </div>
       </div>
     </main>
   );

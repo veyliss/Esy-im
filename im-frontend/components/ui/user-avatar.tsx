@@ -14,7 +14,7 @@ interface UserAvatarProps {
   // 用户名（用于生成默认头像）
   name?: string;
   // 尺寸
-  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
   // 形状
   shape?: "circle" | "rounded" | "square";
   // 在线状态
@@ -62,7 +62,8 @@ export function UserAvatar({
     md: "w-10 h-10 text-base",
     lg: "w-12 h-12 text-lg",
     xl: "w-16 h-16 text-xl",
-    "2xl": "w-20 h-20 text-2xl"
+    "2xl": "w-20 h-20 text-2xl",
+    "3xl": "w-32 h-32 text-4xl"
   };
 
   // 形状映射
@@ -88,7 +89,8 @@ export function UserAvatar({
     md: "w-3 h-3",
     lg: "w-3.5 h-3.5",
     xl: "w-4 h-4",
-    "2xl": "w-5 h-5"
+    "2xl": "w-5 h-5",
+    "3xl": "w-6 h-6"
   };
 
   // 生成用户名首字母
@@ -200,7 +202,7 @@ export function AvatarGroup({
     status?: "online" | "offline" | "away" | "busy" | "invisible";
   }>;
   max?: number;
-  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
   className?: string;
 }) {
   const displayUsers = users.slice(0, max);
@@ -212,7 +214,8 @@ export function AvatarGroup({
     md: "-space-x-2",
     lg: "-space-x-2.5",
     xl: "-space-x-3",
-    "2xl": "-space-x-4"
+    "2xl": "-space-x-4",
+    "3xl": "-space-x-5"
   };
 
   return (
@@ -239,7 +242,8 @@ export function AvatarGroup({
             md: "w-10 h-10 text-base",
             lg: "w-12 h-12 text-lg",
             xl: "w-16 h-16 text-xl",
-            "2xl": "w-20 h-20 text-2xl"
+            "2xl": "w-20 h-20 text-2xl",
+            "3xl": "w-32 h-32 text-4xl"
           }[size]
         )}>
           +{remainingCount}

@@ -57,8 +57,11 @@ export function JoinGroupModal({
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">搜索并加入群聊</h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="关闭"
+            title="关闭"
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -81,6 +84,7 @@ export function JoinGroupModal({
             />
           </div>
           <button
+            type="button"
             onClick={handleSearch}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
           >
@@ -109,6 +113,7 @@ export function JoinGroupModal({
                   <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人 · 群号 {group.group_id}</p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleJoin(group.group_id)}
                   className="rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-white hover:bg-primary/90"
                 >

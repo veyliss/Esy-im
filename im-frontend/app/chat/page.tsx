@@ -12,7 +12,8 @@ import { UserAPI } from "@/lib/api/user";
 import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { ActionBar, EmptyPanel, SectionCard, SectionTitle, SidebarSection } from "@/components/workspace/section";
+import { TopBarActions, TopIconButton, TopStatusPill } from "@/components/layout/top-actions";
+import { EmptyPanel, SidebarItem, SidebarScrollArea, SidebarSearch, SidebarSection, SidebarToolbar, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 
@@ -476,58 +477,55 @@ export default function ChatPage() {
     <WorkspaceShell
       active="chat"
       navVariant="modern"
-      headerDescription="统一私聊与群聊入口，快速切换会话。"
       rightSlot={
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-500 dark:text-slate-400">{wsConnected ? "已连接" : "连接中"}</span>
+        <TopBarActions
+          avatarSrc={currentUser?.avatar}
+          avatarName={currentUser?.nickname || "我"}
+          avatarStatus={wsConnected ? "online" : "away"}
+          showAvatarStatus
+        >
+          <TopStatusPill tone={wsConnected ? "online" : "warning"}>
+            <span className={`size-2 rounded-full ${wsConnected ? "bg-green-500" : "bg-amber-400"}`} />
+            {wsConnected ? "已连接" : "连接中"}
+          </TopStatusPill>
           {totalUnreadCount > 0 ? (
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <TopStatusPill tone="primary">
               未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
-            </span>
+            </TopStatusPill>
           ) : null}
-          <UserAvatar
-            src={currentUser?.avatar}
-            name={currentUser?.nickname || "我"}
-            size="sm"
-            border
-            showStatus
-            status={wsConnected ? "online" : "away"}
-          />
-        </div>
+          <TopIconButton icon="search" label="搜索" />
+          <TopIconButton icon="notifications" label="通知" badge={totalUnreadCount} />
+        </TopBarActions>
       }
       sidebar={
-        <div className="flex h-full flex-col p-4">
-          <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col" bodyClassName="flex-1 space-y-2">
-            <input
+        <WorkspaceSidebar>
+          <SidebarToolbar>
+            <SidebarSearch
               type="text"
-              placeholder="搜索聊天..."
+              placeholder="搜索聊天"
               value={chatFilter}
               onChange={(e) => setChatFilter(e.target.value)}
-              className="ui-input w-full rounded-lg px-4 py-3 text-sm"
             />
+          </SidebarToolbar>
 
-            <div className="flex-1 overflow-y-auto pt-2">
-              <div className="space-y-2">
+          <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col py-4" bodyClassName="flex-1">
+            <SidebarScrollArea className="pt-2">
+              <div className="space-y-1 px-1">
                 {filteredChatList.length === 0 ? (
                   <EmptyPanel
                     title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
                     description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
-                    className="min-h-[220px]"
+                    className="min-h-[220px] border-0 bg-transparent"
                   />
                 ) : (
                   filteredChatList.map((chatItem) => {
                     const isActive = currentChat?.id === chatItem.id;
 
                     return (
-                      <button
+                      <SidebarItem
                         key={chatItem.id}
-                        type="button"
                         onClick={() => handleSelectChat(chatItem)}
-                        className={`flex w-full items-center gap-3 rounded-lg border px-3 py-3 text-left transition-all ${
-                          isActive
-                            ? "border-primary/30 bg-primary/10 shadow-sm dark:border-primary/40 dark:bg-primary/20"
-                            : "border-transparent bg-slate-50 hover:border-slate-200 hover:bg-white dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800"
-                        }`}
+                        active={isActive}
                       >
                         <div className="relative">
                           <UserAvatar
@@ -546,8 +544,8 @@ export default function ChatPage() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">{chatItem.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                            <p className={`truncate text-sm ${isActive ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>{chatItem.name}</p>
+                            <p className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
                               {chatItem.lastMessageTime
                                 ? new Date(chatItem.lastMessageTime).toLocaleTimeString("zh-CN", {
                                     hour: "2-digit",
@@ -556,63 +554,72 @@ export default function ChatPage() {
                                 : ""}
                             </p>
                           </div>
-                          <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
+                          <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
                         </div>
 
                         {chatItem.unreadCount > 0 ? (
-                          <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                          <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
                             {chatItem.unreadCount > 99 ? "99+" : chatItem.unreadCount}
                           </span>
                         ) : null}
-                      </button>
+                      </SidebarItem>
                     );
                   })
                 )}
               </div>
-            </div>
+            </SidebarScrollArea>
           </SidebarSection>
-        </div>
+        </WorkspaceSidebar>
       }
       main={
         currentChat ? (
-          <div className="flex h-full min-w-0 flex-1 flex-col p-6">
-            <SectionCard className="flex min-h-0 flex-1 flex-col p-0">
-              <div className="border-b border-slate-200/70 px-6 py-5 dark:border-slate-800">
-                <SectionTitle
-                  title={currentChat.name}
-                  description={currentChat.type === "group" && "member_count" in currentChat.data ? `${currentChat.data.member_count} 人` : "当前会话"}
-                  action={
-                    <UserAvatar
-                      src={currentChat.avatar}
-                      name={currentChat.name}
-                      size="md"
-                      shape={currentChat.type === "group" ? "rounded" : "circle"}
-                      border
-                    />
-                  }
+          <div className="flex h-full min-w-0 flex-1 flex-col">
+            <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200 px-8 dark:border-slate-800">
+              <div className="flex min-w-0 items-center gap-3">
+                <UserAvatar
+                  src={currentChat.avatar}
+                  name={currentChat.name}
+                  size="md"
+                  shape={currentChat.type === "group" ? "rounded" : "circle"}
+                  border
                 />
+                <div className="min-w-0">
+                  <h2 className="truncate text-lg font-bold text-slate-900 dark:text-white">{currentChat.name}</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {currentChat.type === "group" && "member_count" in currentChat.data ? `${currentChat.data.member_count} 人` : "当前会话"}
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                className="workspace-icon-button"
+                aria-label="更多"
+                title="更多"
+              >
+                <span className="material-symbols-outlined text-xl">more_vert</span>
+              </button>
+            </div>
 
-              <ErrorAlert
-                error={connectionError}
-                type="warning"
-                onClose={() => setConnectionError(null)}
-                className="mx-6 mt-4"
-              />
-              <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mt-3" />
+            <ErrorAlert
+              error={connectionError}
+              type="warning"
+              onClose={() => setConnectionError(null)}
+              className="mx-8 mt-5"
+            />
+            <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-3" />
 
-              <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
-                {currentMessages.length === 0 ? (
-                  <EmptyPanel title="暂无消息" description="开始发送第一条消息吧" className="min-h-[420px]" />
-                ) : (
+            <div className="flex-1 space-y-6 overflow-y-auto bg-white px-8 py-7 dark:bg-slate-900">
+              {currentMessages.length === 0 ? (
+                <EmptyPanel title="暂无消息" description="开始发送第一条消息吧" className="min-h-[420px] border-0 bg-transparent" />
+              ) : (
                 currentMessages.map((message) => {
                   const isMyMessage = message.from_user_id === currentUser?.user_id;
                   const messageUser = isMyMessage ? currentUser : message.from_user;
 
                   if (isMyMessage) {
                     return (
-                      <div key={message.id} className="flex justify-end gap-3">
-                        <div className="max-w-lg rounded-lg rounded-tr-md bg-primary px-4 py-3 text-sm text-white shadow-sm">
+                      <div key={message.id} className="flex justify-end gap-4">
+                        <div className="chat-message-bubble rounded-lg rounded-tr-none bg-primary px-4 py-3 text-sm leading-6 text-white shadow-sm">
                           {message.content}
                         </div>
                         <UserAvatar
@@ -627,7 +634,7 @@ export default function ChatPage() {
                   }
 
                   return (
-                    <div key={message.id} className="flex gap-3">
+                    <div key={message.id} className="flex gap-4">
                       <UserAvatar
                         src={messageUser?.avatar}
                         name={messageUser?.nickname || `用户${message.from_user_id}`}
@@ -635,13 +642,13 @@ export default function ChatPage() {
                         border
                         className="shrink-0"
                       />
-                      <div className="max-w-lg">
+                      <div className="chat-message-bubble">
                         {currentChat.type === "group" ? (
                           <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">
                             {messageUser?.nickname || `用户${message.from_user_id}`}
                           </p>
                         ) : null}
-                        <div className="rounded-lg rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+                        <div className="rounded-lg rounded-tl-none bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-800 shadow-sm dark:bg-slate-800 dark:text-slate-200">
                           {message.content}
                         </div>
                       </div>
@@ -652,11 +659,12 @@ export default function ChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-              <div className="border-t border-slate-200/70 bg-white/80 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/70">
-                <ActionBar className="gap-2">
+            <div className="shrink-0 border-t border-slate-200 bg-background-light px-8 py-5 dark:border-slate-800 dark:bg-background-dark">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
                   <input
-                    className="form-input flex-1 rounded-lg px-4 py-3 text-sm"
-                    placeholder="输入消息..."
+                    className="chat-composer-input form-input w-full rounded-full border-transparent bg-slate-100 py-3 pl-5 pr-24 text-sm shadow-none dark:bg-slate-800"
+                    placeholder="输入消息"
                     type="text"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -670,23 +678,41 @@ export default function ChatPage() {
                     }}
                     disabled={sendingMessage}
                   />
+                  <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-3">
+                    <button
+                      type="button"
+                      className="flex size-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                      aria-label="表情"
+                      title="表情"
+                    >
+                      <span className="material-symbols-outlined text-xl">mood</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="flex size-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+                      aria-label="附件"
+                      title="附件"
+                    >
+                      <span className="material-symbols-outlined text-xl">attach_file</span>
+                    </button>
+                  </div>
+                </div>
 
-                  <button
-                    className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={handleSendMessage}
-                    disabled={sendingMessage || !messageInput.trim()}
-                    aria-label="发送消息"
-                    title="发送消息"
-                  >
-                    发送
-                  </button>
-                </ActionBar>
+                <button
+                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={handleSendMessage}
+                  disabled={sendingMessage || !messageInput.trim()}
+                  aria-label="发送消息"
+                  title="发送消息"
+                >
+                  <span className="material-symbols-outlined text-xl">send</span>
+                </button>
               </div>
-            </SectionCard>
+            </div>
           </div>
         ) : (
-          <div className="flex h-full min-h-[72vh] items-center justify-center p-6">
-            <EmptyPanel title="选择一个聊天开始交流" description="支持私聊与群聊" className="min-h-[520px] w-full border-solid bg-white/80 dark:bg-slate-900/70" />
+          <div className="workspace-empty-wrap">
+            <EmptyPanel title="选择一个聊天开始交流" description="支持私聊与群聊" className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900" />
           </div>
         )
       }

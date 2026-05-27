@@ -15,8 +15,9 @@ export function FriendItem({ friend, isActive, onClick }: FriendItemProps) {
   const friendUser = friend.friend_user;
 
   return (
-    <a
-      className={`flex items-center gap-3 rounded-lg p-3 transition-all cursor-pointer ${
+    <button
+      type="button"
+      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-all ${
         isActive
           ? "bg-primary/10 dark:bg-primary/20 text-primary shadow-sm"
           : "hover:bg-slate-100 dark:hover:bg-slate-800 hover:shadow-sm"
@@ -26,7 +27,7 @@ export function FriendItem({ friend, isActive, onClick }: FriendItemProps) {
       <div className="relative inline-block">
         <Image
           className="size-11 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700"
-          src={friendUser?.avatar || "https://via.placeholder.com/44"}
+          src={friendUser?.avatar || "/default-avatar.png"}
           alt={friendUser?.nickname || "好友"}
           width={44}
           height={44}
@@ -49,6 +50,6 @@ export function FriendItem({ friend, isActive, onClick }: FriendItemProps) {
           check_circle
         </span>
       )}
-    </a>
+    </button>
   );
 }

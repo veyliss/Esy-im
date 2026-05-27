@@ -30,39 +30,6 @@ input {
     #f6f7f8;
 }
 
-.auth-brand-block {
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.auth-logo {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: #137fec;
-  color: #fff;
-  font-size: 22px;
-  font-weight: 800;
-  box-shadow: 0 16px 34px -24px rgba(17, 115, 212, 0.9);
-}
-
-.auth-brand-block h1 {
-  margin: 16px 0 0;
-  font-size: 24px;
-  line-height: 1.2;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.auth-brand-block p {
-  margin: 4px 0 0;
-  font-size: 14px;
-  color: #64748b;
-}
-
 .auth-card {
   width: 100%;
   max-width: 448px;

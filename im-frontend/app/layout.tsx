@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "VeylissIM - 即时通讯系统",
+  title: "即时通讯系统",
   description: "现代化的即时通讯系统，提供安全、高效的沟通体验",
 };
 

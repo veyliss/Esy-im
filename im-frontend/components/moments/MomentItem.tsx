@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Moment, User, MomentLike, MomentComment } from "@/lib/types/api";
 import { formatTime } from "@/lib/utils/time";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface MomentItemProps {
   moment: Moment;
@@ -23,7 +24,15 @@ export function MomentItem({
   const [commentContent, setCommentContent] = useState("");
   const [replyTo, setReplyTo] = useState<MomentComment | null>(null);
 
-  const images = moment.images ? JSON.parse(moment.images) : [];
+  const images = (() => {
+    if (!moment.images) return [];
+    try {
+      const parsed = JSON.parse(moment.images);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })();
   const isLiked = moment.likes?.some(
     (like: MomentLike) => like.user_id === currentUser?.user_id
   );
@@ -52,15 +61,15 @@ export function MomentItem({
   };
 
   return (
-    <div className="bg-white dark:bg-[#182430] rounded-lg shadow-sm border border-slate-200/50 dark:border-slate-700/50 overflow-hidden hover:shadow-md transition-shadow">
-      {/* Header */}
+    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="p-5">
-        <div className="flex items-start justify-between mb-4">
+        <div className="mb-3 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <img
-              src={moment.user?.avatar || "https://via.placeholder.com/40"}
-              alt={moment.user?.nickname}
-              className="size-10 rounded-full object-cover"
+            <UserAvatar
+              src={moment.user?.avatar || "/default-avatar.png"}
+              name={moment.user?.nickname || "用户"}
+              size="md"
+              border
             />
             <div>
               <p className="font-bold text-slate-800 dark:text-slate-200">
@@ -73,31 +82,31 @@ export function MomentItem({
           </div>
           {currentUser?.user_id === moment.user_id && (
             <button
+              type="button"
               onClick={() => onDelete(moment.id)}
-              className="text-slate-400 hover:text-red-500 transition-colors"
+              className="workspace-icon-button"
+              aria-label="删除动态"
+              title="删除动态"
             >
               <span className="material-symbols-outlined text-lg">delete</span>
             </button>
           )}
         </div>
 
-        {/* Content */}
-        <p className="mb-4 text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="mb-4 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
           {moment.content}
         </p>
 
-        {/* Location */}
         {moment.location && (
-          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mb-3">
+          <div className="mb-3 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
             <span className="material-symbols-outlined text-sm">location_on</span>
             <span>{moment.location}</span>
           </div>
         )}
       </div>
 
-      {/* Images */}
       {images.length > 0 && (
-        <div className={`grid gap-1 ${images.length === 1 ? "" : "grid-cols-3"}`}>
+        <div className={`grid gap-1 bg-slate-100 dark:bg-slate-800 ${images.length === 1 ? "" : "grid-cols-3"}`}>
           {images.map((img: string, index: number) => (
             <div
               key={index}
@@ -108,10 +117,10 @@ export function MomentItem({
         </div>
       )}
 
-      {/* Actions */}
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800">
+      <div className="border-t border-slate-200 p-2 dark:border-slate-800">
         <div className="flex justify-end gap-2">
           <button
+            type="button"
             onClick={handleLikeClick}
             className={`flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 transition-colors ${
               isLiked
@@ -125,6 +134,7 @@ export function MomentItem({
             <span>{moment.like_count || 0}</span>
           </button>
           <button
+            type="button"
             onClick={() => setShowCommentInput(!showCommentInput)}
             className="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
           >
@@ -133,7 +143,6 @@ export function MomentItem({
           </button>
         </div>
 
-        {/* Likes */}
         {moment.likes && moment.likes.length > 0 && (
           <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm">
@@ -149,7 +158,6 @@ export function MomentItem({
           </div>
         )}
 
-        {/* Comments */}
         {moment.comments && moment.comments.length > 0 && (
           <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
             {moment.comments.map((comment: MomentComment) => (
@@ -169,6 +177,7 @@ export function MomentItem({
                   : {comment.content}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleReply(comment)}
                   className="ml-2 text-xs text-primary hover:underline"
                 >
@@ -179,13 +188,13 @@ export function MomentItem({
           </div>
         )}
 
-        {/* Comment Input */}
         {showCommentInput && (
           <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             {replyTo && (
               <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                 回复 @{replyTo.user?.nickname}
                 <button
+                  type="button"
                   onClick={() => {
                     setReplyTo(null);
                     setCommentContent("");
@@ -210,6 +219,7 @@ export function MomentItem({
                 className="ui-input flex-1 rounded-lg px-3 py-2 text-sm"
               />
               <button
+                type="button"
                 onClick={handleCommentSubmit}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
               >
@@ -219,6 +229,6 @@ export function MomentItem({
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }

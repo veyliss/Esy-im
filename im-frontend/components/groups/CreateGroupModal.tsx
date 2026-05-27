@@ -42,13 +42,13 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">创建群组</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-2xl dark:bg-slate-900">
+        <h3 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">创建群组</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               群组名称 *
             </label>
             <input
@@ -62,7 +62,7 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               群组描述
             </label>
             <textarea
@@ -76,7 +76,7 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               最大成员数
             </label>
             <input
@@ -97,7 +97,7 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
                 onChange={(e) => setFormData({ ...formData, is_public: e.target.checked })}
                 className="mr-2 h-4 w-4 accent-primary"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">公开群组</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">公开群组</span>
             </label>
 
             <label className="flex items-center">
@@ -107,7 +107,7 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
                 onChange={(e) => setFormData({ ...formData, join_approval: e.target.checked })}
                 className="mr-2 h-4 w-4 accent-primary"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">需要审批</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">需要审批</span>
             </label>
           </div>
 
@@ -121,14 +121,14 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90 disabled:opacity-50"
             >
               {loading ? '创建中...' : '创建'}
             </button>

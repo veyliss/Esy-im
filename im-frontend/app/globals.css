@@ -452,39 +452,6 @@ html, body {
   font-family: var(--font-display);
 }
 
-.auth-brand-block {
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.auth-logo {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--color-primary);
-  color: white;
-  font-size: 22px;
-  font-weight: 800;
-  box-shadow: 0 16px 34px -24px rgba(17, 115, 212, 0.9);
-}
-
-.auth-brand-block h1 {
-  margin-top: 16px;
-  font-size: 24px;
-  line-height: 1.2;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.auth-brand-block p {
-  margin-top: 4px;
-  font-size: 14px;
-  color: #64748b;
-}
-
 .auth-card {
   width: 100%;
   max-width: 448px;
@@ -515,6 +482,14 @@ html, body {
   color: #6b7280;
   cursor: pointer;
   transition: color 150ms ease, border-color 150ms ease;
+}
+
+.auth-main-tab:focus-visible,
+.auth-underline-tab:focus-visible,
+.auth-code-button:focus-visible,
+.auth-primary-button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(17, 115, 212, 0.16);
 }
 
 .auth-main-tab span {
@@ -651,6 +626,7 @@ html, body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .auth-code-button:disabled {
@@ -750,6 +726,16 @@ html, body {
     margin-left: 4px;
     margin-right: 4px;
   }
+
+  .auth-input.has-code-button {
+    padding-right: 112px;
+  }
+
+  .auth-code-button {
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 13px;
+  }
 }
 
 @media (min-width: 641px) {
@@ -795,38 +781,6 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.welcome-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.welcome-logo {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: #137fec;
-  color: white;
-  font-weight: 800;
-  font-size: 18px;
-  box-shadow: 0 16px 34px -24px rgba(19, 127, 236, 0.9);
-}
-
-.welcome-brand-name {
-  font-size: 16px;
-  line-height: 1.2;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.welcome-brand-subtitle {
-  margin-top: 3px;
-  font-size: 13px;
-  color: #64748b;
 }
 
 .welcome-header-button {
@@ -1205,5 +1159,304 @@ html, body {
 
   .preview-chat {
     min-height: 340px;
+  }
+}
+
+/* Shared post-login workspace */
+.im-workspace {
+  background: #f6f7f8;
+}
+
+.im-workspace-inner {
+  height: 100svh;
+}
+
+.im-workspace-header {
+  height: 72px;
+  min-height: 72px;
+  padding-left: 34px;
+  padding-right: 32px;
+  background: #f6f7f8;
+}
+
+.im-workspace-nav {
+  min-width: 0;
+}
+
+.im-workspace-nav nav {
+  scrollbar-width: none;
+}
+
+.im-workspace-nav nav::-webkit-scrollbar {
+  display: none;
+}
+
+.im-workspace-nav nav ul {
+  gap: 34px;
+}
+
+.im-workspace-nav nav a {
+  padding-top: 26px;
+  padding-bottom: 24px;
+}
+
+.im-workspace-actions {
+  gap: 12px;
+  padding-left: 24px;
+}
+
+.im-workspace-actions > div {
+  gap: 10px;
+}
+
+.im-workspace-actions button {
+  width: 36px;
+  height: 36px;
+}
+
+.im-workspace-actions .top-status-pill {
+  white-space: nowrap;
+}
+
+.im-workspace-body,
+.im-workspace-frame {
+  background: #ffffff;
+}
+
+.im-workspace-sidebar {
+  width: 352px;
+  background: #f6f7f8;
+}
+
+.im-workspace-main {
+  min-width: 0;
+  overscroll-behavior: contain;
+}
+
+.workspace-sidebar {
+  background: #f6f7f8;
+}
+
+.workspace-sidebar-toolbar {
+  padding: 20px 20px 18px;
+}
+
+.workspace-sidebar-scroll {
+  padding-bottom: 22px;
+}
+
+.workspace-sidebar-item {
+  min-height: 58px;
+  outline: none;
+}
+
+.workspace-sidebar-item:hover {
+  background: #eef2f7;
+}
+
+.workspace-sidebar-item:focus-visible {
+  box-shadow: 0 0 0 2px rgba(19, 127, 236, 0.22);
+}
+
+.workspace-sidebar-item.is-active {
+  background: #e2efff;
+}
+
+.workspace-main-panel {
+  height: 100%;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.workspace-content-pad {
+  padding: 32px;
+}
+
+.workspace-empty-wrap {
+  display: flex;
+  min-height: 72vh;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.workspace-icon-button {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #64748b;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.workspace-icon-button:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.chat-message-bubble {
+  max-width: min(68%, 560px);
+}
+
+.chat-composer-input {
+  min-height: 48px;
+}
+
+.dark .im-workspace,
+.dark .im-workspace-header,
+.dark .im-workspace-sidebar {
+  background: #101922;
+}
+
+.dark .im-workspace-body,
+.dark .im-workspace-frame {
+  background: #0f172a;
+}
+
+.dark .workspace-sidebar {
+  background: #101922;
+}
+
+.dark .workspace-sidebar-item:hover {
+  background: #1e293b;
+}
+
+.dark .workspace-sidebar-item.is-active {
+  background: rgba(19, 127, 236, 0.2);
+}
+
+.dark .workspace-main-panel {
+  background: #0f172a;
+}
+
+.dark .workspace-icon-button:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+@media (max-width: 1100px) {
+  .im-workspace-header {
+    padding-left: 24px;
+    padding-right: 20px;
+  }
+
+  .im-workspace-nav nav ul {
+    gap: 24px;
+  }
+
+  .im-workspace-sidebar {
+    width: 324px;
+  }
+}
+
+@media (max-width: 760px) {
+  .im-workspace-header {
+    height: 64px;
+    min-height: 64px;
+    padding-left: 16px;
+    padding-right: 14px;
+  }
+
+  .im-workspace-nav nav ul {
+    gap: 18px;
+  }
+
+  .im-workspace-nav nav a {
+    padding-top: 22px;
+    padding-bottom: 20px;
+  }
+
+  .im-workspace-actions {
+    padding-left: 12px;
+  }
+
+  .im-workspace-actions .top-status-pill {
+    display: none;
+  }
+
+  .im-workspace-sidebar {
+    width: 300px;
+  }
+
+  .workspace-content-pad,
+  .workspace-empty-wrap {
+    padding: 24px;
+  }
+
+  .chat-message-bubble {
+    max-width: min(78%, 520px);
+  }
+}
+
+/* Contacts page */
+.contacts-action-grid {
+  gap: 10px;
+}
+
+.contacts-action-button {
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.contacts-section {
+  padding-top: 18px;
+  padding-bottom: 16px;
+}
+
+.contacts-section h3 {
+  padding-bottom: 10px;
+  letter-spacing: 0;
+}
+
+.contacts-main-surface {
+  padding: 44px 56px;
+}
+
+.contacts-content {
+  width: min(100%, 760px);
+}
+
+.contacts-page-head {
+  padding-bottom: 18px;
+}
+
+.contacts-request-section {
+  padding-top: 4px;
+}
+
+.contacts-profile {
+  padding-top: 8px;
+  padding-bottom: 42px;
+}
+
+.contacts-info-section,
+.contacts-remark-section {
+  margin-top: 34px;
+}
+
+.contacts-info-table {
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.contacts-info-table > div {
+  min-height: 48px;
+  align-items: center;
+}
+
+.contacts-detail-actions {
+  margin-top: 40px;
+  padding-top: 24px;
+}
+
+.contacts-empty-state {
+  min-height: calc(100vh - 220px);
+}
+
+@media (max-width: 900px) {
+  .contacts-main-surface {
+    padding: 28px 24px;
   }
 }
