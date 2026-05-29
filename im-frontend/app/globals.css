@@ -1714,6 +1714,545 @@ html, body {
   color: #f8fafc;
 }
 
+.me-loading-wrap {
+  display: grid;
+  height: 100%;
+  place-items: center;
+  padding: 32px;
+}
+
+.me-page {
+  background: #ffffff;
+}
+
+.me-page-inner {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  padding: 36px 40px 0;
+}
+
+.me-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 220px;
+  align-items: center;
+  gap: 26px;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 24px 0 34px;
+}
+
+.me-avatar-block {
+  display: flex;
+  justify-content: center;
+}
+
+.me-avatar-button {
+  position: relative;
+  display: inline-flex;
+  border-radius: 999px;
+  outline: none;
+}
+
+.me-avatar-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(19, 127, 236, 0.22);
+}
+
+.me-avatar-edit {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  background: #137fec;
+  color: #ffffff;
+  box-shadow: 0 12px 24px -16px rgba(19, 127, 236, 0.85);
+}
+
+.me-hero-copy {
+  min-width: 0;
+}
+
+.me-eyebrow {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #eff6ff;
+  padding: 5px 10px;
+  color: #137fec;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.me-hero-copy h1 {
+  margin-top: 12px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 900;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.me-hero-copy p {
+  margin-top: 10px;
+  max-width: 520px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.me-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.me-hero-meta span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 7px 10px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.me-hero-meta .material-symbols-outlined {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.me-profile-score {
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 16px;
+}
+
+.me-profile-score span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.me-profile-score strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.me-profile-score div {
+  height: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.me-profile-score i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #137fec;
+  transition: width 180ms ease;
+}
+
+.me-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  padding: 28px 0 110px;
+}
+
+.me-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 22px;
+  box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03), 0 26px 54px -48px rgba(15, 23, 42, 0.48);
+}
+
+.me-panel.is-wide {
+  grid-column: 1 / -1;
+}
+
+.me-panel-head {
+  display: flex;
+  gap: 12px;
+}
+
+.me-panel-head > .material-symbols-outlined {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #137fec;
+}
+
+.me-panel-head h2 {
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.me-panel-head p {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.me-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.me-field {
+  display: grid;
+  gap: 8px;
+}
+
+.me-field > span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.me-field .ui-input {
+  height: 48px;
+  border-radius: 8px;
+  padding: 0 14px;
+}
+
+.me-field small {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.me-avatar-picker {
+  display: flex;
+  height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 14px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.me-avatar-picker:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.me-info-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.me-info-list div {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.me-info-list div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.me-info-list span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.me-info-list strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.me-password-meter {
+  margin-top: 18px;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.me-password-meter > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.me-password-meter span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.me-password-meter strong {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.me-password-meter strong.is-muted {
+  color: #94a3b8;
+}
+
+.me-password-meter strong.is-danger {
+  color: #ef4444;
+}
+
+.me-password-meter strong.is-warning {
+  color: #d97706;
+}
+
+.me-password-meter strong.is-success {
+  color: #059669;
+}
+
+.me-password-bars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.me-password-bars i {
+  height: 7px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.me-password-bars i.is-danger {
+  background: #ef4444;
+}
+
+.me-password-bars i.is-warning {
+  background: #f59e0b;
+}
+
+.me-password-bars i.is-success {
+  background: #10b981;
+}
+
+.me-save-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 16px 0;
+  backdrop-filter: blur(14px);
+}
+
+.me-save-bar strong {
+  display: block;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.me-save-bar span {
+  display: block;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.me-save-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.me-secondary-button,
+.me-primary-button,
+.me-logout-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 0 15px;
+  font-size: 14px;
+  font-weight: 900;
+  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease, transform 160ms ease;
+}
+
+.me-secondary-button {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.me-secondary-button:hover {
+  background: #e2e8f0;
+}
+
+.me-primary-button {
+  background: #137fec;
+  color: #ffffff;
+}
+
+.me-primary-button:hover {
+  background: #0f70d2;
+}
+
+.me-secondary-button:active,
+.me-primary-button:active,
+.me-logout-button:active {
+  transform: scale(0.98);
+}
+
+.me-secondary-button:disabled,
+.me-primary-button:disabled,
+.me-logout-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.me-sidebar-footer {
+  border-top: 1px solid #e2e8f0;
+  padding: 18px 20px;
+}
+
+.me-logout-button {
+  width: 100%;
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.me-logout-button:hover {
+  background: #ffe4e6;
+}
+
+.dark .me-page,
+.dark .me-panel,
+.dark .me-save-bar {
+  background: #0f172a;
+}
+
+.dark .me-hero,
+.dark .me-panel,
+.dark .me-save-bar,
+.dark .me-sidebar-footer {
+  border-color: #1e293b;
+}
+
+.dark .me-avatar-edit {
+  border-color: #0f172a;
+}
+
+.dark .me-eyebrow,
+.dark .me-panel-head > .material-symbols-outlined {
+  background: rgba(19, 127, 236, 0.16);
+  color: #60a5fa;
+}
+
+.dark .me-hero-copy h1,
+.dark .me-profile-score strong,
+.dark .me-panel-head h2,
+.dark .me-info-list strong,
+.dark .me-save-bar strong {
+  color: #f8fafc;
+}
+
+.dark .me-hero-copy p,
+.dark .me-panel-head p,
+.dark .me-info-list span,
+.dark .me-field > span,
+.dark .me-save-bar span,
+.dark .me-password-meter span {
+  color: #94a3b8;
+}
+
+.dark .me-hero-meta span,
+.dark .me-profile-score,
+.dark .me-password-meter {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.dark .me-profile-score div,
+.dark .me-password-bars i {
+  background: #334155;
+}
+
+.dark .me-avatar-picker,
+.dark .me-secondary-button {
+  border-color: #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.dark .me-avatar-picker:hover,
+.dark .me-secondary-button:hover {
+  background: #273449;
+}
+
+.dark .me-info-list div {
+  border-bottom-color: #1e293b;
+}
+
+.dark .me-save-bar {
+  background: rgba(15, 23, 42, 0.94);
+}
+
+.dark .me-sidebar-footer {
+  border-top-color: #1e293b;
+}
+
+.dark .me-logout-button {
+  background: rgba(244, 63, 94, 0.12);
+  color: #fb7185;
+}
+
+.dark .me-logout-button:hover {
+  background: rgba(244, 63, 94, 0.18);
+}
+
 /* App interactions */
 .app-toast-region {
   position: fixed;
@@ -2108,6 +2647,75 @@ html, body {
   .chat-start-panel {
     min-height: 48dvh;
     padding: 24px 18px;
+  }
+
+  .me-page-inner {
+    padding: 20px 18px 0;
+  }
+
+  .me-hero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 18px;
+    padding: 16px 0 24px;
+    text-align: center;
+  }
+
+  .me-hero-copy h1 {
+    white-space: normal;
+  }
+
+  .me-hero-copy p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .me-hero-meta {
+    justify-content: center;
+  }
+
+  .me-profile-score {
+    width: min(280px, 100%);
+  }
+
+  .me-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px 0 132px;
+  }
+
+  .me-panel {
+    padding: 18px;
+  }
+
+  .me-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .me-info-list div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .me-info-list strong {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .me-save-bar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px 0 14px;
+  }
+
+  .me-save-actions {
+    width: 100%;
+  }
+
+  .me-secondary-button,
+  .me-primary-button {
+    flex: 1;
   }
 
   .mobile-detail-header {

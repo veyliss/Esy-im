@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { TopBarActions } from "@/components/layout/top-actions";
-import { ActionBar, SectionTitle, SidebarItem, SidebarSection, WorkspaceSidebar } from "@/components/workspace/section";
+import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
+import { SidebarItem, SidebarSection, WorkspaceSidebar } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -11,9 +13,30 @@ import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { UserAPI } from "@/lib/api/user";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
 import type { User } from "@/lib/types/api";
+
+function formatDate(value?: string) {
+  if (!value) return "未记录";
+  return new Date(value).toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function passwordStrength(password: string) {
+  if (!password) return { score: 0, label: "未设置", tone: "muted" as const };
+
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+  if (score <= 1) return { score, label: "偏弱", tone: "danger" as const };
+  if (score <= 3) return { score, label: "可用", tone: "warning" as const };
+  return { score, label: "较强", tone: "success" as const };
+}
 
 export default function MePage() {
   const { confirm, toast } = useAppInteractions();
@@ -24,19 +47,16 @@ export default function MePage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // 表单状态
+
   const [nickname, setNickname] = useState("");
   const [avatar, setAvatar] = useState("");
   const [saving, setSaving] = useState(false);
-  
-  // 修改密码状态
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 加载用户信息
   useEffect(() => {
     const loadUserInfo = async () => {
       setLoading(true);
@@ -49,7 +69,8 @@ export default function MePage() {
           setAvatar(user.avatar || "");
         }
       } catch (error) {
-        console.error("加载用户信息失败:", error);
+        const apiError = handleApiError(error);
+        setError(createUserFriendlyErrorMessage(apiError));
       } finally {
         setLoading(false);
       }
@@ -57,41 +78,62 @@ export default function MePage() {
 
     if (token) {
       loadUserInfo();
+    } else {
+      setLoading(false);
     }
   }, [token]);
 
-  // 保存修改
-  const handleSave = async () => {
-    await handleSaveAll();
-  };
+  const hasPasswordInput = Boolean(newPassword || confirmPassword);
+  const hasProfileChanges = Boolean(
+    currentUser &&
+      (nickname.trim() !== (currentUser.nickname || "") || avatar !== (currentUser.avatar || "")),
+  );
+  const hasChanges = hasProfileChanges || hasPasswordInput;
 
-  // 取消修改
+  const strength = useMemo(() => passwordStrength(newPassword), [newPassword]);
+
+  const profileCompletion = useMemo(() => {
+    const checks = [Boolean(currentUser?.nickname), Boolean(currentUser?.avatar), Boolean(currentUser?.email), Boolean(currentUser?.user_id)];
+    const done = checks.filter(Boolean).length;
+    return Math.round((done / checks.length) * 100);
+  }, [currentUser]);
+
   const handleCancel = () => {
     if (!currentUser) return;
-    
+
     setNickname(currentUser.nickname || "");
     setAvatar(currentUser.avatar || "");
     setNewPassword("");
     setConfirmPassword("");
+    setError(null);
   };
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("请选择图片文件");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("头像图片不能超过 2MB");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => setAvatar(String(reader.result || ""));
     reader.onerror = () => setError("头像读取失败，请重新选择");
     reader.readAsDataURL(file);
-    e.target.value = "";
+    event.target.value = "";
   };
-  
-  // 保存所有修改（个人信息 + 密码）
-  const handleSaveAll = async () => {
+
+  const handleSave = async () => {
     if (saving) return;
 
     if (!nickname.trim()) {
@@ -99,7 +141,7 @@ export default function MePage() {
       return;
     }
 
-    if (newPassword || confirmPassword) {
+    if (hasPasswordInput) {
       if (!newPassword.trim()) {
         setError("新密码不能为空");
         return;
@@ -127,12 +169,13 @@ export default function MePage() {
         throw new Error(profileRes.data.msg || "个人信息更新失败");
       }
 
-      if (newPassword && confirmPassword) {
+      if (hasPasswordInput) {
         const passwordRes = await AuthAPI.setPassword({
           password: newPassword,
         });
 
         if (passwordRes.data.code === 0) {
+          toast("密码已更新，请重新登录", { tone: "success" });
           clearToken();
           router.push("/login");
           return;
@@ -146,12 +189,13 @@ export default function MePage() {
         setNickname(user.nickname || "");
         setAvatar(user.avatar || "");
       }
+
       setNewPassword("");
       setConfirmPassword("");
       setError(null);
       toast("资料已保存", { tone: "success" });
-    } catch (e) {
-      const apiError = handleApiError(e);
+    } catch (error) {
+      const apiError = handleApiError(error);
       setError(createUserFriendlyErrorMessage(apiError));
     } finally {
       setSaving(false);
@@ -160,7 +204,7 @@ export default function MePage() {
 
   const handleLogout = async () => {
     if (logoutLoading) return;
-    
+
     const confirmed = await confirm({
       title: "退出登录",
       message: "退出后需要重新登录才能继续使用即时通讯系统。",
@@ -171,15 +215,12 @@ export default function MePage() {
 
     setLogoutLoading(true);
     try {
-      // 调用后端登出接口
       await AuthAPI.logout();
     } catch (error) {
       console.warn("登出请求失败，但仍然清除本地 token", error);
     } finally {
-      // 无论后端接口是否成功，都清除本地 token
       clearToken();
       setLogoutLoading(false);
-      // 跳转到登录页
       router.push("/login");
     }
   };
@@ -191,10 +232,8 @@ export default function MePage() {
         navVariant="modern"
         sidebar={<div className="h-full bg-white/60 dark:bg-slate-900/40" />}
         main={
-          <div className="h-full overflow-y-auto px-8 py-8">
-            <div className="mx-auto max-w-4xl rounded-lg border border-slate-200 bg-white/85 px-6 py-12 shadow-[0_18px_48px_-40px_rgba(15,23,42,0.5)] dark:border-slate-800 dark:bg-slate-900/70">
-              <PageLoading message="加载中..." size="md" />
-            </div>
+          <div className="me-loading-wrap">
+            <PageLoading message="加载个人资料..." size="md" />
           </div>
         }
       />
@@ -205,13 +244,15 @@ export default function MePage() {
     <WorkspaceShell
       active="me"
       navVariant="modern"
+      mobileDetailActive={false}
       rightSlot={
-        <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
+        <TopBarActions avatarSrc={avatar || currentUser?.avatar} avatarName={nickname || currentUser?.nickname || "我"}>
+          {hasChanges ? <TopStatusPill tone="warning">有未保存修改</TopStatusPill> : null}
         </TopBarActions>
       }
       sidebar={
         <WorkspaceSidebar>
-          <SidebarSection title="设置" className="flex-1" bodyClassName="space-y-1">
+          <SidebarSection title="个人中心" className="flex-1" bodyClassName="space-y-1">
             <SidebarItem
               active
               leading={<span className="material-symbols-outlined text-lg">person</span>}
@@ -220,150 +261,196 @@ export default function MePage() {
               onClick={() => document.getElementById("profile-section")?.scrollIntoView({ behavior: "smooth" })}
             />
             <SidebarItem
-              leading={<span className="material-symbols-outlined text-lg">security</span>}
+              leading={<span className="material-symbols-outlined text-lg">badge</span>}
+              title="账号信息"
+              description="用户 ID、邮箱、创建时间"
+              onClick={() => document.getElementById("account-section")?.scrollIntoView({ behavior: "smooth" })}
+            />
+            <SidebarItem
+              leading={<span className="material-symbols-outlined text-lg">shield_lock</span>}
               title="账号与安全"
               description="修改密码与登录安全"
               onClick={() => document.getElementById("security-section")?.scrollIntoView({ behavior: "smooth" })}
             />
           </SidebarSection>
 
-          <SidebarItem
-            className="m-5 w-[calc(100%-40px)]"
-            onClick={handleLogout}
-            leading={<span className="material-symbols-outlined text-lg">logout</span>}
-            title={logoutLoading ? "退出中..." : "退出登录"}
-          />
+          <div className="me-sidebar-footer">
+            <button type="button" onClick={handleLogout} disabled={logoutLoading} className="me-logout-button">
+              <span className="material-symbols-outlined text-lg">logout</span>
+              <span>{logoutLoading ? "退出中..." : "退出登录"}</span>
+            </button>
+          </div>
         </WorkspaceSidebar>
       }
       main={
-        <div className="p-11 max-sm:p-6 workspace-main-panel">
-          <div className="mx-auto max-w-5xl px-9 py-8 pb-0">
+        <div className="me-page workspace-main-panel">
+          <div className="me-page-inner">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
 
-            <section className="flex items-center gap-6 border-b border-slate-200 pb-[36px] pt-[34px] dark:border-slate-800 max-sm:gap-4 max-sm:pb-[26px] max-sm:pt-[22px] max-[430px]:flex-col">
-              <div className="relative shrink-0">
-                <div className="relative inline-block">
+            <section className="me-hero" id="profile-section">
+              <div className="me-avatar-block">
+                <button type="button" onClick={handleAvatarClick} className="me-avatar-button" aria-label="修改头像" title="修改头像">
                   <UserAvatar
                     src={avatar || currentUser?.avatar || "/default-avatar.png"}
-                    name={currentUser?.nickname || "我"}
+                    name={nickname || currentUser?.nickname || "我"}
                     size="3xl"
                     border
                   />
-                  <button
-                    type="button"
-                    onClick={handleAvatarClick}
-                    className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-white shadow-sm"
-                    aria-label="修改头像"
-                    title="修改头像"
-                  >
-                    <span className="material-symbols-outlined text-lg">edit</span>
-                  </button>
-                </div>
+                  <span className="me-avatar-edit">
+                    <span className="material-symbols-outlined text-lg">photo_camera</span>
+                  </span>
+                </button>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
               </div>
-              <div className="min-w-0">
-                <h2 className="truncate text-2xl font-bold text-slate-950 dark:text-white">{currentUser?.nickname || "未设置昵称"}</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">用户 ID：{currentUser?.user_id}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">邮箱：{currentUser?.email || "未绑定"}</p>
+
+              <div className="me-hero-copy">
+                <span className="me-eyebrow">个人资料</span>
+                <h1>{nickname || currentUser?.nickname || "未设置昵称"}</h1>
+                <p>这里管理你在聊天、通讯录和群聊中展示的资料。</p>
+                <div className="me-hero-meta">
+                  <span>
+                    <span className="material-symbols-outlined">alternate_email</span>
+                    {currentUser?.user_id || "未设置 ID"}
+                  </span>
+                  <span>
+                    <span className="material-symbols-outlined">mail</span>
+                    {currentUser?.email || "未绑定邮箱"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="me-profile-score" aria-label={`资料完整度 ${profileCompletion}%`}>
+                <span>资料完整度</span>
+                <strong>{profileCompletion}%</strong>
+                <div>
+                  <i style={{ width: `${profileCompletion}%` }} />
+                </div>
               </div>
             </section>
 
-            <div className="mt-8 space-y-10">
-              <section id="profile-section" className="scroll-mt-6">
-                <SectionTitle title="个人信息" />
-                <div className="rounded-lg mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1.5">
+            <div className="me-grid">
+              <section className="me-panel" aria-labelledby="me-profile-title">
+                <div className="me-panel-head">
+                  <span className="material-symbols-outlined">edit_square</span>
+                  <div>
+                    <h2 id="me-profile-title">编辑资料</h2>
+                    <p>头像和昵称会显示在聊天气泡、通讯录和群聊成员列表中。</p>
+                  </div>
+                </div>
+
+                <div className="me-form-grid">
+                  <label className="me-field">
                     <span>昵称</span>
                     <input
-                      className="ui-input w-full rounded-lg px-4 py-3"
+                      className="ui-input"
                       value={nickname}
-                      onChange={(e) => setNickname(e.target.value)}
+                      onChange={(event) => setNickname(event.target.value)}
                       placeholder="请输入昵称"
+                      maxLength={30}
                     />
+                    <small>{nickname.length}/30</small>
                   </label>
 
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">头像</span>
-                    <button
-                      type="button"
-                      onClick={handleAvatarClick}
-                      className="flex h-[50px] items-center justify-between rounded-lg border border-slate-300 bg-white px-4 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-background-dark dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <span>更换头像</span>
-                      <span className="material-symbols-outlined text-lg text-slate-400">edit</span>
+                  <label className="me-field">
+                    <span>头像</span>
+                    <button type="button" onClick={handleAvatarClick} className="me-avatar-picker">
+                      <span>选择本地图片</span>
+                      <span className="material-symbols-outlined text-lg">upload</span>
                     </button>
+                    <small>支持常见图片格式，建议小于 2MB</small>
                   </label>
                 </div>
               </section>
 
-              <section className="scroll-mt-6">
-                <SectionTitle title="账号信息" />
-                <div className="rounded-lg mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">用户 ID</span>
-                    <input
-                      className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
-                      value={currentUser?.user_id || ""}
-                      disabled
-                    />
-                  </label>
+              <section className="me-panel" id="account-section" aria-labelledby="me-account-title">
+                <div className="me-panel-head">
+                  <span className="material-symbols-outlined">badge</span>
+                  <div>
+                    <h2 id="me-account-title">账号信息</h2>
+                    <p>这些信息用于登录识别，不在这里直接修改。</p>
+                  </div>
+                </div>
 
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">邮箱</span>
-                    <input
-                      className="ui-input w-full rounded-lg px-4 py-3 text-slate-500 dark:text-slate-400"
-                      value={currentUser?.email || ""}
-                      disabled
-                    />
-                  </label>
+                <div className="me-info-list">
+                  <div>
+                    <span>用户 ID</span>
+                    <strong>{currentUser?.user_id || "未设置"}</strong>
+                  </div>
+                  <div>
+                    <span>邮箱</span>
+                    <strong>{currentUser?.email || "未绑定"}</strong>
+                  </div>
+                  <div>
+                    <span>创建时间</span>
+                    <strong>{formatDate(currentUser?.created_at)}</strong>
+                  </div>
+                  <div>
+                    <span>最近更新</span>
+                    <strong>{formatDate(currentUser?.updated_at)}</strong>
+                  </div>
                 </div>
               </section>
 
-              <section id="security-section" className="scroll-mt-6">
-                <SectionTitle title="账号与安全" description="设置新密码后需要重新登录。" />
-                <div className="rounded-lg mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1.5">
+              <section className="me-panel is-wide" id="security-section" aria-labelledby="me-security-title">
+                <div className="me-panel-head">
+                  <span className="material-symbols-outlined">shield_lock</span>
+                  <div>
+                    <h2 id="me-security-title">账号与安全</h2>
+                    <p>修改密码后会自动退出当前登录，需要重新登录。</p>
+                  </div>
+                </div>
+
+                <div className="me-form-grid">
+                  <label className="me-field">
                     <span>新密码</span>
                     <input
                       type="password"
-                      className="ui-input w-full rounded-lg px-4 py-3"
+                      className="ui-input"
                       placeholder="请输入新密码（最少8位）"
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={(event) => setNewPassword(event.target.value)}
                     />
                   </label>
 
-                  <label className="flex flex-col gap-1.5">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">确认密码</span>
+                  <label className="me-field">
+                    <span>确认密码</span>
                     <input
                       type="password"
-                      className="ui-input w-full rounded-lg px-4 py-3"
+                      className="ui-input"
                       placeholder="请再次输入密码"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
                     />
                   </label>
                 </div>
-              </section>
 
-              <ActionBar className="sticky bottom-0 justify-end border-t border-slate-200 bg-white/95 py-5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={saving}
-                  className="rounded-lg bg-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                >
+                <div className="me-password-meter">
+                  <div>
+                    <span>密码强度</span>
+                    <strong className={`is-${strength.tone}`}>{strength.label}</strong>
+                  </div>
+                  <div className="me-password-bars" aria-hidden="true">
+                    {[1, 2, 3, 4].map((item) => (
+                      <i key={item} className={item <= strength.score ? `is-${strength.tone}` : ""} />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div className="me-save-bar">
+              <div>
+                <strong>{hasChanges ? "有未保存修改" : "资料已同步"}</strong>
+                <span>{hasPasswordInput ? "保存后需要重新登录" : "修改资料后记得保存"}</span>
+              </div>
+              <div className="me-save-actions">
+                <button type="button" onClick={handleCancel} disabled={saving || !hasChanges} className="me-secondary-button">
                   取消
                 </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
-                >
+                <button type="button" onClick={handleSave} disabled={saving || !hasChanges} className="me-primary-button">
                   {saving ? "保存中..." : "保存修改"}
                 </button>
-              </ActionBar>
+              </div>
             </div>
           </div>
         </div>
