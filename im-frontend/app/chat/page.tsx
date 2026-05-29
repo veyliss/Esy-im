@@ -659,7 +659,7 @@ export default function ChatPage() {
       mainClassName="bg-gradient-to-b from-slate-50/80 to-white dark:from-[#0f172a] dark:to-[#0f172a]"
       sidebar={
         <WorkspaceSidebar>
-          <SidebarToolbar className="space-y-3">
+          <SidebarToolbar className="space-y-4">
             <SidebarSearch
               type="text"
               placeholder="搜索聊天"
@@ -683,9 +683,9 @@ export default function ChatPage() {
             </div>
           </SidebarToolbar>
 
-          <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col py-4" bodyClassName="flex-1">
-            <SidebarScrollArea className="pt-2">
-              <div className="space-y-1 px-1">
+          <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col" bodyClassName="flex-1">
+            <SidebarScrollArea>
+              <div className="space-y-3">
                 {filteredChatList.length === 0 ? (
                   <EmptyPanel
                     title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
@@ -701,7 +701,7 @@ export default function ChatPage() {
                         key={chatItem.id}
                         onClick={() => handleSelectChat(chatItem)}
                         active={isActive}
-                        className="min-h-[72px]"
+                        className="min-h-[78px]"
                       >
                         <div className="relative">
                           <UserAvatar

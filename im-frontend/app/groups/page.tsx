@@ -110,7 +110,7 @@ export default function GroupsPage() {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
               />
-              <div className="grid gap-2 mt-3">
+              <div className="sidebar-quick-actions">
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(true)}
@@ -144,10 +144,10 @@ export default function GroupsPage() {
 
             <SidebarSection
               title={searchKeyword.trim() ? "筛选结果" : "我的群聊"}
-              className="flex min-h-0 flex-1 flex-col py-4"
+              className="flex min-h-0 flex-1 flex-col"
               bodyClassName="flex-1"
             >
-              <SidebarScrollArea className="pt-2">
+              <SidebarScrollArea>
                 {loading ? (
                   <PageLoading message="加载群组中..." size="sm" />
                 ) : filteredGroups.length === 0 ? (
@@ -157,7 +157,7 @@ export default function GroupsPage() {
                     className="min-h-[220px] border-0 bg-transparent"
                   />
                 ) : (
-                  <div className="space-y-1 px-1">
+                  <div className="space-y-3">
                     {filteredGroups.map((group) => {
                       const isActive = currentGroup?.group_id === group.group_id;
                       return (

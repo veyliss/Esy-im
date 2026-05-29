@@ -125,7 +125,7 @@ export function NavTabs({
                     "relative inline-flex items-center justify-center gap-1.5 text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                     // Modern variant: spacious padding + bottom border indicator
                     variant === "modern"
-                      ? "im-nav-link h-10 rounded-lg px-3 font-semibold"
+                      ? "im-nav-link h-10 px-3 font-semibold"
                       : "px-0 py-5 font-medium",
                     // Variant-specific link tone
                     tone.link,

@@ -279,7 +279,7 @@ export default function ContactsPage() {
                 ) : null}
               </div>
 
-              <div className="grid gap-2 mt-3">
+              <div className="sidebar-quick-actions">
                 <button
                   type="button"
                   onClick={() => setShowAddFriend(true)}
@@ -298,7 +298,7 @@ export default function ContactsPage() {
             </SidebarToolbar>
 
             <SidebarScrollArea>
-              <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+              <div className="sidebar-feature-row">
                 <SidebarItem
                   type="button"
                   onClick={openRequests}
@@ -329,34 +329,36 @@ export default function ContactsPage() {
                     className="min-h-[120px] border-0 bg-transparent"
                   />
                 ) : (
-                  filteredFriends.map((friend) => {
-                    const isActive = selectedFriend?.id === friend.id;
-                    const fu = friend.friend_user;
-                    const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
-                    return (
-                      <SidebarItem
-                        key={friend.id}
-                        type="button"
-                        active={isActive}
-                        onClick={() => selectFriend(friend)}
-                      >
-                        <UserAvatar
-                          src={fu?.avatar || "/default-avatar.png"}
-                          name={fu?.nickname || "用户"}
-                          size="md"
-                          status="online"
-                          border
-                        />
-                        <span className={`min-w-0 flex-1 text-sm ${isActive ? "font-semibold text-primary" : "text-slate-800 dark:text-slate-100"}`}>
-                          <span className="block truncate">{displayName}</span>
-                          <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
-                            用户 ID：{fu?.user_id || "-"}
+                  <div className="space-y-3">
+                    {filteredFriends.map((friend) => {
+                      const isActive = selectedFriend?.id === friend.id;
+                      const fu = friend.friend_user;
+                      const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
+                      return (
+                        <SidebarItem
+                          key={friend.id}
+                          type="button"
+                          active={isActive}
+                          onClick={() => selectFriend(friend)}
+                        >
+                          <UserAvatar
+                            src={fu?.avatar || "/default-avatar.png"}
+                            name={fu?.nickname || "用户"}
+                            size="md"
+                            status="online"
+                            border
+                          />
+                          <span className={`min-w-0 flex-1 text-sm ${isActive ? "font-semibold text-primary" : "text-slate-800 dark:text-slate-100"}`}>
+                            <span className="block truncate">{displayName}</span>
+                            <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
+                              用户 ID：{fu?.user_id || "-"}
+                            </span>
                           </span>
-                        </span>
-                        <span className="material-symbols-outlined text-base text-slate-300">chevron_right</span>
-                      </SidebarItem>
-                    );
-                  })
+                          <span className="material-symbols-outlined text-base text-slate-300">chevron_right</span>
+                        </SidebarItem>
+                      );
+                    })}
+                  </div>
                 )}
               </SidebarSection>
             </SidebarScrollArea>

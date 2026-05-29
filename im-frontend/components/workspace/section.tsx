@@ -49,9 +49,9 @@ interface SidebarSectionProps {
 
 export function SidebarSection({ title, children, className, bodyClassName }: SidebarSectionProps) {
   return (
-    <section className={clsx("border-b border-slate-200 px-4 py-5 last:border-b-0 dark:border-slate-800", className)}>
-      <h3 className="px-1 pb-3 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{title}</h3>
-      <div className={clsx("space-y-2", bodyClassName)}>{children}</div>
+    <section className={clsx("border-b border-slate-200 px-6 py-6 last:border-b-0 dark:border-slate-800", className)}>
+      <h3 className="px-1 pb-4 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{title}</h3>
+      <div className={clsx("space-y-3", bodyClassName)}>{children}</div>
     </section>
   );
 }
@@ -72,7 +72,7 @@ interface SidebarToolbarProps {
 
 export function SidebarToolbar({ children, className }: SidebarToolbarProps) {
   return (
-    <div className={clsx("workspace-sidebar-toolbar border-b border-slate-200 px-5 py-5 dark:border-slate-800", className)}>
+    <div className={clsx("workspace-sidebar-toolbar border-b border-slate-200 px-8 py-8 dark:border-slate-800", className)}>
       {children}
     </div>
   );
@@ -88,7 +88,7 @@ export function SidebarSearch({ icon = "search", className, ...props }: SidebarS
       <span className="workspace-search-icon" aria-hidden="true" data-icon={icon} />
       <input
         {...props}
-        className={clsx("workspace-search-input ui-input h-11 w-full rounded-full py-2.5 pr-4 text-sm shadow-none", className)}
+        className={clsx("workspace-search-input ui-input h-11 w-full rounded-full py-2.5 pl-14 pr-5 text-sm shadow-none", className)}
       />
     </div>
   );
@@ -128,7 +128,7 @@ export function SidebarItem({
       type={type}
       aria-current={active ? "true" : undefined}
       className={clsx(
-        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-slate-700 transition-colors hover:bg-slate-100 active:scale-[0.98] dark:text-slate-300 dark:hover:bg-slate-800",
+        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-slate-700 transition-colors hover:bg-slate-100 active:scale-[0.98] dark:text-slate-300 dark:hover:bg-slate-800",
         active && "is-active bg-primary/10 text-primary dark:bg-primary/20",
         className,
       )}

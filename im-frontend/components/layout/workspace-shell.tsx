@@ -37,9 +37,9 @@ export function WorkspaceShell({
       )}
     >
       <div className="flex flex-col" style={{ height: "100svh" }}>
-        <header className="im-topbar flex h-16 min-h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-background-light px-6 dark:border-slate-800 dark:bg-background-dark sm:px-8">
+        <header className="im-topbar flex shrink-0 items-center justify-between border-b border-slate-200 bg-background-light px-6 dark:border-slate-800 dark:bg-background-dark sm:px-8">
           <div className="flex min-w-0 flex-1 items-center">
-            <NavTabs active={active} variant={navVariant} showIcons />
+            <NavTabs active={active} variant={navVariant} showIcons={false} />
           </div>
 
           <div className="flex shrink-0 items-center justify-end gap-3 pl-6">{rightSlot}</div>

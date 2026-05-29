@@ -68,6 +68,7 @@ build/
 out/
 target/
 .next/
+.next-build/
 bin/
 server
 im-backend/server
