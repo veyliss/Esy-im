@@ -61,7 +61,7 @@ export function MomentItem({
   };
 
   return (
-    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_16px_42px_-36px_rgba(15,23,42,0.42)] dark:border-slate-800 dark:bg-slate-900">
+    <article className="moment-item im-panel overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
       <div className="p-5">
         <div className="mb-3 flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -122,10 +122,10 @@ export function MomentItem({
           <button
             type="button"
             onClick={handleLikeClick}
-            className={`flex items-center gap-1.5 text-sm py-1 px-3 rounded-full transition-colors hover:bg-primary/8 hover:text-primary ${
+            className={`moment-action-button ${
               isLiked
-                ? "text-primary"
-                : "text-slate-600 dark:text-slate-300 hover:text-primary"
+                ? "is-active"
+                : ""
             }`}
           >
             <span className="material-symbols-outlined text-lg">
@@ -136,7 +136,7 @@ export function MomentItem({
           <button
             type="button"
             onClick={() => setShowCommentInput(!showCommentInput)}
-            className="flex items-center gap-1.5 text-sm py-1 px-3 rounded-full text-slate-600 transition-colors hover:bg-primary/8 hover:text-primary dark:text-slate-300"
+            className="moment-action-button"
           >
             <span className="material-symbols-outlined text-lg">chat_bubble</span>
             <span>{moment.comment_count || 0}</span>
@@ -221,7 +221,7 @@ export function MomentItem({
               <button
                 type="button"
                 onClick={handleCommentSubmit}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors"
+                className="im-primary-button"
               >
                 发送
               </button>

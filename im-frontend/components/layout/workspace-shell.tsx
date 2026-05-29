@@ -32,20 +32,20 @@ export function WorkspaceShell({
   return (
     <div
       className={clsx(
-        "min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-200",
+        "im-shell min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-200",
         shellClassName,
       )}
     >
       <div className="flex flex-col" style={{ height: "100svh" }}>
-        <header className="flex shrink-0 items-center justify-between h-16 min-h-16 px-6 sm:px-8 border-b border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark">
+        <header className="im-topbar flex h-16 min-h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-background-light px-6 dark:border-slate-800 dark:bg-background-dark sm:px-8">
           <div className="flex min-w-0 flex-1 items-center">
-            <NavTabs active={active} variant={navVariant} showIcons={false} />
+            <NavTabs active={active} variant={navVariant} showIcons />
           </div>
 
           <div className="flex shrink-0 items-center justify-end gap-3 pl-6">{rightSlot}</div>
         </header>
 
-        <div className="flex-1 overflow-hidden bg-white dark:bg-slate-900">
+        <div className="im-shell-body flex-1 overflow-hidden bg-white dark:bg-slate-900">
           {headerDescription && (
             <div className="border-b border-slate-200 bg-white px-6 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
               {headerDescription}

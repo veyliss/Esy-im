@@ -283,12 +283,12 @@ export default function ContactsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddFriend(true)}
-                  className="flex min-h-[58px] w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-160 border-primary/32 bg-blue-50 text-primary-dark hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-px dark:border-primary/38 dark:bg-primary/16 dark:text-blue-200 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                  className="im-action-card is-primary"
                 >
-                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+                  <span className="im-action-icon">
                     <span className="material-symbols-outlined text-xl">person_add</span>
                   </span>
-                  <span className="min-w-0 flex-1">
+                  <span className="im-action-copy">
                     <span>添加好友</span>
                     <small>通过账号、手机号或邮箱查找</small>
                   </span>
@@ -363,19 +363,19 @@ export default function ContactsPage() {
           </WorkspaceSidebar>
         }
         main={
-          <div className="p-11 max-sm:p-6 workspace-main-panel">
-            <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
+          <div className="workspace-main-panel">
+            <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />
 
             {activeRightTab === "requests" ? (
-              <div className="w-full max-w-3xl mx-auto space-y-8">
+              <div className="im-detail-inner space-y-8">
                 <MobileDetailHeader
                   title="新的朋友"
                   description="好友申请与记录"
                   onBack={backToList}
                 />
-                <div className="border-b border-slate-200 pb-4 dark:border-slate-800">
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">新的朋友</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">处理收到的好友请求，或查看已发出的申请。</p>
+                <div className="border-b border-slate-200 pb-5 dark:border-slate-800">
+                  <h2 className="im-detail-title">新的朋友</h2>
+                  <p className="im-detail-subtitle">处理收到的好友请求，或查看已发出的申请。</p>
                 </div>
 
                 <section>
@@ -411,7 +411,7 @@ export default function ContactsPage() {
                 </section>
               </div>
             ) : selectedFriend && friendUser ? (
-              <div className="mx-auto max-w-3xl">
+              <div className="im-detail-inner">
                 <MobileDetailHeader
                   title={selectedFriend.remark || friendUser.nickname || "好友详情"}
                   description={`用户 ID：${friendUser.user_id}`}
@@ -428,7 +428,7 @@ export default function ContactsPage() {
                       border
                     />
                   </div>
-                  <h2 className="mt-5 text-3xl font-bold text-slate-900 dark:text-white">
+                  <h2 className="mt-5 im-detail-title">
                     {selectedFriend.remark || friendUser.nickname}
                   </h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">昵称：{friendUser.nickname}</p>
@@ -437,18 +437,18 @@ export default function ContactsPage() {
 
                 <section className="mt-8">
                   <SectionTitle title="基础信息" className="mb-4" />
-                  <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800 overflow-hidden bg-white dark:bg-transparent">
-                    <div className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm">
-                      <p className="text-slate-500 dark:text-slate-400">用户 ID</p>
-                      <p className="text-slate-900 dark:text-slate-100">{friendUser.user_id}</p>
+                  <div className="im-info-grid">
+                    <div className="im-info-row">
+                      <span>用户 ID</span>
+                      <p>{friendUser.user_id}</p>
                     </div>
-                    <div className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm">
-                      <p className="text-slate-500 dark:text-slate-400">邮箱</p>
-                      <p className="text-slate-900 dark:text-slate-100">{friendUser.email || "未填写"}</p>
+                    <div className="im-info-row">
+                      <span>邮箱</span>
+                      <p>{friendUser.email || "未填写"}</p>
                     </div>
-                    <div className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm">
-                      <p className="text-slate-500 dark:text-slate-400">关系</p>
-                      <p className="text-slate-900 dark:text-slate-100">好友</p>
+                    <div className="im-info-row">
+                      <span>关系</span>
+                      <p>好友</p>
                     </div>
                   </div>
                 </section>
@@ -468,7 +468,7 @@ export default function ContactsPage() {
                   <button
                     type="button"
                     onClick={handleSendMessage}
-                    className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90"
+                    className="im-primary-button"
                   >
                     <span className="material-symbols-outlined text-lg">chat</span>
                     发送消息
@@ -476,7 +476,7 @@ export default function ContactsPage() {
                   <button
                     type="button"
                     onClick={handleUpdateRemark}
-                    className="flex items-center gap-2 rounded-lg bg-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    className="im-secondary-button"
                   >
                     <span className="material-symbols-outlined text-lg">save</span>
                     保存备注
@@ -484,7 +484,7 @@ export default function ContactsPage() {
                   <button
                     type="button"
                     onClick={handleDeleteFriend}
-                    className="flex items-center gap-2 rounded-lg bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                    className="im-danger-button"
                   >
                     <span className="material-symbols-outlined text-lg">delete</span>
                     删除联系人
@@ -492,11 +492,13 @@ export default function ContactsPage() {
                 </div>
               </div>
             ) : (
-              <EmptyPanel
-                title="从左侧选择好友查看详情"
-                description="也可以使用上方入口添加新的好友"
-                className="min-h-[calc(100vh-220px)] border-0 bg-white dark:bg-slate-900"
-              />
+              <div className="workspace-empty-wrap">
+                <EmptyPanel
+                  title="从左侧选择好友查看详情"
+                  description="也可以使用上方入口添加新的好友"
+                  className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900"
+                />
+              </div>
             )}
           </div>
         }

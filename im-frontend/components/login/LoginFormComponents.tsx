@@ -62,7 +62,7 @@ export function SegmentedTab({ options, active, onChange }: {
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] dark:bg-slate-800 p-1">
+    <div className="auth-segmented flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] dark:bg-slate-800 p-1">
       {options.map((option) => (
         <label
           key={option.key}
@@ -162,7 +162,7 @@ export function AuthInput({
     <div className="relative">
       <input
         className={clsx(
-          "form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal",
+          "auth-input form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal",
           withCodeButton && "pr-32"
         )}
         placeholder={placeholder}
@@ -186,7 +186,7 @@ export function PrimaryButton({ loading, loadingText, text, disabled, onClick }:
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="w-full flex items-center justify-center rounded-lg bg-primary text-white h-14 px-4 text-base font-semibold hover:bg-primary/90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
+      className="auth-primary-button w-full flex items-center justify-center rounded-lg bg-primary text-white h-14 px-4 text-base font-semibold hover:bg-primary/90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150"
     >
       {loading ? loadingText : text}
     </button>

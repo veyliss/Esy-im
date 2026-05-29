@@ -84,9 +84,9 @@ const styles = {
     active: "border-b-2 border-primary text-primary",
   },
   modern: {
-    container: "bg-transparent p-0",
-    link: "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
-    active: "text-primary font-bold border-b-2 border-primary",
+    container: "im-nav-tabs bg-transparent p-0",
+    link: "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100",
+    active: "is-active text-primary font-bold",
   },
 } as const;
 
@@ -107,7 +107,7 @@ export function NavTabs({
         <ul
           className={clsx(
             "flex items-center whitespace-nowrap",
-            variant === "modern" ? "gap-6 sm:gap-8" : "gap-2",
+            variant === "modern" ? "gap-1 sm:gap-2" : "gap-2",
           )}
         >
           {items.map((item) => {
@@ -125,7 +125,7 @@ export function NavTabs({
                     "relative inline-flex items-center justify-center gap-1.5 text-sm transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                     // Modern variant: spacious padding + bottom border indicator
                     variant === "modern"
-                      ? "px-2 pt-5 pb-[calc(1.25rem-2px)] border-b-2 border-transparent font-medium"
+                      ? "im-nav-link h-10 rounded-lg px-3 font-semibold"
                       : "px-0 py-5 font-medium",
                     // Variant-specific link tone
                     tone.link,

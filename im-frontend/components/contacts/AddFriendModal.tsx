@@ -136,7 +136,7 @@ export function AddFriendModal({
                   type="button"
                   onClick={handleSearch}
                   disabled={searching}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shrink-0"
+                  className="im-primary-button shrink-0"
                 >
                   {searching ? "搜索中" : "搜索"}
                 </button>
@@ -174,7 +174,7 @@ export function AddFriendModal({
                     type="button"
                     onClick={handleSendRequest}
                     disabled={sending || relationshipCopy[searchResult.relationship_status].disabled}
-                    className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
+                    className="im-primary-button min-h-8 shrink-0 px-3 text-xs disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
                   >
                     {sending ? "发送中" : relationshipCopy[searchResult.relationship_status].action}
                   </button>

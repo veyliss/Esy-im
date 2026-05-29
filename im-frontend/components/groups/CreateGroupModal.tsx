@@ -62,7 +62,7 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="im-secondary-button"
           >
             取消
           </button>
@@ -70,7 +70,7 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
             type="submit"
             form="create-group-form"
             disabled={loading}
-            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="im-primary-button"
           >
             {loading ? "创建中" : "创建群聊"}
           </button>

@@ -114,12 +114,12 @@ export default function GroupsPage() {
                 <button
                   type="button"
                   onClick={() => setShowJoinModal(true)}
-                  className="flex min-h-[58px] w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-160 border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-px dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+                  className="im-action-card"
                 >
-                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+                  <span className="im-action-icon">
                     <span className="material-symbols-outlined text-xl">group_add</span>
                   </span>
-                  <span className="min-w-0 flex-1">
+                  <span className="im-action-copy">
                     <span>加入群聊</span>
                     <small>搜索群号或关键词</small>
                   </span>
@@ -128,12 +128,12 @@ export default function GroupsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(true)}
-                  className="flex min-h-[58px] w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-160 border-primary/32 bg-blue-50 text-primary-dark hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-px dark:border-primary/38 dark:bg-primary/16 dark:text-blue-200 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+                  className="im-action-card is-primary"
                 >
-                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white">
+                  <span className="im-action-icon">
                     <span className="material-symbols-outlined text-xl">add</span>
                   </span>
-                  <span className="min-w-0 flex-1">
+                  <span className="im-action-copy">
                     <span>创建群聊</span>
                     <small>发起新的多人会话</small>
                   </span>
@@ -200,7 +200,7 @@ export default function GroupsPage() {
               />
             ) : (
               <div className="workspace-empty-wrap">
-                <EmptyPanel title="选择一个群聊查看详情" description="也可以创建群聊，或搜索公开群聊加入" className="min-h-[520px] border-0 bg-white dark:bg-slate-900" />
+                <EmptyPanel title="选择一个群聊查看详情" description="也可以创建群聊，或搜索公开群聊加入" className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900" />
               </div>
             )}
           </div>

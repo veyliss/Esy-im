@@ -9,7 +9,7 @@ export function SectionCard({ children, className, ...props }: SectionCardProps)
   return (
     <div
       className={clsx(
-        "rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950",
+        "im-panel rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950",
         className,
       )}
       {...props}
@@ -28,7 +28,7 @@ interface SectionTitleProps {
 
 export function SectionTitle({ title, description, action, className }: SectionTitleProps) {
   return (
-    <div className={clsx("flex items-start justify-between gap-4", className)}>
+    <div className={clsx("im-section-title flex items-start justify-between gap-4", className)}>
       <div className="min-w-0">
         <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-100">{title}</h2>
         {description ? (

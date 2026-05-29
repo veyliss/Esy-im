@@ -125,7 +125,7 @@ export function JoinGroupModal({
               type="button"
               onClick={handleSearch}
               disabled={searching}
-              className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="im-primary-button shrink-0"
             >
               {searching ? "搜索中" : "搜索"}
             </button>
@@ -165,7 +165,7 @@ export function JoinGroupModal({
                     type="button"
                     onClick={() => handleJoin(group.group_id)}
                     disabled={Boolean(joiningId)}
-                    className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="im-primary-button min-h-8 shrink-0 px-3 text-xs"
                   >
                     {joiningId === group.group_id ? "加入中" : "加入"}
                   </button>

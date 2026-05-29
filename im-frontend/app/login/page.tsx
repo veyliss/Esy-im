@@ -309,15 +309,15 @@ export default function LoginPage() {
 
   return (
     <main
-      className="min-h-screen w-full flex flex-col items-center justify-center overflow-x-hidden px-4 py-8 bg-background-light dark:bg-background-dark"
+      className="auth-page min-h-screen w-full flex flex-col items-center justify-center overflow-x-hidden px-4 py-8 bg-background-light dark:bg-background-dark"
       style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
     >
-      <div className="mb-6 text-center">
+      <div className="auth-brand mb-6 text-center">
         <h1 className="text-2xl font-extrabold text-primary">Esy-IM</h1>
         <p className="text-sm text-slate-500 mt-1">即时通讯系统</p>
       </div>
 
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-4 sm:p-8">
+      <div className="auth-card w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-4 sm:p-8">
         <div className="flex flex-1 flex-col">
           <div className="pb-3">
             <div className="flex border-b border-[#cfdbe7] dark:border-slate-700 px-4 gap-8">

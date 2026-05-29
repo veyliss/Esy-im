@@ -303,7 +303,7 @@ export default function MomentsPage() {
         <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-50 to-white px-8 py-[30px] dark:from-[#101922] dark:to-[#0f172a] max-sm:px-[18px] max-sm:py-5">
           <div className="mx-auto max-w-3xl space-y-7">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
-            <SectionCard className="border-slate-200 shadow-[0_16px_40px_-34px_rgba(15,23,42,0.35)] dark:border-slate-700">
+            <SectionCard className="moment-composer border-slate-200 dark:border-slate-700">
               <div className="flex gap-4">
                 <UserAvatar
                   src={currentUser?.avatar || "/default-avatar.png"}
@@ -341,7 +341,7 @@ export default function MomentsPage() {
                       type="button"
                       onClick={handlePublish}
                       disabled={!content.trim() && images.length === 0}
-                      className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="im-primary-button"
                     >
                       发布
                     </button>

@@ -37,7 +37,7 @@ export function FriendRequestItem({
   // };
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:shadow-md transition-all">
+    <div className="im-panel flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-all dark:border-slate-800 dark:bg-slate-900">
       <div className="relative">
         <Image
           className="size-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
@@ -75,18 +75,18 @@ export function FriendRequestItem({
         </p>
       </div>
       {type === "received" && isPending && (
-        <div className="flex flex-col gap-2 shrink-0">
+        <div className="flex shrink-0 flex-col gap-2">
           <button
             type="button"
             onClick={() => onAccept?.(request.id)}
-            className="px-5 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 hover:shadow-md transition-all"
+            className="im-primary-button min-h-9 px-5 text-sm"
           >
             同意
           </button>
           <button
             type="button"
             onClick={() => onReject?.(request.id)}
-            className="px-5 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+            className="im-secondary-button min-h-9 px-5 text-sm"
           >
             拒绝
           </button>

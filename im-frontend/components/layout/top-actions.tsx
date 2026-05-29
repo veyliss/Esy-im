@@ -59,7 +59,7 @@ export function TopIconButton({
       aria-label={label}
       title={label}
       className={clsx(
-        "relative flex size-8 items-center justify-center rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.92] disabled:cursor-not-allowed disabled:opacity-50",
+        "im-top-icon-button relative flex size-9 items-center justify-center rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.92] disabled:cursor-not-allowed disabled:opacity-50",
         tone === "default" &&
           "text-slate-500 hover:bg-black/5 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-100",
         tone === "primary" && "bg-primary text-white shadow-sm hover:bg-primary/90",

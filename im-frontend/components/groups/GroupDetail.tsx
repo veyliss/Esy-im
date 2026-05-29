@@ -72,8 +72,8 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
   };
 
   return (
-    <div className="flex min-h-[520px] flex-col bg-white dark:bg-slate-900">
-      <div className="border-b border-slate-200 px-8 py-8 dark:border-slate-800">
+    <div className="im-detail-page flex min-h-[520px] flex-col">
+      <div className="im-detail-inner">
         {onBack ? (
           <MobileDetailHeader
             title={group.name}
@@ -81,7 +81,7 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
             onBack={onBack}
           />
         ) : null}
-        <div className="flex items-start gap-5">
+        <div className="im-detail-hero">
           <UserAvatar
             src={group.avatar || "/default-group-avatar.png"}
             name={group.name}
@@ -90,22 +90,22 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
             border
           />
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-3xl font-bold text-slate-900 dark:text-white">{group.name}</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="im-detail-title">{group.name}</h2>
+            <p className="im-detail-subtitle">
               {group.member_count} 人 · 群号：{group.group_id}
             </p>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">{group.description || "暂无群描述"}</p>
+            <p className="im-detail-subtitle max-w-2xl">{group.description || "暂无群描述"}</p>
           </div>
         </div>
 
         <ActionBar className="mt-8 justify-start">
-          <button type="button" onClick={handleSendMessage} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90">
+          <button type="button" onClick={handleSendMessage} className="im-primary-button">
             发消息
           </button>
           <button
             type="button"
             onClick={handleLeave}
-            className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="im-secondary-button"
           >
             退出群聊
           </button>
@@ -119,11 +119,11 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
         ) : members.length === 0 ? (
           <EmptyPanel title="暂无成员信息" description="稍后刷新再试" className="min-h-[220px] border-0 bg-transparent" />
         ) : (
-          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="im-list-grid">
             {members.map((member) => (
               <div
                 key={member.user_id}
-                className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="im-list-row"
               >
                 <UserAvatar
                   src={member.user?.avatar || "/default-avatar.png"}
