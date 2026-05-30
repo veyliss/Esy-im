@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { NavTabs, type NavKey } from "@/components/ui/nav-tabs";
+import { MobileBottomNav, NavTabs, type NavKey } from "@/components/ui/nav-tabs";
 
 interface WorkspaceShellProps {
   active: NavKey;
@@ -80,6 +80,7 @@ export function WorkspaceShell({
           </div>
         </div>
       </div>
+      <MobileBottomNav active={active} />
     </div>
   );
 }

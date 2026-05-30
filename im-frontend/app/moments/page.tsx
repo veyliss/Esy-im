@@ -317,7 +317,7 @@ export default function MomentsPage() {
                     className="ui-textarea min-h-[104px] w-full resize-none rounded-lg border-transparent bg-slate-50 p-4 text-sm shadow-none dark:bg-slate-800/60"
                     placeholder="分享这一刻"
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={(e) => setContent(e.target.value.slice(0, 500))}
                   />
                   <div className="mt-3 flex items-center gap-2">
                     <span className="material-symbols-outlined text-base text-slate-400">location_on</span>
@@ -332,11 +332,12 @@ export default function MomentsPage() {
                     <button
                       onClick={handleImageSelect}
                       type="button"
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary dark:text-slate-400 dark:hover:bg-slate-800"
+                      className="im-secondary-button min-h-9 px-3 text-sm"
                     >
                       <span className="material-symbols-outlined text-xl">image</span>
                       {images.length > 0 ? `${images.length}/9` : "图片"}
                     </button>
+                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">{content.length}/500</span>
                     <button
                       type="button"
                       onClick={handlePublish}
@@ -388,6 +389,14 @@ export default function MomentsPage() {
                 <EmptyPanel
                   title={activeTab === "timeline" ? "暂无朋友动态" : "还没有发布任何动态"}
                   description={activeTab === "timeline" ? "稍后再来看看" : "发布第一条动态吧"}
+                  icon={activeTab === "timeline" ? "dynamic_feed" : "add_photo_alternate"}
+                  action={
+                    activeTab === "my" ? (
+                      <button type="button" className="im-secondary-button" onClick={() => setContent("今天想分享：")}>
+                        写一条动态
+                      </button>
+                    ) : null
+                  }
                   className="min-h-[240px] border-0 bg-white dark:bg-slate-900"
                 />
               ) : (

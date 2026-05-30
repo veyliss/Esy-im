@@ -154,6 +154,19 @@ export default function GroupsPage() {
                   <EmptyPanel
                     title={searchKeyword.trim() ? "未找到相关群聊" : "暂无群聊"}
                     description={searchKeyword.trim() ? "尝试其他关键词" : "可以创建群聊，或搜索公开群聊加入"}
+                    icon="groups"
+                    action={
+                      !searchKeyword.trim() ? (
+                        <div className="flex flex-wrap justify-center gap-2">
+                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => setShowJoinModal(true)}>
+                            加入群聊
+                          </button>
+                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => setShowCreateModal(true)}>
+                            创建群聊
+                          </button>
+                        </div>
+                      ) : null
+                    }
                     className="min-h-[220px] border-0 bg-transparent"
                   />
                 ) : (
@@ -200,7 +213,22 @@ export default function GroupsPage() {
               />
             ) : (
               <div className="workspace-empty-wrap">
-                <EmptyPanel title="选择一个群聊查看详情" description="也可以创建群聊，或搜索公开群聊加入" className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900" />
+                <EmptyPanel
+                  title="选择一个群聊查看详情"
+                  description="也可以创建群聊，或搜索公开群聊加入"
+                  icon="groups"
+                  action={
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <button type="button" className="im-secondary-button" onClick={() => setShowJoinModal(true)}>
+                        加入群聊
+                      </button>
+                      <button type="button" className="im-primary-button" onClick={() => setShowCreateModal(true)}>
+                        创建群聊
+                      </button>
+                    </div>
+                  }
+                  className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900"
+                />
               </div>
             )}
           </div>

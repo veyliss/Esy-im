@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { useChatStore } from "@/lib/store/chat";
 import { useGroupStore } from "@/lib/store/group";
@@ -60,6 +61,7 @@ function formatListTime(value?: string) {
 
 export default function ChatPage() {
   const { toast } = useAppInteractions();
+  const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const {
     conversations,
@@ -690,6 +692,19 @@ export default function ChatPage() {
                   <EmptyPanel
                     title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
                     description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
+                    icon="forum"
+                    action={
+                      !chatFilter.trim() ? (
+                        <div className="flex flex-wrap justify-center gap-2">
+                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => router.push("/contacts")}>
+                            添加好友
+                          </button>
+                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => router.push("/groups")}>
+                            创建群聊
+                          </button>
+                        </div>
+                      ) : null
+                    }
                     className="min-h-[220px] border-0 bg-transparent"
                   />
                 ) : (
@@ -798,6 +813,9 @@ export default function ChatPage() {
                   <span className="material-symbols-outlined">forum</span>
                   <strong>还没有消息</strong>
                   <p>发一条简短消息，让这个会话开始流动起来。</p>
+                  <button type="button" className="im-secondary-button mt-5" onClick={() => setInspectorOpen(true)}>
+                    查看资料
+                  </button>
                 </div>
               ) : (
                 messageTimeline.map((entry) => {

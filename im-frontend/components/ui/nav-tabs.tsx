@@ -167,4 +167,30 @@ export function NavTabs({
   );
 }
 
+export function MobileBottomNav({ active, badges = {} }: { active: NavKey; badges?: Partial<Record<NavKey, number>> }) {
+  return (
+    <nav className="im-mobile-nav" aria-label="移动端主导航">
+      {items.map((item) => {
+        const isActive = item.key === active;
+        const badgeCount = badges[item.key] || 0;
+
+        return (
+          <Link
+            key={item.key}
+            href={item.href}
+            aria-current={isActive ? "page" : undefined}
+            className={clsx("im-mobile-nav-item", isActive && "is-active")}
+          >
+            <span className="material-symbols-outlined">{item.icon}</span>
+            <span>{item.label}</span>
+            {badgeCount > 0 ? (
+              <em>{badgeCount > 99 ? "99+" : badgeCount}</em>
+            ) : null}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export default NavTabs;

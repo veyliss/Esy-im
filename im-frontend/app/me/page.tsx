@@ -444,10 +444,10 @@ export default function MePage() {
                 <span>{hasPasswordInput ? "保存后需要重新登录" : "修改资料后记得保存"}</span>
               </div>
               <div className="me-save-actions">
-                <button type="button" onClick={handleCancel} disabled={saving || !hasChanges} className="me-secondary-button">
+                <button type="button" onClick={handleCancel} disabled={saving || !hasChanges} className="im-secondary-button">
                   取消
                 </button>
-                <button type="button" onClick={handleSave} disabled={saving || !hasChanges} className="me-primary-button">
+                <button type="button" onClick={handleSave} disabled={saving || !hasChanges} className="im-primary-button">
                   {saving ? "保存中..." : "保存修改"}
                 </button>
               </div>

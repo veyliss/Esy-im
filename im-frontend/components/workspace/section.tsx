@@ -160,9 +160,11 @@ interface EmptyPanelProps {
   title: string;
   description?: string;
   className?: string;
+  icon?: string;
+  action?: ReactNode;
 }
 
-export function EmptyPanel({ title, description, className }: EmptyPanelProps) {
+export function EmptyPanel({ title, description, className, icon, action }: EmptyPanelProps) {
   return (
     <div
       className={clsx(
@@ -171,8 +173,14 @@ export function EmptyPanel({ title, description, className }: EmptyPanelProps) {
       )}
     >
       <div>
+        {icon ? (
+          <span className="workspace-empty-icon material-symbols-outlined" aria-hidden="true">
+            {icon}
+          </span>
+        ) : null}
         <p className="text-base font-semibold text-slate-700 dark:text-slate-200">{title}</p>
         {description ? <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{description}</p> : null}
+        {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
       </div>
     </div>
   );

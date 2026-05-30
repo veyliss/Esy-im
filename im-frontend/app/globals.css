@@ -1361,6 +1361,10 @@ html, body {
   --im-surface: #ffffff;
   --im-soft: #f8fafc;
   --im-accent: #137fec;
+  --im-radius: 8px;
+  --im-sidebar-pad-x: 34px;
+  --im-sidebar-pad-y: 32px;
+  --im-shadow-soft: 0 1px 1px rgba(15, 23, 42, 0.03), 0 26px 54px -48px rgba(15, 23, 42, 0.5);
 }
 
 .im-topbar {
@@ -1481,6 +1485,19 @@ html, body {
 .workspace-empty-panel {
   border-color: transparent;
   background: #ffffff;
+}
+
+.workspace-empty-icon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--im-radius);
+  background: #eff6ff;
+  color: #137fec;
+  font-size: 26px;
+  margin-bottom: 14px;
 }
 
 .workspace-empty-panel p:first-child {
@@ -1780,6 +1797,11 @@ html, body {
   color: #bfdbfe;
 }
 
+.dark .workspace-empty-icon {
+  background: rgba(19, 127, 236, 0.16);
+  color: #60a5fa;
+}
+
 .dark .sidebar-feature-row {
   border-bottom-color: #1e293b;
 }
@@ -1795,6 +1817,10 @@ html, body {
 
 .dark .im-danger-button:hover {
   background: rgba(244, 63, 94, 0.18);
+}
+
+.im-mobile-nav {
+  display: none;
 }
 
 .moment-composer {
@@ -3100,6 +3126,70 @@ html, body {
 }
 
 @media (max-width: 700px) {
+  .im-shell > .flex {
+    height: calc(100svh - 64px) !important;
+  }
+
+  .im-mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 70;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border-top: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+    backdrop-filter: blur(16px);
+  }
+
+  .im-mobile-nav-item {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    justify-items: center;
+    gap: 2px;
+    border-radius: 8px;
+    padding: 6px 0;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .im-mobile-nav-item .material-symbols-outlined {
+    font-size: 21px;
+  }
+
+  .im-mobile-nav-item.is-active {
+    background: #eff6ff;
+    color: #137fec;
+  }
+
+  .im-mobile-nav-item em {
+    position: absolute;
+    right: 18%;
+    top: 3px;
+    min-width: 16px;
+    border-radius: 999px;
+    background: #ef4444;
+    padding: 1px 4px;
+    color: #ffffff;
+    font-size: 9px;
+    font-style: normal;
+    line-height: 14px;
+  }
+
+  .dark .im-mobile-nav {
+    border-top-color: #1e293b;
+    background: rgba(15, 23, 42, 0.96);
+  }
+
+  .dark .im-mobile-nav-item.is-active {
+    background: rgba(19, 127, 236, 0.16);
+    color: #60a5fa;
+  }
+
   .workspace-sidebar-toolbar {
     padding: 22px 20px 22px;
   }

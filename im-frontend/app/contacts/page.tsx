@@ -326,6 +326,14 @@ export default function ContactsPage() {
                   <EmptyPanel
                     title={filterKeyword ? "未找到相关好友" : "暂无好友"}
                     description={filterKeyword ? "尝试其他关键词" : "点击上方添加好友"}
+                    icon="contacts"
+                    action={
+                      !filterKeyword ? (
+                        <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => setShowAddFriend(true)}>
+                          添加好友
+                        </button>
+                      ) : null
+                    }
                     className="min-h-[120px] border-0 bg-transparent"
                   />
                 ) : (
@@ -384,7 +392,7 @@ export default function ContactsPage() {
                   <SectionTitle title="收到的请求" className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800" />
                   <div className="space-y-3">
                     {receivedRequests.length === 0 ? (
-                      <EmptyPanel title="暂无收到的请求" className="min-h-[180px] border-0 bg-transparent" />
+                      <EmptyPanel title="暂无收到的请求" icon="inbox" className="min-h-[180px] border-0 bg-transparent" />
                     ) : (
                       receivedRequests.map((req) => (
                         <FriendRequestItem
@@ -403,7 +411,7 @@ export default function ContactsPage() {
                   <SectionTitle title="我发出的请求" className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800" />
                   <div className="space-y-3">
                     {sentRequests.length === 0 ? (
-                      <EmptyPanel title="暂无发出的请求" className="min-h-[180px] border-0 bg-transparent" />
+                      <EmptyPanel title="暂无发出的请求" icon="send" className="min-h-[180px] border-0 bg-transparent" />
                     ) : (
                       sentRequests.map((req) => (
                         <FriendRequestItem key={req.id} request={req} type="sent" />
@@ -498,6 +506,12 @@ export default function ContactsPage() {
                 <EmptyPanel
                   title="从左侧选择好友查看详情"
                   description="也可以使用上方入口添加新的好友"
+                  icon="person_search"
+                  action={
+                    <button type="button" className="im-secondary-button" onClick={() => setShowAddFriend(true)}>
+                      添加好友
+                    </button>
+                  }
                   className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900"
                 />
               </div>
