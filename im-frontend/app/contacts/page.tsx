@@ -22,6 +22,7 @@ import {
   SidebarSection,
   SidebarToolbar,
   WorkspaceSidebar,
+  WorkspaceSidebarHeader,
 } from "@/components/workspace/section";
 import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -259,12 +260,23 @@ export default function ContactsPage() {
         sidebar={
           <WorkspaceSidebar>
             <SidebarToolbar>
+              <WorkspaceSidebarHeader
+                eyebrow="联系人"
+                title="通讯录"
+                description="管理好友、申请记录和一对一会话入口。"
+                action={
+                  pendingRequestCount > 0 ? (
+                    <span className="workspace-count-badge">{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</span>
+                  ) : null
+                }
+              />
               <div className="relative">
                 <SidebarSearch
                   type="text"
                   placeholder="搜索好友"
                   value={contactFilter}
                   onChange={(e) => setContactFilter(e.target.value)}
+                  className={contactFilter ? "pr-12" : undefined}
                 />
                 {contactFilter ? (
                   <button
@@ -321,7 +333,7 @@ export default function ContactsPage() {
                 </SidebarItem>
               </div>
 
-              <SidebarSection title="我的好友">
+              <SidebarSection title={`我的好友 · ${filteredFriends.length}`}>
                 {filteredFriends.length === 0 ? (
                   <EmptyPanel
                     title={filterKeyword ? "未找到相关好友" : "暂无好友"}

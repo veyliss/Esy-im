@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
-import { SidebarItem, SidebarSection, WorkspaceSidebar } from "@/components/workspace/section";
+import { SidebarItem, SidebarSection, SidebarToolbar, WorkspaceSidebar, WorkspaceSidebarHeader } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -252,7 +252,14 @@ export default function MePage() {
       }
       sidebar={
         <WorkspaceSidebar>
-          <SidebarSection title="个人中心" className="flex-1" bodyClassName="space-y-1">
+          <SidebarToolbar>
+            <WorkspaceSidebarHeader
+              eyebrow="设置"
+              title="我的"
+              description="资料、账号安全和退出登录集中在这里。"
+            />
+          </SidebarToolbar>
+          <SidebarSection title="设置目录" className="flex-1" bodyClassName="space-y-1">
             <SidebarItem
               active
               leading={<span className="material-symbols-outlined text-lg">person</span>}

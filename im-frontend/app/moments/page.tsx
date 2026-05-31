@@ -4,7 +4,16 @@ import { useEffect, useState, useRef } from "react";
 import { MomentItem } from "@/components/moments/MomentItem";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
-import { ActionBar, EmptyPanel, SectionCard, SidebarItem, SidebarSection, SidebarToolbar, WorkspaceSidebar } from "@/components/workspace/section";
+import {
+  ActionBar,
+  EmptyPanel,
+  SectionCard,
+  SidebarItem,
+  SidebarSection,
+  SidebarToolbar,
+  WorkspaceSidebar,
+  WorkspaceSidebarHeader,
+} from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -266,6 +275,11 @@ export default function MomentsPage() {
       sidebar={
         <WorkspaceSidebar>
           <SidebarToolbar>
+            <WorkspaceSidebarHeader
+              eyebrow="动态"
+              title="朋友圈"
+              description="浏览朋友近况，也可以记录自己的生活瞬间。"
+            />
             <div className="flex items-center gap-3">
               <UserAvatar
                 src={currentUser?.avatar || "/default-avatar.png"}
@@ -282,19 +296,19 @@ export default function MomentsPage() {
           <SidebarSection title="时间流视图" className="flex-1">
             <SidebarItem
               type="button"
-              active={activeTab === "my"}
-              leading={<span className="material-symbols-outlined text-lg">account_circle</span>}
-              title="我的朋友圈"
-              description="查看我发布的动态"
-              onClick={() => setActiveTab("my")}
-            />
-            <SidebarItem
-              type="button"
               active={activeTab === "timeline"}
               leading={<span className="material-symbols-outlined text-lg">dynamic_feed</span>}
               title="朋友动态"
-              description="查看好友分享"
+              description={`${timeline.length} 条可见动态`}
               onClick={() => setActiveTab("timeline")}
+            />
+            <SidebarItem
+              type="button"
+              active={activeTab === "my"}
+              leading={<span className="material-symbols-outlined text-lg">account_circle</span>}
+              title="我的朋友圈"
+              description={`${myMoments.length} 条我的动态`}
+              onClick={() => setActiveTab("my")}
             />
           </SidebarSection>
         </WorkspaceSidebar>

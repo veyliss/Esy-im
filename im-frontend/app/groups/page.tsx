@@ -15,6 +15,7 @@ import {
   SidebarSection,
   SidebarToolbar,
   WorkspaceSidebar,
+  WorkspaceSidebarHeader,
 } from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -104,12 +105,31 @@ export default function GroupsPage() {
         sidebar={
           <WorkspaceSidebar>
             <SidebarToolbar>
-              <SidebarSearch
-                type="text"
-                placeholder="搜索我的群聊"
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
+              <WorkspaceSidebarHeader
+                eyebrow="多人会话"
+                title="群聊"
+                description="创建、加入和管理你的群组关系。"
               />
+              <div className="relative">
+                <SidebarSearch
+                  type="text"
+                  placeholder="搜索我的群聊"
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  className={searchKeyword ? "pr-12" : undefined}
+                />
+                {searchKeyword ? (
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex size-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                    onClick={() => setSearchKeyword("")}
+                    aria-label="清空搜索"
+                    title="清空搜索"
+                  >
+                    <span className="material-symbols-outlined text-base">close</span>
+                  </button>
+                ) : null}
+              </div>
               <div className="sidebar-quick-actions">
                 <button
                   type="button"
@@ -143,7 +163,7 @@ export default function GroupsPage() {
             </SidebarToolbar>
 
             <SidebarSection
-              title={searchKeyword.trim() ? "筛选结果" : "我的群聊"}
+              title={searchKeyword.trim() ? `筛选结果 · ${filteredGroups.length}` : `我的群聊 · ${filteredGroups.length}`}
               className="flex min-h-0 flex-1 flex-col"
               bodyClassName="flex-1"
             >

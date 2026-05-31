@@ -65,6 +65,33 @@ export function WorkspaceSidebar({ children, className }: WorkspaceSidebarProps)
   return <div className={clsx("workspace-sidebar flex h-full flex-col overflow-hidden", className)}>{children}</div>;
 }
 
+interface WorkspaceSidebarHeaderProps {
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  description?: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}
+
+export function WorkspaceSidebarHeader({
+  eyebrow,
+  title,
+  description,
+  action,
+  className,
+}: WorkspaceSidebarHeaderProps) {
+  return (
+    <div className={clsx("workspace-sidebar-header", className)}>
+      <div className="min-w-0">
+        {eyebrow ? <span className="workspace-sidebar-eyebrow">{eyebrow}</span> : null}
+        <h1>{title}</h1>
+        {description ? <p>{description}</p> : null}
+      </div>
+      {action ? <div className="workspace-sidebar-header-action">{action}</div> : null}
+    </div>
+  );
+}
+
 interface SidebarToolbarProps {
   children: ReactNode;
   className?: string;

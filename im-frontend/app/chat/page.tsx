@@ -14,7 +14,16 @@ import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
-import { EmptyPanel, SidebarItem, SidebarScrollArea, SidebarSearch, SidebarSection, SidebarToolbar, WorkspaceSidebar } from "@/components/workspace/section";
+import {
+  EmptyPanel,
+  SidebarItem,
+  SidebarScrollArea,
+  SidebarSearch,
+  SidebarSection,
+  SidebarToolbar,
+  WorkspaceSidebar,
+  WorkspaceSidebarHeader,
+} from "@/components/workspace/section";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { useAppInteractions } from "@/components/ui/app-interactions";
@@ -662,6 +671,16 @@ export default function ChatPage() {
       sidebar={
         <WorkspaceSidebar>
           <SidebarToolbar className="space-y-4">
+            <WorkspaceSidebarHeader
+              eyebrow="消息中心"
+              title="会话"
+              description="私聊、群聊和未读消息统一在这里处理。"
+              action={
+                totalUnreadCount > 0 ? (
+                  <span className="workspace-count-badge">{totalUnreadCount > 99 ? "99+" : totalUnreadCount}</span>
+                ) : null
+              }
+            />
             <SidebarSearch
               type="text"
               placeholder="搜索聊天"
@@ -879,8 +898,8 @@ export default function ChatPage() {
             </div>
 
             {inspectorOpen ? (
-              <aside className="absolute right-[18px] top-[88px] z-20 w-[300px] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white/96 dark:bg-slate-900/96 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.76)] backdrop-blur-md">
-                <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-4 py-[14px]">
+              <aside className="chat-inspector">
+                <div className="chat-inspector-head">
                   <strong>{currentChat.type === "group" ? "群聊资料" : "联系人资料"}</strong>
                   <button
                     type="button"
@@ -892,7 +911,7 @@ export default function ChatPage() {
                     <span className="material-symbols-outlined text-xl">close</span>
                   </button>
                 </div>
-                <div className="grid justify-items-center px-[18px] py-[22px] text-center">
+                <div className="chat-inspector-profile">
                   <UserAvatar
                     src={currentChat.avatar}
                     name={currentChat.name}
@@ -907,7 +926,7 @@ export default function ChatPage() {
                       : "私聊会话"}
                   </p>
                 </div>
-                <div className="grid border-t border-slate-100 dark:border-slate-800">
+                <div className="chat-inspector-list">
                   <div>
                     <span>类型</span>
                     <strong>{currentChat.type === "group" ? "群聊" : "私聊"}</strong>
@@ -923,6 +942,17 @@ export default function ChatPage() {
                     </div>
                   ) : null}
                 </div>
+                <div className="chat-inspector-actions">
+                  {currentChat.type === "group" ? (
+                    <button type="button" className="im-secondary-button" onClick={() => router.push("/groups")}>
+                      群聊详情
+                    </button>
+                  ) : (
+                    <button type="button" className="im-secondary-button" onClick={() => router.push("/contacts")}>
+                      联系人详情
+                    </button>
+                  )}
+                </div>
               </aside>
             ) : null}
           </div>
@@ -932,11 +962,16 @@ export default function ChatPage() {
               <span className="material-symbols-outlined">chat</span>
               <h2>选择一个聊天开始交流</h2>
               <p>会话、群聊和未读消息都在左侧统一管理，进入后可以继续查看资料和发送消息。</p>
-              {firstAvailableChat ? (
-                <button type="button" onClick={handlePickFirstChat}>
-                  打开最近会话
+              <div className="chat-start-actions">
+                {firstAvailableChat ? (
+                  <button type="button" onClick={handlePickFirstChat}>
+                    打开最近会话
+                  </button>
+                ) : null}
+                <button type="button" className="is-secondary" onClick={() => router.push("/contacts")}>
+                  去通讯录
                 </button>
-              ) : null}
+              </div>
             </div>
           </div>
         )
