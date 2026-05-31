@@ -2,20 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { MomentItem } from "@/components/moments/MomentItem";
-import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
 import {
   ActionBar,
   EmptyPanel,
   SectionCard,
 } from "@/components/workspace/section";
-import {
-  ImListItem,
-  ImShell,
-  ImSidebar,
-  ImSidebarHeader,
-  ImSidebarSection,
-  ImSidebarToolbar,
-} from "@/components/im/layout";
+import { Im4IconButton, Im4Shell } from "@/components/im4";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -291,16 +283,63 @@ export default function MomentsPage() {
 
   const moments = activeTab === "timeline" ? timeline : myMoments;
 
+  const sessionPanel = (
+    <div className="im4-session-panel">
+      <div className="im4-session-head">
+        <div className="im4-session-title">
+          <div>
+            <h1>朋友圈</h1>
+            <p>朋友动态和我的分享。</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <UserAvatar
+            src={currentUser?.avatar || "/default-avatar.png"}
+            name={currentUser?.nickname || "我"}
+            size="md"
+            border
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">{currentUser?.nickname || "我"}</p>
+            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">分享近况与朋友动态</span>
+          </div>
+        </div>
+      </div>
+      <div className="im4-session-list">
+        <h2 className="im4-session-section-label">时间流视图</h2>
+        <button
+          type="button"
+          className={`im4-contact-request ${activeTab === "timeline" ? "is-active" : ""}`}
+          onClick={() => setActiveTab("timeline")}
+        >
+          <span>朋友动态</span>
+          <small>{timeline.length} 条可见动态</small>
+        </button>
+        <button
+          type="button"
+          className={`im4-contact-request ${activeTab === "my" ? "is-active" : ""}`}
+          onClick={() => setActiveTab("my")}
+        >
+          <span>我的朋友圈</span>
+          <small>{myMoments.length} 条我的动态</small>
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <ImShell
+    <Im4Shell
       active="moments"
       title="朋友圈"
       subtitle="朋友动态和我的分享"
-      mobileDetailActive
+      detailActive
+      sessionPanel={sessionPanel}
+      avatarSrc={currentUser?.avatar}
+      avatarName={currentUser?.nickname || "我"}
       rightSlot={
-        <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
-          <TopIconButton icon="add_photo_alternate" label="发布图片" onClick={handleImageSelect} />
-          <TopIconButton
+        <div className="flex items-center gap-2">
+          <Im4IconButton icon="add_photo_alternate" label="发布图片" onClick={handleImageSelect} />
+          <Im4IconButton
             icon="refresh"
             label="刷新动态"
             onClick={() => {
@@ -311,61 +350,11 @@ export default function MomentsPage() {
               }
             }}
           />
-        </TopBarActions>
-      }
-      mainClassName="bg-background-light dark:bg-background-dark"
-      sidebar={
-        <ImSidebar>
-          <ImSidebarToolbar>
-            <ImSidebarHeader
-              eyebrow="动态"
-              title="朋友圈"
-              description="浏览朋友近况，也可以记录自己的生活瞬间。"
-            />
-            <div className="flex items-center gap-3">
-              <UserAvatar
-                src={currentUser?.avatar || "/default-avatar.png"}
-                name={currentUser?.nickname || "我"}
-                size="md"
-                border
-              />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">{currentUser?.nickname || "我"}</p>
-                <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">分享近况与朋友动态</span>
-              </div>
-            </div>
-          </ImSidebarToolbar>
-          <ImSidebarSection title="时间流视图" className="flex-1">
-            <ImListItem
-              type="button"
-              active={activeTab === "timeline"}
-              onClick={() => setActiveTab("timeline")}
-            >
-              <span className="min-w-0 flex-1">
-                <span className={`block text-sm ${activeTab === "timeline" ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
-                  朋友动态
-                </span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">{timeline.length} 条可见动态</span>
-              </span>
-            </ImListItem>
-            <ImListItem
-              type="button"
-              active={activeTab === "my"}
-              onClick={() => setActiveTab("my")}
-            >
-              <span className="min-w-0 flex-1">
-                <span className={`block text-sm ${activeTab === "my" ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
-                  我的朋友圈
-                </span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">{myMoments.length} 条我的动态</span>
-              </span>
-            </ImListItem>
-          </ImSidebarSection>
-        </ImSidebar>
+        </div>
       }
     >
-        <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-50 to-white px-8 py-[30px] dark:from-[#101922] dark:to-[#0f172a] max-sm:px-[18px] max-sm:py-5">
-          <div className="mx-auto max-w-3xl space-y-7">
+        <div className="im4-feed-page">
+          <div className="im4-feed-column">
             <div className="im3-mobile-tabs" role="tablist" aria-label="朋友圈视图">
               <button
                 type="button"
@@ -511,6 +500,6 @@ export default function MomentsPage() {
             </div>
           </div>
         </div>
-    </ImShell>
+    </Im4Shell>
   );
 }

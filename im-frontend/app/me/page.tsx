@@ -2,15 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
-import {
-  ImListItem,
-  ImShell,
-  ImSidebar,
-  ImSidebarHeader,
-  ImSidebarSection,
-  ImSidebarToolbar,
-} from "@/components/im/layout";
+import { Im4Button, Im4Shell, Im4Status } from "@/components/im4";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -298,86 +290,105 @@ export default function MePage() {
     }
   };
 
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const settingsPanel = (
+    <div className="im4-session-panel">
+      <div className="im4-session-head">
+        <div className="im4-session-title">
+          <div>
+            <h1>我的</h1>
+            <p>资料、安全和偏好集中管理。</p>
+          </div>
+          {hasChanges ? <Im4Status tone="warning">未保存</Im4Status> : null}
+        </div>
+      </div>
+
+      <div className="im4-session-list">
+        <h2 className="im4-session-section-label">设置目录</h2>
+        <button
+          type="button"
+          className="im4-contact-request is-active"
+          onClick={() => scrollToSection("profile-section")}
+        >
+          <span>我的资料</span>
+          <small>头像、昵称和展示信息</small>
+        </button>
+        <button
+          type="button"
+          className="im4-contact-request"
+          onClick={() => scrollToSection("account-section")}
+        >
+          <span>账号信息</span>
+          <small>用户 ID、邮箱和创建时间</small>
+        </button>
+        <button
+          type="button"
+          className="im4-contact-request"
+          onClick={() => scrollToSection("security-section")}
+        >
+          <span>账号与安全</span>
+          <small>密码与登录状态</small>
+        </button>
+        <button
+          type="button"
+          className="im4-contact-request"
+          onClick={() => scrollToSection("preference-section")}
+        >
+          <span>偏好设置</span>
+          <small>通知和显示习惯</small>
+        </button>
+      </div>
+
+      <div className="im4-me-footer">
+        <Im4Button tone="danger" onClick={handleLogout} disabled={logoutLoading}>
+          {logoutLoading ? "退出中..." : "退出登录"}
+        </Im4Button>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
-      <ImShell
+      <Im4Shell
         active="me"
         title="我的"
         subtitle="资料和设置"
-        mobileDetailActive
-        sidebar={<ImSidebar />}
+        detailActive
+        sessionPanel={
+          <div className="im4-session-panel">
+            <div className="im4-session-head">
+              <div className="im4-session-title">
+                <div>
+                  <h1>我的</h1>
+                  <p>正在同步个人资料。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       >
           <div className="me-loading-wrap">
             <PageLoading message="加载个人资料..." size="md" />
           </div>
-      </ImShell>
+      </Im4Shell>
     );
   }
 
   return (
-    <ImShell
+    <Im4Shell
       active="me"
       title="我的"
       subtitle="资料、安全和偏好"
-      mobileDetailActive
+      detailActive
       rightSlot={
-        <TopBarActions avatarSrc={avatar || currentUser?.avatar} avatarName={nickname || currentUser?.nickname || "我"}>
-          {hasChanges ? <TopStatusPill tone="warning">有未保存修改</TopStatusPill> : null}
-        </TopBarActions>
+        hasChanges ? <Im4Status tone="warning">有未保存修改</Im4Status> : null
       }
-      sidebar={
-        <ImSidebar>
-          <ImSidebarToolbar>
-            <ImSidebarHeader
-              eyebrow="设置"
-              title="我的"
-              description="资料、账号安全和退出登录集中在这里。"
-            />
-          </ImSidebarToolbar>
-          <ImSidebarSection title="设置目录" className="flex-1">
-            <ImListItem
-              active
-              onClick={() => document.getElementById("profile-section")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-primary">我的资料</span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">头像、昵称、账号信息</span>
-              </span>
-            </ImListItem>
-            <ImListItem
-              onClick={() => document.getElementById("account-section")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">账号信息</span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">用户 ID、邮箱、创建时间</span>
-              </span>
-            </ImListItem>
-            <ImListItem
-              onClick={() => document.getElementById("security-section")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">账号与安全</span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">修改密码与登录安全</span>
-              </span>
-            </ImListItem>
-            <ImListItem
-              onClick={() => document.getElementById("preference-section")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">偏好设置</span>
-                <span className="block text-xs text-slate-500 dark:text-slate-400">通知和显示习惯</span>
-              </span>
-            </ImListItem>
-          </ImSidebarSection>
-
-          <div className="me-sidebar-footer">
-            <button type="button" onClick={handleLogout} disabled={logoutLoading} className="me-logout-button">
-              <span className="material-symbols-outlined text-lg">logout</span>
-              <span>{logoutLoading ? "退出中..." : "退出登录"}</span>
-            </button>
-          </div>
-        </ImSidebar>
-      }
+      sessionPanel={settingsPanel}
+      avatarSrc={avatar || currentUser?.avatar}
+      avatarName={nickname || currentUser?.nickname || "我"}
     >
         <div className="me-page workspace-main-panel">
           <div className="me-page-inner">
@@ -593,6 +604,6 @@ export default function MePage() {
             </div>
           </div>
         </div>
-    </ImShell>
+    </Im4Shell>
   );
 }

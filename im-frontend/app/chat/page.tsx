@@ -12,31 +12,23 @@ import type { Message, MessageType, Conversation, Group, GroupMessage, GroupMess
 import { UserAPI } from "@/lib/api/user";
 import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
-import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
 import {
-  ImActionButton,
-  ImActionStrip,
-  ImCountBadge,
-  ImEmptyState,
-  ImSearchBox,
-  ImShell,
-  ImSidebar,
-  ImSidebarHeader,
-  ImSidebarScroll,
-  ImSidebarSection,
-  ImSidebarToolbar,
-} from "@/components/im/layout";
-import {
-  ChatComposer,
-  ChatConversationHeader,
-  ChatFilterTabs,
-  ChatInspector,
-  ChatMessageList,
-  ChatStartPanel,
-  ConversationItem,
-  type ChatRenderableMessage,
-  type ChatTimelineEntry,
-} from "@/components/im/chat";
+  Im4Button,
+  Im4Composer,
+  Im4ConversationHeader,
+  Im4Empty,
+  Im4IconButton,
+  Im4Inspector,
+  Im4MessageList,
+  Im4Search,
+  Im4Segmented,
+  Im4SessionItem,
+  Im4Shell,
+  Im4StartPanel,
+  Im4Status,
+  type Im4RenderableMessage,
+  type Im4TimelineEntry,
+} from "@/components/im4";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 
@@ -626,11 +618,11 @@ export default function ChatPage() {
     return [];
   }, [currentChat, privateMessages, groupMessages]);
 
-  const messageTimeline = useMemo<ChatTimelineEntry[]>(() => {
+  const messageTimeline = useMemo<Im4TimelineEntry[]>(() => {
     let lastDateLabel = "";
     return currentMessages.flatMap((message) => {
       const dateLabel = formatChatDate(message.created_at);
-      const entries: ChatTimelineEntry[] = [];
+      const entries: Im4TimelineEntry[] = [];
       if (dateLabel && dateLabel !== lastDateLabel) {
         entries.push({ type: "date", id: `date-${dateLabel}-${message.id}`, label: dateLabel });
         lastDateLabel = dateLabel;
@@ -640,7 +632,7 @@ export default function ChatPage() {
     });
   }, [currentMessages]);
 
-  const visibleMessageTimeline = useMemo<ChatTimelineEntry[]>(() => {
+  const visibleMessageTimeline = useMemo<Im4TimelineEntry[]>(() => {
     const keyword = threadKeyword.trim().toLowerCase();
     if (!keyword) return messageTimeline;
 
@@ -733,7 +725,7 @@ export default function ChatPage() {
     }
   };
 
-  const handleReplyMessage = (message: ChatRenderableMessage) => {
+  const handleReplyMessage = (message: Im4RenderableMessage) => {
     const isMine = message.from_user_id === currentUser?.user_id;
     setReplyDraft({
       id: String(message.id),
@@ -772,113 +764,124 @@ export default function ChatPage() {
     return privateUnreadCount + groupUnread;
   }, [privateUnreadCount, groupUnreadCounts]);
 
+  const sessionPanel = (
+    <div className={`im4-session-panel ${compactMessages ? "is-compact" : ""}`}>
+      <div className="im4-session-head">
+        <div className="im4-session-title">
+          <div>
+            <h1>会话</h1>
+            <p>私聊、群聊、未读和草稿集中处理。</p>
+          </div>
+          {totalUnreadCount > 0 ? (
+            <span className="im4-session-badge">{totalUnreadCount > 99 ? "99+" : totalUnreadCount}</span>
+          ) : null}
+        </div>
+        <Im4Search
+          type="text"
+          placeholder="搜索聊天"
+          value={chatFilter}
+          onChange={(e) => setChatFilter(e.target.value)}
+          onClear={() => setChatFilter("")}
+        />
+        <Im4Segmented active={chatMode} items={chatModeItems} onChange={setChatMode} label="会话筛选" />
+      </div>
+
+      <div className="im4-session-list">
+        <h2 className="im4-session-section-label">会话列表 · {filteredChatList.length}</h2>
+        {filteredChatList.length === 0 ? (
+          <Im4Empty
+            title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
+            description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或创建一个群聊"}
+            action={
+              !chatFilter.trim() ? (
+                <>
+                  <Im4Button onClick={() => router.push("/contacts")}>添加好友</Im4Button>
+                  <Im4Button onClick={() => router.push("/groups")}>创建群聊</Im4Button>
+                </>
+              ) : null
+            }
+          />
+        ) : (
+          filteredChatList.map((chatItem) => (
+            <Im4SessionItem
+              key={chatItem.id}
+              active={currentChat?.id === chatItem.id}
+              type={chatItem.type}
+              name={chatItem.name}
+              avatar={chatItem.avatar}
+              lastMessage={chatItem.lastMessage}
+              time={formatListTime(chatItem.lastMessageTime)}
+              unreadCount={chatItem.unreadCount}
+              pinned={chatItem.pinned}
+              muted={chatItem.muted}
+              onClick={() => handleSelectChat(chatItem)}
+              onPin={() =>
+                handleConversationPref(
+                  chatItem,
+                  { pinned: !chatItem.pinned },
+                  chatItem.pinned ? "已取消置顶" : "已置顶会话",
+                )
+              }
+              onMute={() =>
+                handleConversationPref(
+                  chatItem,
+                  { muted: !chatItem.muted },
+                  chatItem.muted ? "已取消免打扰" : "已设为免打扰",
+                )
+              }
+              onHide={() => handleHideChatItem(chatItem)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  const mobileRightSlot = (
+    <div className="flex items-center gap-2">
+      <Im4Status tone={wsConnected ? "online" : "warning"}>{wsConnected ? "在线" : "连接中"}</Im4Status>
+      {totalUnreadCount > 0 ? (
+        <Im4Status tone="primary">未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}</Im4Status>
+      ) : null}
+    </div>
+  );
+
+  const inspector =
+    inspectorOpen && currentChat ? (
+      <Im4Inspector
+        name={currentChat.name}
+        avatar={currentChat.avatar}
+        type={currentChat.type}
+        unreadCount={currentChat.unreadCount}
+        messageCount={currentMessages.length}
+        pinned={currentChat.pinned}
+        muted={currentChat.muted}
+        groupId={currentChat.type === "group" && "group_id" in currentChat.data ? currentChat.data.group_id : undefined}
+        memberCount={currentChat.type === "group" && "member_count" in currentChat.data ? currentChat.data.member_count : undefined}
+        onClose={() => setInspectorOpen(false)}
+        onTogglePinned={handleTogglePinned}
+        onToggleMuted={handleToggleMuted}
+        onOpenDetail={() => router.push(currentChat.type === "group" ? "/groups" : "/contacts")}
+        onHideConversation={handleHideConversation}
+      />
+    ) : null;
+
   return (
-    <ImShell
+    <Im4Shell
       active="chat"
       title="聊天"
       subtitle="会话、消息和实时状态"
-      mobileDetailActive={Boolean(currentChat)}
-      rightSlot={
-        <TopBarActions
-          avatarSrc={currentUser?.avatar}
-          avatarName={currentUser?.nickname || "我"}
-          avatarStatus={wsConnected ? "online" : "away"}
-          showAvatarStatus
-        >
-          <TopStatusPill tone={wsConnected ? "online" : "warning"}>
-            <span className={`size-2 rounded-full ${wsConnected ? "bg-green-500" : "bg-amber-400"}`} />
-            {wsConnected ? "已连接" : "连接中"}
-          </TopStatusPill>
-          {totalUnreadCount > 0 ? (
-            <TopStatusPill tone="primary">
-              未读 {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
-            </TopStatusPill>
-          ) : null}
-        </TopBarActions>
-      }
-      mainClassName="im3-chat-main"
-      sidebar={
-        <ImSidebar className={compactMessages ? "is-compact" : undefined}>
-          <ImSidebarToolbar>
-            <ImSidebarHeader
-              eyebrow="消息中心"
-              title="会话"
-              description="私聊、群聊和未读消息统一在这里处理。"
-              action={
-                totalUnreadCount > 0 ? (
-                  <ImCountBadge>{totalUnreadCount > 99 ? "99+" : totalUnreadCount}</ImCountBadge>
-                ) : null
-              }
-            />
-            <ImSearchBox
-              type="text"
-              placeholder="搜索聊天"
-              value={chatFilter}
-              onChange={(e) => setChatFilter(e.target.value)}
-              onClear={() => setChatFilter("")}
-            />
-            <ChatFilterTabs active={chatMode} items={chatModeItems} onChange={setChatMode} />
-          </ImSidebarToolbar>
-
-          <ImSidebarScroll>
-            <ImSidebarSection title={`会话列表 · ${filteredChatList.length}`}>
-                {filteredChatList.length === 0 ? (
-                  <ImEmptyState
-                    title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
-                    description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
-                    action={
-                      !chatFilter.trim() ? (
-                        <ImActionStrip>
-                          <ImActionButton onClick={() => router.push("/contacts")}>
-                            添加好友
-                          </ImActionButton>
-                          <ImActionButton onClick={() => router.push("/groups")}>
-                            创建群聊
-                          </ImActionButton>
-                        </ImActionStrip>
-                      ) : null
-                    }
-                  />
-                ) : (
-                  filteredChatList.map((chatItem) => (
-                    <ConversationItem
-                      key={chatItem.id}
-                      active={currentChat?.id === chatItem.id}
-                      type={chatItem.type}
-                      name={chatItem.name}
-                      avatar={chatItem.avatar}
-                      lastMessage={chatItem.lastMessage}
-                      time={formatListTime(chatItem.lastMessageTime)}
-                      unreadCount={chatItem.unreadCount}
-                      pinned={chatItem.pinned}
-                      muted={chatItem.muted}
-                      onClick={() => handleSelectChat(chatItem)}
-                      onPin={() =>
-                        handleConversationPref(
-                          chatItem,
-                          { pinned: !chatItem.pinned },
-                          chatItem.pinned ? "已取消置顶" : "已置顶会话",
-                        )
-                      }
-                      onMute={() =>
-                        handleConversationPref(
-                          chatItem,
-                          { muted: !chatItem.muted },
-                          chatItem.muted ? "已取消免打扰" : "已设为免打扰",
-                        )
-                      }
-                      onHide={() => handleHideChatItem(chatItem)}
-                    />
-                  ))
-                )}
-            </ImSidebarSection>
-          </ImSidebarScroll>
-        </ImSidebar>
-      }
+      detailActive={Boolean(currentChat)}
+      sessionPanel={sessionPanel}
+      rightSlot={mobileRightSlot}
+      inspector={inspector}
+      avatarSrc={currentUser?.avatar}
+      avatarName={currentUser?.nickname || "我"}
+      avatarStatus={wsConnected ? "online" : "away"}
     >
       {currentChat ? (
-        <div className="im3-chat-surface">
-          <ChatConversationHeader
+        <>
+          <Im4ConversationHeader
             avatar={currentChat.avatar}
             name={currentChat.name}
             shape={currentChat.type === "group" ? "rounded" : "circle"}
@@ -895,121 +898,80 @@ export default function ChatPage() {
             }}
             actions={
               <>
-                <button
-                  type="button"
-                  className={`im3-icon-button ${threadSearchOpen ? "is-active" : ""}`}
+                <Im4IconButton
+                  icon="search"
+                  label="搜索当前聊天"
+                  active={threadSearchOpen}
                   onClick={() => setThreadSearchOpen((value) => !value)}
-                  aria-label="搜索当前聊天"
-                  title="搜索当前聊天"
-                >
-                  <span className="material-symbols-outlined">search</span>
-                </button>
-                <button
-                  type="button"
-                  className={`im3-icon-button ${currentChat.pinned ? "is-active" : ""}`}
+                />
+                <Im4IconButton
+                  icon={currentChat.pinned ? "keep_off" : "keep"}
+                  label={currentChat.pinned ? "取消置顶" : "置顶会话"}
+                  active={currentChat.pinned}
                   onClick={handleTogglePinned}
-                  aria-label={currentChat.pinned ? "取消置顶" : "置顶会话"}
-                  title={currentChat.pinned ? "取消置顶" : "置顶会话"}
-                >
-                  <span className="material-symbols-outlined">{currentChat.pinned ? "keep_off" : "keep"}</span>
-                </button>
-                <button
-                  type="button"
-                  className={`im3-icon-button ${currentChat.muted ? "is-active" : ""}`}
+                />
+                <Im4IconButton
+                  icon={currentChat.muted ? "notifications" : "notifications_off"}
+                  label={currentChat.muted ? "取消免打扰" : "免打扰"}
+                  active={currentChat.muted}
                   onClick={handleToggleMuted}
-                  aria-label={currentChat.muted ? "取消免打扰" : "免打扰"}
-                  title={currentChat.muted ? "取消免打扰" : "免打扰"}
-                >
-                  <span className="material-symbols-outlined">{currentChat.muted ? "notifications" : "notifications_off"}</span>
-                </button>
-                <button
-                  type="button"
-                  className="im3-icon-button"
-                  onClick={() => setInspectorOpen((value) => !value)}
-                  aria-label="查看资料"
-                  title="查看资料"
-                >
-                  <span className="material-symbols-outlined">info</span>
-                </button>
+                />
+                <Im4IconButton icon="info" label="查看资料" active={inspectorOpen} onClick={() => setInspectorOpen((value) => !value)} />
               </>
             }
           />
 
-            <ErrorAlert
-              error={connectionError}
-              type="warning"
-              onClose={() => setConnectionError(null)}
-              className="mx-8 mt-5"
-            />
-            <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-3" />
+          <ErrorAlert error={connectionError} type="warning" onClose={() => setConnectionError(null)} className="mx-6 mt-4" />
+          <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mt-3" />
 
-            {threadSearchOpen ? (
-              <div className="chat-thread-search">
-                <ImSearchBox
-                  type="text"
-                  placeholder="搜索当前聊天记录"
-                  value={threadKeyword}
-                  onChange={(e) => setThreadKeyword(e.target.value)}
-                  onClear={() => setThreadKeyword("")}
-                />
-                {threadKeyword.trim() ? (
-                  <span>{visibleMessageTimeline.filter((entry) => entry.type === "message").length} 条结果</span>
-                ) : (
-                  <span>输入关键词筛选消息</span>
-                )}
-              </div>
-            ) : null}
-
-            <ChatMessageList
-              entries={visibleMessageTimeline}
-              currentUser={currentUser}
-              showSender={currentChat.type === "group"}
-              endRef={messagesEndRef}
-              onCopyMessage={handleCopyMessage}
-              onReplyMessage={handleReplyMessage}
-              onOpenInspector={() => setInspectorOpen(true)}
-            />
-
-            <ChatComposer
-              inputRef={composerInputRef}
-              value={messageInput}
-              placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
-              hint={composerHint}
-              replyPreview={replyDraft}
-              quickReplies={quickReplyItems}
-              sending={sendingMessage}
-              onChange={handleComposerChange}
-              onSend={handleSendMessage}
-              onAttach={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
-              onCancelReply={() => setReplyDraft(null)}
-              onQuickReply={handleQuickReply}
-            />
-
-            {inspectorOpen ? (
-              <ChatInspector
-                name={currentChat.name}
-                avatar={currentChat.avatar}
-                type={currentChat.type}
-                unreadCount={currentChat.unreadCount}
-                messageCount={currentMessages.length}
-                pinned={currentChat.pinned}
-                muted={currentChat.muted}
-                groupId={currentChat.type === "group" && "group_id" in currentChat.data ? currentChat.data.group_id : undefined}
-                memberCount={currentChat.type === "group" && "member_count" in currentChat.data ? currentChat.data.member_count : undefined}
-                onClose={() => setInspectorOpen(false)}
-                onTogglePinned={handleTogglePinned}
-                onToggleMuted={handleToggleMuted}
-                onOpenDetail={() => router.push(currentChat.type === "group" ? "/groups" : "/contacts")}
-                onHideConversation={handleHideConversation}
+          {threadSearchOpen ? (
+            <div className="im4-thread-search">
+              <Im4Search
+                type="text"
+                placeholder="搜索当前聊天记录"
+                value={threadKeyword}
+                onChange={(e) => setThreadKeyword(e.target.value)}
+                onClear={() => setThreadKeyword("")}
               />
-            ) : null}
-          </div>
+              {threadKeyword.trim() ? (
+                <span>{visibleMessageTimeline.filter((entry) => entry.type === "message").length} 条结果</span>
+              ) : (
+                <span>输入关键词筛选消息</span>
+              )}
+            </div>
+          ) : null}
+
+          <Im4MessageList
+            entries={visibleMessageTimeline}
+            currentUser={currentUser}
+            showSender={currentChat.type === "group"}
+            endRef={messagesEndRef}
+            onCopyMessage={handleCopyMessage}
+            onReplyMessage={handleReplyMessage}
+            onOpenInspector={() => setInspectorOpen(true)}
+          />
+
+          <Im4Composer
+            inputRef={composerInputRef}
+            value={messageInput}
+            placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
+            hint={composerHint}
+            replyPreview={replyDraft}
+            quickReplies={quickReplyItems}
+            sending={sendingMessage}
+            onChange={handleComposerChange}
+            onSend={handleSendMessage}
+            onAttach={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
+            onCancelReply={() => setReplyDraft(null)}
+            onQuickReply={handleQuickReply}
+          />
+        </>
       ) : (
-        <ChatStartPanel
+        <Im4StartPanel
           onOpenRecent={firstAvailableChat ? handlePickFirstChat : undefined}
           onOpenContacts={() => router.push("/contacts")}
         />
       )}
-    </ImShell>
+    </Im4Shell>
   );
 }

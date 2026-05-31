@@ -11,25 +11,11 @@ import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/erro
 import type { User } from "@/lib/types/api";
 import { useRouter } from "next/navigation";
 import { wsClient } from "@/lib/websocket/client";
-import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
 import {
   EmptyPanel,
   SectionTitle,
 } from "@/components/workspace/section";
-import {
-  ImActionButton,
-  ImActionStrip,
-  ImCountBadge,
-  ImEmptyState,
-  ImListItem,
-  ImSearchBox,
-  ImShell,
-  ImSidebar,
-  ImSidebarHeader,
-  ImSidebarScroll,
-  ImSidebarSection,
-  ImSidebarToolbar,
-} from "@/components/im/layout";
+import { Im4Button, Im4Empty, Im4Search, Im4SessionItem, Im4Shell, Im4Status } from "@/components/im4";
 import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -284,125 +270,86 @@ export default function ContactsPage() {
     setActiveRightTab("detail");
   };
 
+  const sessionPanel = (
+    <div className="im4-session-panel">
+      <div className="im4-session-head">
+        <div className="im4-session-title">
+          <div>
+            <h1>通讯录</h1>
+            <p>添加好友、处理申请，并快速发起私聊。</p>
+          </div>
+          {pendingRequestCount > 0 ? (
+            <span className="im4-session-badge">{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</span>
+          ) : null}
+        </div>
+        <Im4Search
+          type="text"
+          placeholder="搜索好友"
+          value={contactFilter}
+          onChange={(e) => setContactFilter(e.target.value)}
+          onClear={() => setContactFilter("")}
+        />
+        <div className="im4-contact-actions">
+          <Im4Button tone="primary" onClick={() => setShowAddFriend(true)}>添加好友</Im4Button>
+          <Im4Button onClick={openRequests}>好友申请</Im4Button>
+        </div>
+      </div>
+
+      <div className="im4-session-list">
+        <button
+          type="button"
+          className={`im4-contact-request ${activeRightTab === "requests" ? "is-active" : ""}`}
+          onClick={openRequests}
+        >
+          <span>新的朋友</span>
+          <small>好友申请与记录</small>
+          {pendingRequestCount > 0 ? <em>{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</em> : null}
+        </button>
+
+        <h2 className="im4-session-section-label">我的好友 · {filteredFriends.length}</h2>
+        {filteredFriends.length === 0 ? (
+          <Im4Empty
+            title={filterKeyword ? "未找到相关好友" : "暂无好友"}
+            description={filterKeyword ? "尝试其他关键词" : "点击上方添加好友"}
+            action={!filterKeyword ? <Im4Button onClick={() => setShowAddFriend(true)}>添加好友</Im4Button> : null}
+          />
+        ) : (
+          groupedFriends.map((group) => (
+            <div key={group.key} className="im4-alpha-group">
+              <h3>{group.key}</h3>
+              {group.items.map((friend) => {
+                const fu = friend.friend_user;
+                const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
+                return (
+                  <Im4SessionItem
+                    key={friend.id}
+                    active={selectedFriend?.id === friend.id}
+                    type="private"
+                    name={displayName}
+                    avatar={fu?.avatar || "/default-avatar.png"}
+                    lastMessage={`用户 ID：${fu?.user_id || "-"}`}
+                    onClick={() => selectFriend(friend)}
+                  />
+                );
+              })}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <ImShell
+      <Im4Shell
         active="contacts"
         title="通讯录"
         subtitle="好友、申请和一对一会话"
-        mobileDetailActive={activeRightTab === "requests" || Boolean(selectedFriend)}
-        rightSlot={
-          <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
-            <TopIconButton icon="notifications" label="好友请求" badge={pendingRequestCount} onClick={openRequests} />
-          </TopBarActions>
-        }
-        sidebar={
-          <ImSidebar>
-            <ImSidebarToolbar>
-              <ImSidebarHeader
-                eyebrow="联系人"
-                title="通讯录"
-                description="管理好友、申请记录和一对一会话入口。"
-                action={
-                  pendingRequestCount > 0 ? (
-                    <ImCountBadge>{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</ImCountBadge>
-                  ) : null
-                }
-              />
-              <ImSearchBox
-                type="text"
-                placeholder="搜索好友"
-                value={contactFilter}
-                onChange={(e) => setContactFilter(e.target.value)}
-                onClear={() => setContactFilter("")}
-              />
-
-              <ImActionStrip>
-                <ImActionButton tone="primary" onClick={() => setShowAddFriend(true)}>
-                  添加好友
-                </ImActionButton>
-                <ImActionButton onClick={openRequests}>
-                  好友申请
-                </ImActionButton>
-              </ImActionStrip>
-            </ImSidebarToolbar>
-
-            <ImSidebarScroll>
-              <ImSidebarSection>
-                <ImListItem
-                  type="button"
-                  onClick={openRequests}
-                  active={activeRightTab === "requests"}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className={`block text-sm ${activeRightTab === "requests" ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
-                      新的朋友
-                    </span>
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">好友申请与记录</span>
-                  </span>
-                  {pendingRequestCount > 0 ? (
-                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
-                      {pendingRequestCount > 99 ? "99+" : pendingRequestCount}
-                    </span>
-                  ) : null}
-                </ImListItem>
-              </ImSidebarSection>
-
-              <ImSidebarSection title={`我的好友 · ${filteredFriends.length}`}>
-                {filteredFriends.length === 0 ? (
-                  <ImEmptyState
-                    title={filterKeyword ? "未找到相关好友" : "暂无好友"}
-                    description={filterKeyword ? "尝试其他关键词" : "点击上方添加好友"}
-                    action={
-                      !filterKeyword ? (
-                        <ImActionButton onClick={() => setShowAddFriend(true)}>
-                          添加好友
-                        </ImActionButton>
-                      ) : null
-                    }
-                  />
-                ) : (
-                  <div className="space-y-4">
-                    {groupedFriends.map((group) => (
-                      <div key={group.key} className="contact-alpha-group">
-                        <h4>{group.key}</h4>
-                        <div className="space-y-3">
-                          {group.items.map((friend) => {
-                            const isActive = selectedFriend?.id === friend.id;
-                            const fu = friend.friend_user;
-                            const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
-                            return (
-                              <ImListItem
-                                key={friend.id}
-                                type="button"
-                                active={isActive}
-                                onClick={() => selectFriend(friend)}
-                              >
-                                <UserAvatar
-                                  src={fu?.avatar || "/default-avatar.png"}
-                                  name={fu?.nickname || "用户"}
-                                  size="md"
-                                  status="online"
-                                  border
-                                />
-                                <span className={`min-w-0 flex-1 text-sm ${isActive ? "font-semibold text-primary" : "text-slate-800 dark:text-slate-100"}`}>
-                                  <span className="block truncate">{displayName}</span>
-                                  <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
-                                    用户 ID：{fu?.user_id || "-"}
-                                  </span>
-                                </span>
-                              </ImListItem>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ImSidebarSection>
-            </ImSidebarScroll>
-          </ImSidebar>
-        }
+        detailActive={activeRightTab === "requests" || Boolean(selectedFriend)}
+        sessionPanel={sessionPanel}
+        avatarSrc={currentUser?.avatar}
+        avatarName={currentUser?.nickname || "我"}
+        rightSlot={pendingRequestCount > 0 ? <Im4Status tone="primary">申请 {pendingRequestCount > 99 ? "99+" : pendingRequestCount}</Im4Status> : null}
       >
           <div className="workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />
@@ -542,20 +489,20 @@ export default function ContactsPage() {
               </div>
             ) : (
               <div className="workspace-empty-wrap">
-                <ImEmptyState
+                <Im4Empty
                   title="从左侧选择好友查看详情"
                   description="也可以使用上方入口添加新的好友"
                   action={
-                    <ImActionButton onClick={() => setShowAddFriend(true)}>
+                    <Im4Button onClick={() => setShowAddFriend(true)}>
                       添加好友
-                    </ImActionButton>
+                    </Im4Button>
                   }
                   className="min-h-[520px] w-full"
                 />
               </div>
             )}
           </div>
-      </ImShell>
+      </Im4Shell>
 
       {showAddFriend && (
         <AddFriendModal
