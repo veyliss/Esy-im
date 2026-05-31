@@ -11,19 +11,25 @@ import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/erro
 import type { User } from "@/lib/types/api";
 import { useRouter } from "next/navigation";
 import { wsClient } from "@/lib/websocket/client";
-import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
 import {
   EmptyPanel,
   SectionTitle,
-  SidebarItem,
-  SidebarScrollArea,
-  SidebarSearch,
-  SidebarSection,
-  SidebarToolbar,
-  WorkspaceSidebar,
-  WorkspaceSidebarHeader,
 } from "@/components/workspace/section";
+import {
+  ImActionButton,
+  ImActionStrip,
+  ImCountBadge,
+  ImEmptyState,
+  ImListItem,
+  ImSearchBox,
+  ImShell,
+  ImSidebar,
+  ImSidebarHeader,
+  ImSidebarScroll,
+  ImSidebarSection,
+  ImSidebarToolbar,
+} from "@/components/im/layout";
 import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -280,9 +286,10 @@ export default function ContactsPage() {
 
   return (
     <>
-      <WorkspaceShell
+      <ImShell
         active="contacts"
-        navVariant="modern"
+        title="通讯录"
+        subtitle="好友、申请和一对一会话"
         mobileDetailActive={activeRightTab === "requests" || Boolean(selectedFriend)}
         rightSlot={
           <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
@@ -290,67 +297,43 @@ export default function ContactsPage() {
           </TopBarActions>
         }
         sidebar={
-          <WorkspaceSidebar>
-            <SidebarToolbar>
-              <WorkspaceSidebarHeader
+          <ImSidebar>
+            <ImSidebarToolbar>
+              <ImSidebarHeader
                 eyebrow="联系人"
                 title="通讯录"
                 description="管理好友、申请记录和一对一会话入口。"
                 action={
                   pendingRequestCount > 0 ? (
-                    <span className="workspace-count-badge">{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</span>
+                    <ImCountBadge>{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</ImCountBadge>
                   ) : null
                 }
               />
-              <div className="relative">
-                <SidebarSearch
-                  type="text"
-                  placeholder="搜索好友"
-                  value={contactFilter}
-                  onChange={(e) => setContactFilter(e.target.value)}
-                  className={contactFilter ? "pr-12" : undefined}
-                />
-                {contactFilter ? (
-                  <button
-                    type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex size-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
-                    onClick={() => setContactFilter("")}
-                    aria-label="清空搜索"
-                    title="清空搜索"
-                  >
-                    <span className="material-symbols-outlined text-base">close</span>
-                  </button>
-                ) : null}
-              </div>
+              <ImSearchBox
+                type="text"
+                placeholder="搜索好友"
+                value={contactFilter}
+                onChange={(e) => setContactFilter(e.target.value)}
+                onClear={() => setContactFilter("")}
+              />
 
-              <div className="sidebar-quick-actions">
-                <button
-                  type="button"
-                  onClick={() => setShowAddFriend(true)}
-                  className="im-action-card is-primary"
-                >
-                  <span className="im-action-icon">
-                    <span className="material-symbols-outlined text-xl">person_add</span>
-                  </span>
-                  <span className="im-action-copy">
-                    <span>添加好友</span>
-                    <small>通过账号、手机号或邮箱查找</small>
-                  </span>
-                  <span className="material-symbols-outlined shrink-0 text-slate-400">chevron_right</span>
-                </button>
-              </div>
-            </SidebarToolbar>
+              <ImActionStrip>
+                <ImActionButton tone="primary" onClick={() => setShowAddFriend(true)}>
+                  添加好友
+                </ImActionButton>
+                <ImActionButton onClick={openRequests}>
+                  好友申请
+                </ImActionButton>
+              </ImActionStrip>
+            </ImSidebarToolbar>
 
-            <SidebarScrollArea>
-              <div className="sidebar-feature-row">
-                <SidebarItem
+            <ImSidebarScroll>
+              <ImSidebarSection>
+                <ImListItem
                   type="button"
                   onClick={openRequests}
                   active={activeRightTab === "requests"}
                 >
-                  <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20">
-                    <span className="material-symbols-outlined text-xl">person_add</span>
-                  </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block text-sm ${activeRightTab === "requests" ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
                       新的朋友
@@ -362,23 +345,21 @@ export default function ContactsPage() {
                       {pendingRequestCount > 99 ? "99+" : pendingRequestCount}
                     </span>
                   ) : null}
-                </SidebarItem>
-              </div>
+                </ImListItem>
+              </ImSidebarSection>
 
-              <SidebarSection title={`我的好友 · ${filteredFriends.length}`}>
+              <ImSidebarSection title={`我的好友 · ${filteredFriends.length}`}>
                 {filteredFriends.length === 0 ? (
-                  <EmptyPanel
+                  <ImEmptyState
                     title={filterKeyword ? "未找到相关好友" : "暂无好友"}
                     description={filterKeyword ? "尝试其他关键词" : "点击上方添加好友"}
-                    icon="contacts"
                     action={
                       !filterKeyword ? (
-                        <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => setShowAddFriend(true)}>
+                        <ImActionButton onClick={() => setShowAddFriend(true)}>
                           添加好友
-                        </button>
+                        </ImActionButton>
                       ) : null
                     }
-                    className="min-h-[120px] border-0 bg-transparent"
                   />
                 ) : (
                   <div className="space-y-4">
@@ -391,7 +372,7 @@ export default function ContactsPage() {
                             const fu = friend.friend_user;
                             const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
                             return (
-                              <SidebarItem
+                              <ImListItem
                                 key={friend.id}
                                 type="button"
                                 active={isActive}
@@ -410,8 +391,7 @@ export default function ContactsPage() {
                                     用户 ID：{fu?.user_id || "-"}
                                   </span>
                                 </span>
-                                <span className="material-symbols-outlined text-base text-slate-300">chevron_right</span>
-                              </SidebarItem>
+                              </ImListItem>
                             );
                           })}
                         </div>
@@ -419,11 +399,11 @@ export default function ContactsPage() {
                     ))}
                   </div>
                 )}
-              </SidebarSection>
-            </SidebarScrollArea>
-          </WorkspaceSidebar>
+              </ImSidebarSection>
+            </ImSidebarScroll>
+          </ImSidebar>
         }
-        main={
+      >
           <div className="workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />
 
@@ -562,22 +542,20 @@ export default function ContactsPage() {
               </div>
             ) : (
               <div className="workspace-empty-wrap">
-                <EmptyPanel
+                <ImEmptyState
                   title="从左侧选择好友查看详情"
                   description="也可以使用上方入口添加新的好友"
-                  icon="person_search"
                   action={
-                    <button type="button" className="im-secondary-button" onClick={() => setShowAddFriend(true)}>
+                    <ImActionButton onClick={() => setShowAddFriend(true)}>
                       添加好友
-                    </button>
+                    </ImActionButton>
                   }
-                  className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900"
+                  className="min-h-[520px] w-full"
                 />
               </div>
             )}
           </div>
-        }
-      />
+      </ImShell>
 
       {showAddFriend && (
         <AddFriendModal

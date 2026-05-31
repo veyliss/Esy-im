@@ -12,19 +12,30 @@ import type { Message, MessageType, Conversation, Group, GroupMessage, GroupMess
 import { UserAPI } from "@/lib/api/user";
 import type { User } from "@/lib/types/api";
 import { handleApiError, createUserFriendlyErrorMessage, isNetworkError, isWebSocketError } from "@/lib/utils/errors";
-import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
 import {
-  EmptyPanel,
-  SidebarItem,
-  SidebarScrollArea,
-  SidebarSearch,
-  SidebarSection,
-  SidebarToolbar,
-  WorkspaceSidebar,
-  WorkspaceSidebarHeader,
-} from "@/components/workspace/section";
-import { UserAvatar } from "@/components/ui/user-avatar";
+  ImActionButton,
+  ImActionStrip,
+  ImCountBadge,
+  ImEmptyState,
+  ImSearchBox,
+  ImShell,
+  ImSidebar,
+  ImSidebarHeader,
+  ImSidebarScroll,
+  ImSidebarSection,
+  ImSidebarToolbar,
+} from "@/components/im/layout";
+import {
+  ChatComposer,
+  ChatConversationHeader,
+  ChatFilterTabs,
+  ChatInspector,
+  ChatMessageList,
+  ChatStartPanel,
+  ConversationItem,
+  type ChatTimelineEntry,
+} from "@/components/im/chat";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 
@@ -600,11 +611,11 @@ export default function ChatPage() {
     return [];
   }, [currentChat, privateMessages, groupMessages]);
 
-  const messageTimeline = useMemo(() => {
+  const messageTimeline = useMemo<ChatTimelineEntry[]>(() => {
     let lastDateLabel = "";
     return currentMessages.flatMap((message) => {
       const dateLabel = formatChatDate(message.created_at);
-      const entries: Array<{ type: "date"; id: string; label: string } | { type: "message"; id: string; message: typeof message }> = [];
+      const entries: ChatTimelineEntry[] = [];
       if (dateLabel && dateLabel !== lastDateLabel) {
         entries.push({ type: "date", id: `date-${dateLabel}-${message.id}`, label: dateLabel });
         lastDateLabel = dateLabel;
@@ -696,67 +707,6 @@ export default function ChatPage() {
     }
   };
 
-  const renderMessage = (message: (typeof currentMessages)[number]) => {
-    const isMyMessage = message.from_user_id === currentUser?.user_id;
-    const messageUser = isMyMessage ? currentUser : message.from_user;
-    const messageTime = message.created_at
-      ? new Date(message.created_at).toLocaleTimeString("zh-CN", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "";
-
-    if (isMyMessage) {
-      return (
-        <div key={message.id} className="chat-bubble-row is-me">
-          <div className="chat-bubble-stack is-me">
-          <div className="chat-bubble is-me">{message.content}</div>
-            <div className="chat-message-actions">
-              <button type="button" onClick={() => handleCopyMessage(message.content)}>
-                复制
-              </button>
-            </div>
-            <span className="chat-message-meta">
-              {messageTime}
-              <span className="material-symbols-outlined">done_all</span>
-            </span>
-          </div>
-          <UserAvatar
-            src={messageUser?.avatar}
-            name={messageUser?.nickname || "我"}
-            size="md"
-            border
-            className="chat-message-avatar"
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div key={message.id} className="chat-bubble-row">
-        <UserAvatar
-          src={messageUser?.avatar}
-          name={messageUser?.nickname || `用户${message.from_user_id}`}
-          size="md"
-          border
-          className="chat-message-avatar"
-        />
-        <div className="chat-bubble-stack">
-          {currentChat?.type === "group" ? (
-            <p className="chat-message-sender">{messageUser?.nickname || `用户${message.from_user_id}`}</p>
-          ) : null}
-          <div className="chat-bubble">{message.content}</div>
-          <div className="chat-message-actions">
-            <button type="button" onClick={() => handleCopyMessage(message.content)}>
-              复制
-            </button>
-          </div>
-          {messageTime ? <span className="chat-message-meta">{messageTime}</span> : null}
-        </div>
-      </div>
-    );
-  };
-
   // 计算总未读数
   const totalUnreadCount = useMemo(() => {
     const groupUnread = Object.values(groupUnreadCounts).reduce((sum, count) => sum + count, 0);
@@ -764,9 +714,10 @@ export default function ChatPage() {
   }, [privateUnreadCount, groupUnreadCounts]);
 
   return (
-    <WorkspaceShell
+    <ImShell
       active="chat"
-      navVariant="modern"
+      title="聊天"
+      subtitle="会话、消息和实时状态"
       mobileDetailActive={Boolean(currentChat)}
       rightSlot={
         <TopBarActions
@@ -786,174 +737,100 @@ export default function ChatPage() {
           ) : null}
         </TopBarActions>
       }
-      mainClassName="bg-gradient-to-b from-slate-50/80 to-white dark:from-[#0f172a] dark:to-[#0f172a]"
+      mainClassName="im3-chat-main"
       sidebar={
-        <WorkspaceSidebar className={compactMessages ? "is-compact" : undefined}>
-          <SidebarToolbar className="space-y-4">
-            <WorkspaceSidebarHeader
+        <ImSidebar className={compactMessages ? "is-compact" : undefined}>
+          <ImSidebarToolbar>
+            <ImSidebarHeader
               eyebrow="消息中心"
               title="会话"
               description="私聊、群聊和未读消息统一在这里处理。"
               action={
                 totalUnreadCount > 0 ? (
-                  <span className="workspace-count-badge">{totalUnreadCount > 99 ? "99+" : totalUnreadCount}</span>
+                  <ImCountBadge>{totalUnreadCount > 99 ? "99+" : totalUnreadCount}</ImCountBadge>
                 ) : null
               }
             />
-            <div className="relative">
-              <SidebarSearch
-                type="text"
-                placeholder="搜索聊天"
-                value={chatFilter}
-                onChange={(e) => setChatFilter(e.target.value)}
-                className={chatFilter ? "pr-12" : undefined}
-              />
-              {chatFilter ? (
-                <button
-                  type="button"
-                  className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300"
-                  onClick={() => setChatFilter("")}
-                  aria-label="清空搜索"
-                  title="清空搜索"
-                >
-                  <span className="material-symbols-outlined text-base">close</span>
-                </button>
-              ) : null}
-            </div>
-            <div className="chat-filter-row" role="tablist" aria-label="会话筛选">
-              {chatModeItems.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={chatMode === item.key}
-                  className={`chat-filter-chip ${chatMode === item.key ? "is-active" : ""}`}
-                  onClick={() => setChatMode(item.key)}
-                >
-                  <span>{item.label}</span>
-                  <strong>{item.count}</strong>
-                </button>
-              ))}
-            </div>
-          </SidebarToolbar>
+            <ImSearchBox
+              type="text"
+              placeholder="搜索聊天"
+              value={chatFilter}
+              onChange={(e) => setChatFilter(e.target.value)}
+              onClear={() => setChatFilter("")}
+            />
+            <ChatFilterTabs active={chatMode} items={chatModeItems} onChange={setChatMode} />
+          </ImSidebarToolbar>
 
-          <SidebarSection title={`会话列表 · ${filteredChatList.length}`} className="flex min-h-0 flex-1 flex-col" bodyClassName="flex-1">
-            <SidebarScrollArea>
-              <div className="space-y-3">
+          <ImSidebarScroll>
+            <ImSidebarSection title={`会话列表 · ${filteredChatList.length}`}>
                 {filteredChatList.length === 0 ? (
-                  <EmptyPanel
+                  <ImEmptyState
                     title={chatFilter.trim() ? "未找到相关聊天" : "暂无聊天记录"}
                     description={chatFilter.trim() ? "尝试更换关键词" : "去通讯录添加好友，或到群聊页面创建群聊"}
-                    icon="forum"
                     action={
                       !chatFilter.trim() ? (
-                        <div className="flex flex-wrap justify-center gap-2">
-                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => router.push("/contacts")}>
+                        <ImActionStrip>
+                          <ImActionButton onClick={() => router.push("/contacts")}>
                             添加好友
-                          </button>
-                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => router.push("/groups")}>
+                          </ImActionButton>
+                          <ImActionButton onClick={() => router.push("/groups")}>
                             创建群聊
-                          </button>
-                        </div>
+                          </ImActionButton>
+                        </ImActionStrip>
                       ) : null
                     }
-                    className="min-h-[220px] border-0 bg-transparent"
                   />
                 ) : (
-                  filteredChatList.map((chatItem) => {
-                    const isActive = currentChat?.id === chatItem.id;
-
-                    return (
-                      <SidebarItem
-                        key={chatItem.id}
-                        onClick={() => handleSelectChat(chatItem)}
-                        active={isActive}
-                        className="min-h-[78px]"
-                      >
-                        <div className="relative">
-                          <UserAvatar
-                            src={chatItem.avatar}
-                            name={chatItem.name}
-                            size="md"
-                            shape={chatItem.type === "group" ? "rounded" : "circle"}
-                            border
-                          />
-                          {chatItem.type === "group" ? (
-                            <span className="absolute -bottom-1 -right-1 rounded bg-slate-700 px-1 text-[10px] font-semibold text-white dark:bg-slate-200 dark:text-slate-900">
-                              群
-                            </span>
-                          ) : null}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex min-w-0 items-center gap-1.5">
-                              {chatItem.pinned ? <span className="chat-list-indicator material-symbols-outlined">keep</span> : null}
-                              {chatItem.muted ? <span className="chat-list-indicator material-symbols-outlined">notifications_off</span> : null}
-                              <p className={`truncate text-sm ${isActive ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>{chatItem.name}</p>
-                            </div>
-                            <p className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
-                              {formatListTime(chatItem.lastMessageTime)}
-                            </p>
-                          </div>
-                          <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">{chatItem.lastMessage || "暂无消息"}</p>
-                        </div>
-
-                        {chatItem.unreadCount > 0 ? (
-                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold text-white ${chatItem.muted ? "bg-slate-400" : "bg-primary"}`}>
-                            {chatItem.unreadCount > 99 ? "99+" : chatItem.unreadCount}
-                          </span>
-                        ) : null}
-                      </SidebarItem>
-                    );
-                  })
+                  filteredChatList.map((chatItem) => (
+                    <ConversationItem
+                      key={chatItem.id}
+                      active={currentChat?.id === chatItem.id}
+                      type={chatItem.type}
+                      name={chatItem.name}
+                      avatar={chatItem.avatar}
+                      lastMessage={chatItem.lastMessage}
+                      time={formatListTime(chatItem.lastMessageTime)}
+                      unreadCount={chatItem.unreadCount}
+                      pinned={chatItem.pinned}
+                      muted={chatItem.muted}
+                      onClick={() => handleSelectChat(chatItem)}
+                    />
+                  ))
                 )}
-              </div>
-            </SidebarScrollArea>
-          </SidebarSection>
-        </WorkspaceSidebar>
+            </ImSidebarSection>
+          </ImSidebarScroll>
+        </ImSidebar>
       }
-      main={
-        currentChat ? (
-          <div className="flex h-full min-w-0 flex-1 flex-col bg-white dark:bg-slate-900">
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 min-h-[76px] px-8 max-sm:px-4 bg-white/92 dark:bg-slate-900/86 backdrop-blur-md">
-              <div className="flex min-w-0 items-center gap-3">
-                <button
-                  type="button"
-                  className="chat-mobile-back workspace-icon-button"
-                  onClick={() => {
-                    setCurrentChat(null);
-                    setInspectorOpen(false);
-                  }}
-                  aria-label="返回会话列表"
-                  title="返回"
-                >
-                  <span className="material-symbols-outlined text-xl">arrow_back</span>
-                </button>
-                <UserAvatar
-                  src={currentChat.avatar}
-                  name={currentChat.name}
-                  size="md"
-                  shape={currentChat.type === "group" ? "rounded" : "circle"}
-                  border
-                />
-                <div className="min-w-0">
-                  <h2 className="truncate text-lg font-bold text-slate-900 dark:text-white">{currentChat.name}</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {currentChat.type === "group" && "member_count" in currentChat.data ? `${currentChat.data.member_count} 位成员` : wsConnected ? "在线" : "连接中"}
-                  </p>
-                </div>
-              </div>
+    >
+      {currentChat ? (
+        <div className="im3-chat-surface">
+          <ChatConversationHeader
+            avatar={currentChat.avatar}
+            name={currentChat.name}
+            shape={currentChat.type === "group" ? "rounded" : "circle"}
+            meta={
+              currentChat.type === "group" && "member_count" in currentChat.data
+                ? `${currentChat.data.member_count} 位成员`
+                : wsConnected
+                  ? "在线"
+                  : "连接中"
+            }
+            onBack={() => {
+              setCurrentChat(null);
+              setInspectorOpen(false);
+            }}
+            actions={
               <button
                 type="button"
-                className="workspace-icon-button"
+                className="im3-icon-button"
                 onClick={() => setInspectorOpen((value) => !value)}
                 aria-label="查看资料"
                 title="查看资料"
               >
-                <span className="material-symbols-outlined text-xl">info</span>
+                <span className="material-symbols-outlined">info</span>
               </button>
-            </div>
+            }
+          />
 
             <ErrorAlert
               error={connectionError}
@@ -963,170 +840,51 @@ export default function ChatPage() {
             />
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-3" />
 
-            <div className="chat-message-list flex-1 space-y-6 overflow-y-auto">
-              {currentMessages.length === 0 ? (
-                <div className="chat-empty-state">
-                  <span className="material-symbols-outlined">forum</span>
-                  <strong>还没有消息</strong>
-                  <p>发一条简短消息，让这个会话开始流动起来。</p>
-                  <button type="button" className="im-secondary-button mt-5" onClick={() => setInspectorOpen(true)}>
-                    查看资料
-                  </button>
-                </div>
-              ) : (
-                messageTimeline.map((entry) => {
-                  if (entry.type === "date") {
-                    return (
-                      <div key={entry.id} className="chat-date-divider">
-                        <span>{entry.label}</span>
-                      </div>
-                    );
-                  }
-                  return renderMessage(entry.message);
-                })
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+            <ChatMessageList
+              entries={messageTimeline}
+              currentUser={currentUser}
+              showSender={currentChat.type === "group"}
+              endRef={messagesEndRef}
+              onCopyMessage={handleCopyMessage}
+              onOpenInspector={() => setInspectorOpen(true)}
+            />
 
-            <div className="chat-composer-shell">
-              <div className="chat-composer">
-                <button
-                  type="button"
-                  className="chat-composer-tool"
-                  onClick={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
-                  aria-label="添加附件"
-                  title="添加附件"
-                >
-                  <span className="material-symbols-outlined">add</span>
-                </button>
-                <div className="chat-composer-input-wrap">
-                  <textarea
-                    ref={composerInputRef}
-                    className="chat-composer-input"
-                    placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
-                    value={messageInput}
-                    onChange={(e) => handleComposerChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!sendingMessage) {
-                          handleSendMessage();
-                        }
-                      }
-                    }}
-                    disabled={sendingMessage}
-                    rows={1}
-                  />
-                  <div className="chat-composer-meta">
-                    <span>{composerHint}</span>
-                    <strong className={messageInput.length > 900 ? "text-amber-500" : ""}>{messageInput.length}/1000</strong>
-                  </div>
-                </div>
-
-                <button
-                  className="chat-send-button"
-                  onClick={handleSendMessage}
-                  disabled={sendingMessage || !messageInput.trim()}
-                  aria-label="发送消息"
-                  title="发送消息"
-                >
-                  <span className="material-symbols-outlined text-xl">{sendingMessage ? "sync" : "send"}</span>
-                </button>
-              </div>
-            </div>
+            <ChatComposer
+              inputRef={composerInputRef}
+              value={messageInput}
+              placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
+              hint={composerHint}
+              sending={sendingMessage}
+              onChange={handleComposerChange}
+              onSend={handleSendMessage}
+              onAttach={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
+            />
 
             {inspectorOpen ? (
-              <aside className="chat-inspector">
-                <div className="chat-inspector-head">
-                  <strong>{currentChat.type === "group" ? "群聊资料" : "联系人资料"}</strong>
-                  <button
-                    type="button"
-                    className="workspace-icon-button"
-                    onClick={() => setInspectorOpen(false)}
-                    aria-label="关闭资料"
-                    title="关闭"
-                  >
-                    <span className="material-symbols-outlined text-xl">close</span>
-                  </button>
-                </div>
-                <div className="chat-inspector-profile">
-                  <UserAvatar
-                    src={currentChat.avatar}
-                    name={currentChat.name}
-                    size="2xl"
-                    shape={currentChat.type === "group" ? "rounded" : "circle"}
-                    border
-                  />
-                  <h3>{currentChat.name}</h3>
-                  <p>
-                    {currentChat.type === "group" && "group_id" in currentChat.data
-                      ? `群号：${currentChat.data.group_id}`
-                      : "私聊会话"}
-                  </p>
-                </div>
-                <div className="chat-inspector-list">
-                  <div>
-                    <span>类型</span>
-                    <strong>{currentChat.type === "group" ? "群聊" : "私聊"}</strong>
-                  </div>
-                  <div>
-                    <span>未读</span>
-                    <strong>{currentChat.unreadCount > 0 ? currentChat.unreadCount : "无"}</strong>
-                  </div>
-                  <div>
-                    <span>消息</span>
-                    <strong>{currentMessages.length} 条</strong>
-                  </div>
-                  {currentChat.type === "group" && "member_count" in currentChat.data ? (
-                    <div>
-                      <span>成员</span>
-                      <strong>{currentChat.data.member_count} 人</strong>
-                    </div>
-                  ) : null}
-                </div>
-                <div className="chat-inspector-actions">
-                  <button type="button" className="im-secondary-button" onClick={handleTogglePinned}>
-                    {currentChat.pinned ? "取消置顶" : "置顶会话"}
-                  </button>
-                  <button type="button" className="im-secondary-button" onClick={handleToggleMuted}>
-                    {currentChat.muted ? "取消免打扰" : "免打扰"}
-                  </button>
-                  {currentChat.type === "group" ? (
-                    <button type="button" className="im-secondary-button" onClick={() => router.push("/groups")}>
-                      群聊详情
-                    </button>
-                  ) : (
-                    <button type="button" className="im-secondary-button" onClick={() => router.push("/contacts")}>
-                      联系人详情
-                    </button>
-                  )}
-                  <button type="button" className="im-danger-button" onClick={handleHideConversation}>
-                    隐藏会话
-                  </button>
-                </div>
-              </aside>
+              <ChatInspector
+                name={currentChat.name}
+                avatar={currentChat.avatar}
+                type={currentChat.type}
+                unreadCount={currentChat.unreadCount}
+                messageCount={currentMessages.length}
+                pinned={currentChat.pinned}
+                muted={currentChat.muted}
+                groupId={currentChat.type === "group" && "group_id" in currentChat.data ? currentChat.data.group_id : undefined}
+                memberCount={currentChat.type === "group" && "member_count" in currentChat.data ? currentChat.data.member_count : undefined}
+                onClose={() => setInspectorOpen(false)}
+                onTogglePinned={handleTogglePinned}
+                onToggleMuted={handleToggleMuted}
+                onOpenDetail={() => router.push(currentChat.type === "group" ? "/groups" : "/contacts")}
+                onHideConversation={handleHideConversation}
+              />
             ) : null}
           </div>
-        ) : (
-          <div className="workspace-empty-wrap">
-            <div className="chat-start-panel">
-              <span className="material-symbols-outlined">chat</span>
-              <h2>选择一个聊天开始交流</h2>
-              <p>会话、群聊和未读消息都在左侧统一管理，进入后可以继续查看资料和发送消息。</p>
-              <div className="chat-start-actions">
-                {firstAvailableChat ? (
-                  <button type="button" onClick={handlePickFirstChat}>
-                    打开最近会话
-                  </button>
-                ) : null}
-                <button type="button" className="is-secondary" onClick={() => router.push("/contacts")}>
-                  去通讯录
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      }
-    />
+      ) : (
+        <ChatStartPanel
+          onOpenRecent={firstAvailableChat ? handlePickFirstChat : undefined}
+          onOpenContacts={() => router.push("/contacts")}
+        />
+      )}
+    </ImShell>
   );
 }

@@ -2,18 +2,20 @@
 
 import { useEffect, useState, useRef } from "react";
 import { MomentItem } from "@/components/moments/MomentItem";
-import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
 import {
   ActionBar,
   EmptyPanel,
   SectionCard,
-  SidebarItem,
-  SidebarSection,
-  SidebarToolbar,
-  WorkspaceSidebar,
-  WorkspaceSidebarHeader,
 } from "@/components/workspace/section";
+import {
+  ImListItem,
+  ImShell,
+  ImSidebar,
+  ImSidebarHeader,
+  ImSidebarSection,
+  ImSidebarToolbar,
+} from "@/components/im/layout";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -290,9 +292,11 @@ export default function MomentsPage() {
   const moments = activeTab === "timeline" ? timeline : myMoments;
 
   return (
-    <WorkspaceShell
+    <ImShell
       active="moments"
-      navVariant="modern"
+      title="朋友圈"
+      subtitle="朋友动态和我的分享"
+      mobileDetailActive
       rightSlot={
         <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
           <TopIconButton icon="add_photo_alternate" label="发布图片" onClick={handleImageSelect} />
@@ -311,9 +315,9 @@ export default function MomentsPage() {
       }
       mainClassName="bg-background-light dark:bg-background-dark"
       sidebar={
-        <WorkspaceSidebar>
-          <SidebarToolbar>
-            <WorkspaceSidebarHeader
+        <ImSidebar>
+          <ImSidebarToolbar>
+            <ImSidebarHeader
               eyebrow="动态"
               title="朋友圈"
               description="浏览朋友近况，也可以记录自己的生活瞬间。"
@@ -330,30 +334,58 @@ export default function MomentsPage() {
                 <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">分享近况与朋友动态</span>
               </div>
             </div>
-          </SidebarToolbar>
-          <SidebarSection title="时间流视图" className="flex-1">
-            <SidebarItem
+          </ImSidebarToolbar>
+          <ImSidebarSection title="时间流视图" className="flex-1">
+            <ImListItem
               type="button"
               active={activeTab === "timeline"}
-              leading={<span className="material-symbols-outlined text-lg">dynamic_feed</span>}
-              title="朋友动态"
-              description={`${timeline.length} 条可见动态`}
               onClick={() => setActiveTab("timeline")}
-            />
-            <SidebarItem
+            >
+              <span className="min-w-0 flex-1">
+                <span className={`block text-sm ${activeTab === "timeline" ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
+                  朋友动态
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">{timeline.length} 条可见动态</span>
+              </span>
+            </ImListItem>
+            <ImListItem
               type="button"
               active={activeTab === "my"}
-              leading={<span className="material-symbols-outlined text-lg">account_circle</span>}
-              title="我的朋友圈"
-              description={`${myMoments.length} 条我的动态`}
               onClick={() => setActiveTab("my")}
-            />
-          </SidebarSection>
-        </WorkspaceSidebar>
+            >
+              <span className="min-w-0 flex-1">
+                <span className={`block text-sm ${activeTab === "my" ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
+                  我的朋友圈
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">{myMoments.length} 条我的动态</span>
+              </span>
+            </ImListItem>
+          </ImSidebarSection>
+        </ImSidebar>
       }
-      main={
+    >
         <div className="h-full overflow-y-auto bg-gradient-to-b from-slate-50 to-white px-8 py-[30px] dark:from-[#101922] dark:to-[#0f172a] max-sm:px-[18px] max-sm:py-5">
           <div className="mx-auto max-w-3xl space-y-7">
+            <div className="im3-mobile-tabs" role="tablist" aria-label="朋友圈视图">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "timeline"}
+                className={activeTab === "timeline" ? "is-active" : undefined}
+                onClick={() => setActiveTab("timeline")}
+              >
+                朋友动态
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "my"}
+                className={activeTab === "my" ? "is-active" : undefined}
+                onClick={() => setActiveTab("my")}
+              >
+                我的朋友圈
+              </button>
+            </div>
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
             <SectionCard className="moment-composer border-slate-200 dark:border-slate-700">
               <div className="flex gap-4">
@@ -479,7 +511,6 @@ export default function MomentsPage() {
             </div>
           </div>
         </div>
-      }
-    />
+    </ImShell>
   );
 }

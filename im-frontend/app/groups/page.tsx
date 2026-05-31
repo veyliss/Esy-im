@@ -5,18 +5,20 @@ import { useAuthStore } from "@/lib/store";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
-import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopIconButton } from "@/components/layout/top-actions";
 import {
-  EmptyPanel,
-  SidebarItem,
-  SidebarScrollArea,
-  SidebarSearch,
-  SidebarSection,
-  SidebarToolbar,
-  WorkspaceSidebar,
-  WorkspaceSidebarHeader,
-} from "@/components/workspace/section";
+  ImActionButton,
+  ImActionStrip,
+  ImEmptyState,
+  ImListItem,
+  ImSearchBox,
+  ImShell,
+  ImSidebar,
+  ImSidebarHeader,
+  ImSidebarScroll,
+  ImSidebarSection,
+  ImSidebarToolbar,
+} from "@/components/im/layout";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -92,9 +94,10 @@ export default function GroupsPage() {
 
   return (
     <>
-      <WorkspaceShell
+      <ImShell
         active="groups"
-        navVariant="modern"
+        title="群聊"
+        subtitle="多人会话、群成员和群资料"
         mobileDetailActive={Boolean(currentGroup)}
         rightSlot={
           <TopBarActions avatarSrc={currentUser?.avatar} avatarName={currentUser?.nickname || "我"}>
@@ -103,98 +106,59 @@ export default function GroupsPage() {
           </TopBarActions>
         }
         sidebar={
-          <WorkspaceSidebar>
-            <SidebarToolbar>
-              <WorkspaceSidebarHeader
+          <ImSidebar>
+            <ImSidebarToolbar>
+              <ImSidebarHeader
                 eyebrow="多人会话"
                 title="群聊"
                 description="创建、加入和管理你的群组关系。"
               />
-              <div className="relative">
-                <SidebarSearch
-                  type="text"
-                  placeholder="搜索我的群聊"
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
-                  className={searchKeyword ? "pr-12" : undefined}
-                />
-                {searchKeyword ? (
-                  <button
-                    type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex size-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300"
-                    onClick={() => setSearchKeyword("")}
-                    aria-label="清空搜索"
-                    title="清空搜索"
-                  >
-                    <span className="material-symbols-outlined text-base">close</span>
-                  </button>
-                ) : null}
-              </div>
-              <div className="sidebar-quick-actions">
-                <button
-                  type="button"
-                  onClick={() => setShowJoinModal(true)}
-                  className="im-action-card"
-                >
-                  <span className="im-action-icon">
-                    <span className="material-symbols-outlined text-xl">group_add</span>
-                  </span>
-                  <span className="im-action-copy">
-                    <span>加入群聊</span>
-                    <small>搜索群号或关键词</small>
-                  </span>
-                  <span className="material-symbols-outlined shrink-0 text-slate-400">chevron_right</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(true)}
-                  className="im-action-card is-primary"
-                >
-                  <span className="im-action-icon">
-                    <span className="material-symbols-outlined text-xl">add</span>
-                  </span>
-                  <span className="im-action-copy">
-                    <span>创建群聊</span>
-                    <small>发起新的多人会话</small>
-                  </span>
-                  <span className="material-symbols-outlined shrink-0 text-slate-400">chevron_right</span>
-                </button>
-              </div>
-            </SidebarToolbar>
+              <ImSearchBox
+                type="text"
+                placeholder="搜索我的群聊"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onClear={() => setSearchKeyword("")}
+              />
+              <ImActionStrip>
+                <ImActionButton onClick={() => setShowJoinModal(true)}>
+                  加入群聊
+                </ImActionButton>
+                <ImActionButton tone="primary" onClick={() => setShowCreateModal(true)}>
+                  创建群聊
+                </ImActionButton>
+              </ImActionStrip>
+            </ImSidebarToolbar>
 
-            <SidebarSection
+            <ImSidebarScroll>
+            <ImSidebarSection
               title={searchKeyword.trim() ? `筛选结果 · ${filteredGroups.length}` : `我的群聊 · ${filteredGroups.length}`}
-              className="flex min-h-0 flex-1 flex-col"
-              bodyClassName="flex-1"
             >
-              <SidebarScrollArea>
                 {loading ? (
                   <PageLoading message="加载群组中..." size="sm" />
                 ) : filteredGroups.length === 0 ? (
-                  <EmptyPanel
+                  <ImEmptyState
                     title={searchKeyword.trim() ? "未找到相关群聊" : "暂无群聊"}
                     description={searchKeyword.trim() ? "尝试其他关键词" : "可以创建群聊，或搜索公开群聊加入"}
-                    icon="groups"
                     action={
                       !searchKeyword.trim() ? (
-                        <div className="flex flex-wrap justify-center gap-2">
-                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => setShowJoinModal(true)}>
+                        <ImActionStrip>
+                          <ImActionButton onClick={() => setShowJoinModal(true)}>
                             加入群聊
-                          </button>
-                          <button type="button" className="im-secondary-button min-h-9 text-xs" onClick={() => setShowCreateModal(true)}>
+                          </ImActionButton>
+                          <ImActionButton onClick={() => setShowCreateModal(true)}>
                             创建群聊
-                          </button>
-                        </div>
+                          </ImActionButton>
+                        </ImActionStrip>
                       ) : null
                     }
-                    className="min-h-[220px] border-0 bg-transparent"
                   />
                 ) : (
                   <div className="space-y-3">
                     {filteredGroups.map((group) => {
                       const isActive = currentGroup?.group_id === group.group_id;
                       return (
-                        <SidebarItem
+                        <ImListItem
                           key={group.group_id}
                           active={isActive}
                           onClick={() => setCurrentGroup(group)}
@@ -210,16 +174,16 @@ export default function GroupsPage() {
                             <p className={`truncate text-sm font-semibold ${isActive ? "text-primary" : "text-slate-900 dark:text-slate-100"}`}>{group.name}</p>
                             <p className="text-xs text-slate-500 dark:text-slate-400">{group.member_count} 人</p>
                           </div>
-                        </SidebarItem>
+                        </ImListItem>
                       );
                     })}
                   </div>
                 )}
-              </SidebarScrollArea>
-            </SidebarSection>
-          </WorkspaceSidebar>
+            </ImSidebarSection>
+            </ImSidebarScroll>
+          </ImSidebar>
         }
-        main={
+      >
           <div className="workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />
             {currentGroup ? (
@@ -233,27 +197,25 @@ export default function GroupsPage() {
               />
             ) : (
               <div className="workspace-empty-wrap">
-                <EmptyPanel
+                <ImEmptyState
                   title="选择一个群聊查看详情"
                   description="也可以创建群聊，或搜索公开群聊加入"
-                  icon="groups"
                   action={
-                    <div className="flex flex-wrap justify-center gap-2">
-                      <button type="button" className="im-secondary-button" onClick={() => setShowJoinModal(true)}>
+                    <ImActionStrip>
+                      <ImActionButton onClick={() => setShowJoinModal(true)}>
                         加入群聊
-                      </button>
-                      <button type="button" className="im-primary-button" onClick={() => setShowCreateModal(true)}>
+                      </ImActionButton>
+                      <ImActionButton tone="primary" onClick={() => setShowCreateModal(true)}>
                         创建群聊
-                      </button>
-                    </div>
+                      </ImActionButton>
+                    </ImActionStrip>
                   }
-                  className="min-h-[520px] w-full border-0 bg-white dark:bg-slate-900"
+                  className="min-h-[520px] w-full"
                 />
               </div>
             )}
           </div>
-        }
-      />
+      </ImShell>
 
       {showCreateModal && (
         <CreateGroupModal

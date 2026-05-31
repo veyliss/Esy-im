@@ -2,9 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { TopBarActions, TopStatusPill } from "@/components/layout/top-actions";
-import { SidebarItem, SidebarSection, SidebarToolbar, WorkspaceSidebar, WorkspaceSidebarHeader } from "@/components/workspace/section";
+import {
+  ImListItem,
+  ImShell,
+  ImSidebar,
+  ImSidebarHeader,
+  ImSidebarSection,
+  ImSidebarToolbar,
+} from "@/components/im/layout";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -294,65 +300,75 @@ export default function MePage() {
 
   if (loading) {
     return (
-      <WorkspaceShell
+      <ImShell
         active="me"
-        navVariant="modern"
-        sidebar={<div className="h-full bg-white/60 dark:bg-slate-900/40" />}
-        main={
+        title="我的"
+        subtitle="资料和设置"
+        mobileDetailActive
+        sidebar={<ImSidebar />}
+      >
           <div className="me-loading-wrap">
             <PageLoading message="加载个人资料..." size="md" />
           </div>
-        }
-      />
+      </ImShell>
     );
   }
 
   return (
-    <WorkspaceShell
+    <ImShell
       active="me"
-      navVariant="modern"
-      mobileDetailActive={false}
+      title="我的"
+      subtitle="资料、安全和偏好"
+      mobileDetailActive
       rightSlot={
         <TopBarActions avatarSrc={avatar || currentUser?.avatar} avatarName={nickname || currentUser?.nickname || "我"}>
           {hasChanges ? <TopStatusPill tone="warning">有未保存修改</TopStatusPill> : null}
         </TopBarActions>
       }
       sidebar={
-        <WorkspaceSidebar>
-          <SidebarToolbar>
-            <WorkspaceSidebarHeader
+        <ImSidebar>
+          <ImSidebarToolbar>
+            <ImSidebarHeader
               eyebrow="设置"
               title="我的"
               description="资料、账号安全和退出登录集中在这里。"
             />
-          </SidebarToolbar>
-          <SidebarSection title="设置目录" className="flex-1" bodyClassName="space-y-1">
-            <SidebarItem
+          </ImSidebarToolbar>
+          <ImSidebarSection title="设置目录" className="flex-1">
+            <ImListItem
               active
-              leading={<span className="material-symbols-outlined text-lg">person</span>}
-              title="我的资料"
-              description="头像、昵称、账号信息"
               onClick={() => document.getElementById("profile-section")?.scrollIntoView({ behavior: "smooth" })}
-            />
-            <SidebarItem
-              leading={<span className="material-symbols-outlined text-lg">badge</span>}
-              title="账号信息"
-              description="用户 ID、邮箱、创建时间"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-primary">我的资料</span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">头像、昵称、账号信息</span>
+              </span>
+            </ImListItem>
+            <ImListItem
               onClick={() => document.getElementById("account-section")?.scrollIntoView({ behavior: "smooth" })}
-            />
-            <SidebarItem
-              leading={<span className="material-symbols-outlined text-lg">shield_lock</span>}
-              title="账号与安全"
-              description="修改密码与登录安全"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">账号信息</span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">用户 ID、邮箱、创建时间</span>
+              </span>
+            </ImListItem>
+            <ImListItem
               onClick={() => document.getElementById("security-section")?.scrollIntoView({ behavior: "smooth" })}
-            />
-            <SidebarItem
-              leading={<span className="material-symbols-outlined text-lg">tune</span>}
-              title="偏好设置"
-              description="通知和显示习惯"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">账号与安全</span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">修改密码与登录安全</span>
+              </span>
+            </ImListItem>
+            <ImListItem
               onClick={() => document.getElementById("preference-section")?.scrollIntoView({ behavior: "smooth" })}
-            />
-          </SidebarSection>
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">偏好设置</span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">通知和显示习惯</span>
+              </span>
+            </ImListItem>
+          </ImSidebarSection>
 
           <div className="me-sidebar-footer">
             <button type="button" onClick={handleLogout} disabled={logoutLoading} className="me-logout-button">
@@ -360,9 +376,9 @@ export default function MePage() {
               <span>{logoutLoading ? "退出中..." : "退出登录"}</span>
             </button>
           </div>
-        </WorkspaceSidebar>
+        </ImSidebar>
       }
-      main={
+    >
         <div className="me-page workspace-main-panel">
           <div className="me-page-inner">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
@@ -577,7 +593,6 @@ export default function MePage() {
             </div>
           </div>
         </div>
-      }
-    />
+    </ImShell>
   );
 }
