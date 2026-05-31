@@ -32,6 +32,10 @@ export function ImShell({
       <div className="im3-app">
         <header className="im3-topbar">
           <div className="im3-topbar-main">
+            <div className="im3-desktop-heading">
+              <strong>{title}</strong>
+              {subtitle ? <span>{subtitle}</span> : null}
+            </div>
             <div className="im3-mobile-heading">
               <strong>{title}</strong>
               {subtitle ? <span>{subtitle}</span> : null}
