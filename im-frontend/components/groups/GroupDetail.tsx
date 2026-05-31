@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
@@ -19,8 +19,17 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
   const { groupMembers, setGroupMembers } = useGroupStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [memberKeyword, setMemberKeyword] = useState("");
 
-  const members = groupMembers[group.group_id] || [];
+  const members = useMemo(() => groupMembers[group.group_id] || [], [groupMembers, group.group_id]);
+  const filteredMembers = useMemo(() => {
+    const keyword = memberKeyword.trim().toLowerCase();
+    if (!keyword) return members;
+    return members.filter((member) => {
+      const displayName = member.nickname || member.user?.nickname || `用户${member.user_id}`;
+      return displayName.toLowerCase().includes(keyword) || member.user_id.toLowerCase().includes(keyword);
+    });
+  }, [memberKeyword, members]);
 
   const loadGroupMembers = async () => {
     try {
@@ -71,6 +80,15 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
     router.push("/chat");
   };
 
+  const handleCopyGroupId = async () => {
+    try {
+      await navigator.clipboard.writeText(group.group_id);
+      toast("群号已复制", { tone: "success" });
+    } catch {
+      setError("复制失败，请手动复制群号");
+    }
+  };
+
   return (
     <div className="im-detail-page flex min-h-[520px] flex-col">
       <div className="im-detail-inner">
@@ -98,9 +116,31 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
           </div>
         </div>
 
+        <div className="im-detail-stats">
+          <div>
+            <span>成员</span>
+            <strong>{group.member_count}</strong>
+          </div>
+          <div>
+            <span>容量</span>
+            <strong>{group.max_members}</strong>
+          </div>
+          <div>
+            <span>加入方式</span>
+            <strong>{group.join_approval ? "需要审核" : "直接加入"}</strong>
+          </div>
+          <div>
+            <span>可见性</span>
+            <strong>{group.is_public ? "公开" : "私密"}</strong>
+          </div>
+        </div>
+
         <ActionBar className="mt-8 justify-start">
           <button type="button" onClick={handleSendMessage} className="im-primary-button">
             发消息
+          </button>
+          <button type="button" onClick={handleCopyGroupId} className="im-secondary-button">
+            复制群号
           </button>
           <button
             type="button"
@@ -113,14 +153,35 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        <SectionTitle title="群成员" className="mb-5 border-b border-slate-200 pb-3 dark:border-slate-800" />
+        <SectionTitle
+          title={`群成员 · ${filteredMembers.length}`}
+          description="成员角色和群内昵称会显示在这里。"
+          className="mb-5 border-b border-slate-200 pb-3 dark:border-slate-800"
+        />
+        <div className="group-member-search">
+          <span className="material-symbols-outlined">search</span>
+          <input
+            value={memberKeyword}
+            onChange={(event) => setMemberKeyword(event.target.value)}
+            placeholder="搜索成员昵称或用户 ID"
+          />
+          {memberKeyword ? (
+            <button type="button" onClick={() => setMemberKeyword("")} aria-label="清空成员搜索" title="清空搜索">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          ) : null}
+        </div>
         {loading ? (
           <PageLoading message="加载群成员中..." size="sm" />
-        ) : members.length === 0 ? (
-          <EmptyPanel title="暂无成员信息" description="稍后刷新再试" className="min-h-[220px] border-0 bg-transparent" />
+        ) : filteredMembers.length === 0 ? (
+          <EmptyPanel
+            title={memberKeyword.trim() ? "未找到相关成员" : "暂无成员信息"}
+            description={memberKeyword.trim() ? "试试其他昵称或用户 ID" : "稍后刷新再试"}
+            className="min-h-[220px] border-0 bg-transparent"
+          />
         ) : (
           <div className="im-list-grid">
-            {members.map((member) => (
+            {filteredMembers.map((member) => (
               <div
                 key={member.user_id}
                 className="im-list-row"

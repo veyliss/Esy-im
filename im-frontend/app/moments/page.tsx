@@ -25,6 +25,8 @@ import { UserAPI } from "@/lib/api/user";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { User } from "@/lib/types/api";
 
+const momentsDraftKey = "esy-im:moments-draft";
+
 export default function MomentsPage() {
   const { confirm, toast } = useAppInteractions();
   const token = useAuthStore((state) => state.token);
@@ -45,6 +47,7 @@ export default function MomentsPage() {
   const [content, setContent] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [location, setLocation] = useState("");
+  const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const visible: 0 | 1 | 2 = 0;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +77,26 @@ export default function MomentsPage() {
       loadCurrentUser();
     }
   }, [token]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(momentsDraftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { content?: string; location?: string };
+      setContent(draft.content || "");
+      setLocation(draft.location || "");
+    } catch {
+      window.localStorage.removeItem(momentsDraftKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (content.trim() || location.trim()) {
+      window.localStorage.setItem(momentsDraftKey, JSON.stringify({ content, location }));
+    } else {
+      window.localStorage.removeItem(momentsDraftKey);
+    }
+  }, [content, location]);
 
   // 加载时间线
   const loadTimeline = async () => {
@@ -119,11 +142,13 @@ export default function MomentsPage() {
 
   // 发布动态
   const handlePublish = async () => {
+    if (publishing) return;
     if (!content.trim() && images.length === 0) {
       setError("请输入内容或添加图片");
       return;
     }
 
+    setPublishing(true);
     try {
       const res = await MomentAPI.createMoment({
         content: content.trim(),
@@ -136,12 +161,15 @@ export default function MomentsPage() {
         setContent("");
         setImages([]);
         setLocation("");
+        window.localStorage.removeItem(momentsDraftKey);
         await loadTimeline();
         toast("动态已发布", { tone: "success" });
       }
     } catch (e) {
       const apiError = handleApiError(e);
       setError(createUserFriendlyErrorMessage(apiError));
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -237,6 +265,9 @@ export default function MomentsPage() {
     try {
       const remainingSlots = Math.max(0, 9 - images.length);
       const pickedFiles = Array.from(files).slice(0, remainingSlots);
+      if (files.length > remainingSlots) {
+        toast("最多只能添加 9 张图片", { tone: "warning" });
+      }
       const newImages = await Promise.all(pickedFiles.map(readImageAsDataUrl));
       setImages([...images, ...newImages].slice(0, 9));
       e.target.value = "";
@@ -247,6 +278,13 @@ export default function MomentsPage() {
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const clearComposer = () => {
+    setContent("");
+    setImages([]);
+    setLocation("");
+    window.localStorage.removeItem(momentsDraftKey);
   };
 
   const moments = activeTab === "timeline" ? timeline : myMoments;
@@ -343,22 +381,34 @@ export default function MomentsPage() {
                     />
                   </div>
                   <ActionBar className="mt-3 justify-between">
-                    <button
-                      onClick={handleImageSelect}
-                      type="button"
-                      className="im-secondary-button min-h-9 px-3 text-sm"
-                    >
-                      <span className="material-symbols-outlined text-xl">image</span>
-                      {images.length > 0 ? `${images.length}/9` : "图片"}
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={handleImageSelect}
+                        type="button"
+                        className="im-secondary-button min-h-9 px-3 text-sm"
+                      >
+                        <span className="material-symbols-outlined text-xl">image</span>
+                        {images.length > 0 ? `${images.length}/9` : "图片"}
+                      </button>
+                      {content.trim() || location.trim() || images.length > 0 ? (
+                        <button
+                          onClick={clearComposer}
+                          type="button"
+                          className="im-secondary-button min-h-9 px-3 text-sm"
+                          disabled={publishing}
+                        >
+                          清空
+                        </button>
+                      ) : null}
+                    </div>
                     <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">{content.length}/500</span>
                     <button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!content.trim() && images.length === 0}
+                      disabled={publishing || (!content.trim() && images.length === 0)}
                       className="im-primary-button"
                     >
-                      发布
+                      {publishing ? "发布中..." : "发布"}
                     </button>
                   </ActionBar>
 

@@ -23,6 +23,7 @@ export function MomentItem({
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentContent, setCommentContent] = useState("");
   const [replyTo, setReplyTo] = useState<MomentComment | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const images = (() => {
     if (!moment.images) return [];
@@ -108,10 +109,13 @@ export function MomentItem({
       {images.length > 0 && (
         <div className={`grid gap-1 bg-slate-100 p-px dark:bg-slate-800 ${images.length === 1 ? "" : "grid-cols-3"}`}>
           {images.map((img: string, index: number) => (
-            <div
+            <button
+              type="button"
               key={index}
-              className={`${images.length === 1 ? "aspect-video" : "aspect-square"} overflow-hidden bg-cover bg-center`}
+              className={`moment-image-button ${images.length === 1 ? "aspect-video" : "aspect-square"}`}
               style={{ backgroundImage: `url(${img})` }}
+              onClick={() => setPreviewImage(img)}
+              aria-label="预览图片"
             />
           ))}
         </div>
@@ -229,6 +233,22 @@ export function MomentItem({
           </div>
         )}
       </div>
+
+      {previewImage ? (
+        <div className="moment-preview-overlay" role="dialog" aria-modal="true" onClick={() => setPreviewImage(null)}>
+          <button
+            type="button"
+            className="moment-preview-close"
+            onClick={() => setPreviewImage(null)}
+            aria-label="关闭预览"
+            title="关闭"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewImage} alt="动态图片预览" onClick={(event) => event.stopPropagation()} />
+        </div>
+      ) : null}
     </article>
   );
 }

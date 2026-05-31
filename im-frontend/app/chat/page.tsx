@@ -68,6 +68,10 @@ function formatListTime(value?: string) {
   return date.toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" });
 }
 
+function getChatDraftKey(chat: ChatItem) {
+  return `esy-im:draft:${chat.id}`;
+}
+
 export default function ChatPage() {
   const { toast } = useAppInteractions();
   const router = useRouter();
@@ -105,6 +109,7 @@ export default function ChatPage() {
   const [chatMode, setChatMode] = useState<ChatFilterMode>("all");
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const composerInputRef = useRef<HTMLTextAreaElement>(null);
 
   // 加载当前用户信息
   useEffect(() => {
@@ -362,6 +367,17 @@ export default function ChatPage() {
     }
   };
 
+  useEffect(() => {
+    if (!currentChat) {
+      setMessageInput("");
+      return;
+    }
+
+    const draft = window.localStorage.getItem(getChatDraftKey(currentChat)) || "";
+    setMessageInput(draft);
+    window.setTimeout(() => composerInputRef.current?.focus(), 80);
+  }, [currentChat]);
+
   // 发送消息
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !currentChat || !currentUser) return;
@@ -380,6 +396,8 @@ export default function ChatPage() {
         setError("消息内容过长，请控制在1000字符以内");
         return;
       }
+
+      const draftKey = getChatDraftKey(currentChat);
 
       if (currentChat.type === 'private' && 'id' in currentChat.data) {
         // 发送私聊消息
@@ -402,6 +420,7 @@ export default function ChatPage() {
           
           addPrivateMessage(message);
           setMessageInput("");
+          window.localStorage.removeItem(draftKey);
           await loadConversations();
         }
       } else if (currentChat.type === 'group' && 'group_id' in currentChat.data) {
@@ -422,6 +441,7 @@ export default function ChatPage() {
           
           addGroupMessage(group.group_id, message);
           setMessageInput("");
+          window.localStorage.removeItem(draftKey);
           await loadGroups();
         }
       }
@@ -579,10 +599,19 @@ export default function ChatPage() {
   };
 
   const handleComposerChange = (value: string) => {
-    if (value.length <= 1000) {
-      setMessageInput(value);
-    } else {
-      setMessageInput(value.slice(0, 1000));
+    const nextValue = value.length <= 1000 ? value : value.slice(0, 1000);
+    setMessageInput(nextValue);
+
+    if (currentChat) {
+      const draftKey = getChatDraftKey(currentChat);
+      if (nextValue.trim()) {
+        window.localStorage.setItem(draftKey, nextValue);
+      } else {
+        window.localStorage.removeItem(draftKey);
+      }
+    }
+
+    if (value.length > 1000) {
       toast("消息最多 1000 个字符", { tone: "warning" });
     }
   };
@@ -681,12 +710,26 @@ export default function ChatPage() {
                 ) : null
               }
             />
-            <SidebarSearch
-              type="text"
-              placeholder="搜索聊天"
-              value={chatFilter}
-              onChange={(e) => setChatFilter(e.target.value)}
-            />
+            <div className="relative">
+              <SidebarSearch
+                type="text"
+                placeholder="搜索聊天"
+                value={chatFilter}
+                onChange={(e) => setChatFilter(e.target.value)}
+                className={chatFilter ? "pr-12" : undefined}
+              />
+              {chatFilter ? (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                  onClick={() => setChatFilter("")}
+                  aria-label="清空搜索"
+                  title="清空搜索"
+                >
+                  <span className="material-symbols-outlined text-base">close</span>
+                </button>
+              ) : null}
+            </div>
             <div className="chat-filter-row" role="tablist" aria-label="会话筛选">
               {chatModeItems.map((item) => (
                 <button
@@ -704,7 +747,7 @@ export default function ChatPage() {
             </div>
           </SidebarToolbar>
 
-          <SidebarSection title="会话列表" className="flex min-h-0 flex-1 flex-col" bodyClassName="flex-1">
+          <SidebarSection title={`会话列表 · ${filteredChatList.length}`} className="flex min-h-0 flex-1 flex-col" bodyClassName="flex-1">
             <SidebarScrollArea>
               <div className="space-y-3">
                 {filteredChatList.length === 0 ? (
@@ -864,6 +907,7 @@ export default function ChatPage() {
                 </button>
                 <div className="chat-composer-input-wrap">
                   <textarea
+                    ref={composerInputRef}
                     className="chat-composer-input"
                     placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
                     value={messageInput}
@@ -934,6 +978,10 @@ export default function ChatPage() {
                   <div>
                     <span>未读</span>
                     <strong>{currentChat.unreadCount > 0 ? currentChat.unreadCount : "无"}</strong>
+                  </div>
+                  <div>
+                    <span>消息</span>
+                    <strong>{currentMessages.length} 条</strong>
                   </div>
                   {currentChat.type === "group" && "member_count" in currentChat.data ? (
                     <div>

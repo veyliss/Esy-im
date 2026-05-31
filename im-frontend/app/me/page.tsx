@@ -38,6 +38,18 @@ function passwordStrength(password: string) {
   return { score, label: "较强", tone: "success" as const };
 }
 
+type UserPreferences = {
+  desktopNotifications: boolean;
+  compactMessages: boolean;
+};
+
+const defaultPreferences: UserPreferences = {
+  desktopNotifications: true,
+  compactMessages: false,
+};
+
+const preferencesStorageKey = "esy-im:user-preferences";
+
 export default function MePage() {
   const { confirm, toast } = useAppInteractions();
   const router = useRouter();
@@ -54,6 +66,9 @@ export default function MePage() {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [desktopNotifications, setDesktopNotifications] = useState(true);
+  const [compactMessages, setCompactMessages] = useState(false);
+  const [savedPreferences, setSavedPreferences] = useState<UserPreferences>(defaultPreferences);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -83,12 +98,33 @@ export default function MePage() {
     }
   }, [token]);
 
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(preferencesStorageKey);
+      const parsed = raw ? (JSON.parse(raw) as Partial<UserPreferences>) : {};
+      const nextPreferences = {
+        ...defaultPreferences,
+        ...parsed,
+      };
+      setSavedPreferences(nextPreferences);
+      setDesktopNotifications(nextPreferences.desktopNotifications);
+      setCompactMessages(nextPreferences.compactMessages);
+    } catch {
+      setSavedPreferences(defaultPreferences);
+      setDesktopNotifications(defaultPreferences.desktopNotifications);
+      setCompactMessages(defaultPreferences.compactMessages);
+    }
+  }, []);
+
   const hasPasswordInput = Boolean(newPassword || confirmPassword);
   const hasProfileChanges = Boolean(
     currentUser &&
       (nickname.trim() !== (currentUser.nickname || "") || avatar !== (currentUser.avatar || "")),
   );
-  const hasChanges = hasProfileChanges || hasPasswordInput;
+  const hasPreferenceChanges =
+    desktopNotifications !== savedPreferences.desktopNotifications ||
+    compactMessages !== savedPreferences.compactMessages;
+  const hasChanges = hasProfileChanges || hasPasswordInput || hasPreferenceChanges;
 
   const strength = useMemo(() => passwordStrength(newPassword), [newPassword]);
 
@@ -105,6 +141,8 @@ export default function MePage() {
     setAvatar(currentUser.avatar || "");
     setNewPassword("");
     setConfirmPassword("");
+    setDesktopNotifications(savedPreferences.desktopNotifications);
+    setCompactMessages(savedPreferences.compactMessages);
     setError(null);
   };
 
@@ -160,13 +198,15 @@ export default function MePage() {
 
     setSaving(true);
     try {
-      const profileRes = await UserAPI.updateProfile({
-        nickname: nickname.trim(),
-        avatar: avatar || undefined,
-      });
+      if (hasProfileChanges) {
+        const profileRes = await UserAPI.updateProfile({
+          nickname: nickname.trim(),
+          avatar: avatar || undefined,
+        });
 
-      if (profileRes.data.code !== 0) {
-        throw new Error(profileRes.data.msg || "个人信息更新失败");
+        if (profileRes.data.code !== 0) {
+          throw new Error(profileRes.data.msg || "个人信息更新失败");
+        }
       }
 
       if (hasPasswordInput) {
@@ -182,18 +222,26 @@ export default function MePage() {
         }
       }
 
-      const userRes = await UserAPI.getMe();
-      if (userRes.data.code === 0) {
-        const user = userRes.data.data;
-        setCurrentUser(user);
-        setNickname(user.nickname || "");
-        setAvatar(user.avatar || "");
+      if (hasPreferenceChanges) {
+        const nextPreferences = { desktopNotifications, compactMessages };
+        window.localStorage.setItem(preferencesStorageKey, JSON.stringify(nextPreferences));
+        setSavedPreferences(nextPreferences);
+      }
+
+      if (hasProfileChanges) {
+        const userRes = await UserAPI.getMe();
+        if (userRes.data.code === 0) {
+          const user = userRes.data.data;
+          setCurrentUser(user);
+          setNickname(user.nickname || "");
+          setAvatar(user.avatar || "");
+        }
       }
 
       setNewPassword("");
       setConfirmPassword("");
       setError(null);
-      toast("资料已保存", { tone: "success" });
+      toast(hasPreferenceChanges && !hasProfileChanges && !hasPasswordInput ? "偏好已保存" : "资料已保存", { tone: "success" });
     } catch (error) {
       const apiError = handleApiError(error);
       setError(createUserFriendlyErrorMessage(apiError));
@@ -278,6 +326,12 @@ export default function MePage() {
               title="账号与安全"
               description="修改密码与登录安全"
               onClick={() => document.getElementById("security-section")?.scrollIntoView({ behavior: "smooth" })}
+            />
+            <SidebarItem
+              leading={<span className="material-symbols-outlined text-lg">tune</span>}
+              title="偏好设置"
+              description="通知和显示习惯"
+              onClick={() => document.getElementById("preference-section")?.scrollIntoView({ behavior: "smooth" })}
             />
           </SidebarSection>
 
@@ -443,12 +497,53 @@ export default function MePage() {
                   </div>
                 </div>
               </section>
+
+              <section className="me-panel is-wide" id="preference-section" aria-labelledby="me-preference-title">
+                <div className="me-panel-head">
+                  <span className="material-symbols-outlined">tune</span>
+                  <div>
+                    <h2 id="me-preference-title">偏好设置</h2>
+                    <p>这些设置先保存在当前前端会话中，后续可以接入后端持久化。</p>
+                  </div>
+                </div>
+
+                <div className="me-preference-list">
+                  <label>
+                    <span>
+                      <strong>桌面通知</strong>
+                      <small>收到新消息时显示浏览器通知提醒。</small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={desktopNotifications}
+                      onChange={(event) => setDesktopNotifications(event.target.checked)}
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      <strong>紧凑消息列表</strong>
+                      <small>提高会话列表密度，适合小屏或高频切换。</small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={compactMessages}
+                      onChange={(event) => setCompactMessages(event.target.checked)}
+                    />
+                  </label>
+                </div>
+              </section>
             </div>
 
             <div className="me-save-bar">
               <div>
-                <strong>{hasChanges ? "有未保存修改" : "资料已同步"}</strong>
-                <span>{hasPasswordInput ? "保存后需要重新登录" : "修改资料后记得保存"}</span>
+                <strong>{hasChanges ? "有未保存修改" : "资料与偏好已同步"}</strong>
+                <span>
+                  {hasPasswordInput
+                    ? "保存后需要重新登录"
+                    : hasPreferenceChanges
+                      ? "偏好设置会保存在当前浏览器"
+                      : "修改资料或偏好后记得保存"}
+                </span>
               </div>
               <div className="me-save-actions">
                 <button type="button" onClick={handleCancel} disabled={saving || !hasChanges} className="im-secondary-button">

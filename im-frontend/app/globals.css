@@ -1760,6 +1760,39 @@ html, body {
   font-weight: 700;
 }
 
+.im-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.im-detail-stats > div {
+  min-width: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.im-detail-stats span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.im-detail-stats strong {
+  display: block;
+  margin-top: 8px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .im-list-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -1777,6 +1810,53 @@ html, body {
 
 .im-list-row:hover {
   background: #f8fafc;
+}
+
+.group-member-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-bottom: 18px;
+  padding: 0 12px;
+}
+
+.group-member-search > .material-symbols-outlined {
+  color: #94a3b8;
+  font-size: 20px;
+}
+
+.group-member-search input {
+  min-width: 0;
+  height: 44px;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  font-size: 14px;
+  outline: none;
+}
+
+.group-member-search input::placeholder {
+  color: #94a3b8;
+}
+
+.group-member-search button {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #94a3b8;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.group-member-search button:hover {
+  background: #f1f5f9;
+  color: #334155;
 }
 
 .dark .im-topbar {
@@ -1851,12 +1931,15 @@ html, body {
 }
 
 .dark .im-panel,
-.dark .im-info-row {
+.dark .im-info-row,
+.dark .im-detail-stats > div {
   background: #0f172a;
 }
 
 .dark .im-detail-hero,
-.dark .im-info-grid {
+.dark .im-info-grid,
+.dark .im-detail-stats > div,
+.dark .group-member-search {
   border-color: #1e293b;
 }
 
@@ -1866,14 +1949,30 @@ html, body {
 
 .dark .im-detail-title,
 .dark .im-action-copy > span,
-.dark .im-info-row {
+.dark .im-info-row,
+.dark .im-detail-stats strong {
   color: #f8fafc;
 }
 
 .dark .im-detail-subtitle,
 .dark .im-action-copy > small,
-.dark .im-info-row span {
+.dark .im-info-row span,
+.dark .im-detail-stats span,
+.dark .group-member-search > .material-symbols-outlined {
   color: #94a3b8;
+}
+
+.dark .group-member-search {
+  background: #0f172a;
+}
+
+.dark .group-member-search input {
+  color: #f8fafc;
+}
+
+.dark .group-member-search button:hover {
+  background: #1e293b;
+  color: #cbd5e1;
 }
 
 .dark .im-action-card {
@@ -1922,6 +2021,64 @@ html, body {
 
 .moment-item {
   box-shadow: 0 1px 1px rgba(15, 23, 42, 0.03), 0 24px 52px -46px rgba(15, 23, 42, 0.5);
+}
+
+.moment-image-button {
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.moment-image-button:hover {
+  filter: brightness(0.96);
+}
+
+.moment-image-button:active {
+  transform: scale(0.995);
+}
+
+.moment-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.82);
+  padding: 32px;
+  backdrop-filter: blur(12px);
+}
+
+.moment-preview-overlay img {
+  max-width: min(960px, 100%);
+  max-height: min(760px, 86dvh);
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 30px 90px -40px rgba(0, 0, 0, 0.82);
+}
+
+.moment-preview-close {
+  position: fixed;
+  right: 24px;
+  top: 24px;
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.moment-preview-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.moment-preview-close:active {
+  transform: scale(0.96);
 }
 
 .moment-action-button {
@@ -2784,6 +2941,70 @@ html, body {
   white-space: nowrap;
 }
 
+.me-preference-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.me-preference-list label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.me-preference-list strong,
+.me-preference-list small {
+  display: block;
+}
+
+.me-preference-list strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.me-preference-list small {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.me-preference-list input {
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  appearance: none;
+  border-radius: 999px;
+  background: #cbd5e1;
+  padding: 3px;
+  transition: background-color 160ms ease;
+}
+
+.me-preference-list input::before {
+  content: "";
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+  transition: transform 160ms ease;
+}
+
+.me-preference-list input:checked {
+  background: #137fec;
+}
+
+.me-preference-list input:checked::before {
+  transform: translateX(18px);
+}
+
 .me-password-meter {
   margin-top: 18px;
   border-radius: 8px;
@@ -2954,7 +3175,8 @@ html, body {
 .dark .me-hero,
 .dark .me-panel,
 .dark .me-save-bar,
-.dark .me-sidebar-footer {
+.dark .me-sidebar-footer,
+.dark .me-preference-list label {
   border-color: #1e293b;
 }
 
@@ -2972,6 +3194,7 @@ html, body {
 .dark .me-profile-score strong,
 .dark .me-panel-head h2,
 .dark .me-info-list strong,
+.dark .me-preference-list strong,
 .dark .me-save-bar strong {
   color: #f8fafc;
 }
@@ -2980,6 +3203,7 @@ html, body {
 .dark .me-panel-head p,
 .dark .me-info-list span,
 .dark .me-field > span,
+.dark .me-preference-list small,
 .dark .me-save-bar span,
 .dark .me-password-meter span {
   color: #94a3b8;
@@ -2987,7 +3211,8 @@ html, body {
 
 .dark .me-hero-meta span,
 .dark .me-profile-score,
-.dark .me-password-meter {
+.dark .me-password-meter,
+.dark .me-preference-list label {
   background: #1e293b;
   color: #cbd5e1;
 }
@@ -3465,6 +3690,10 @@ html, body {
     gap: 5px;
   }
 
+  .im-detail-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .im-list-grid {
     grid-template-columns: 1fr;
   }
@@ -3614,6 +3843,10 @@ html, body {
     align-items: flex-start;
     flex-direction: column;
     gap: 5px;
+  }
+
+  .me-preference-list label {
+    align-items: flex-start;
   }
 
   .me-info-list strong {

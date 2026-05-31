@@ -219,6 +219,16 @@ export default function ContactsPage() {
     }
   };
 
+  const handleCopyFriendId = async () => {
+    if (!friendUser?.user_id) return;
+    try {
+      await navigator.clipboard.writeText(friendUser.user_id);
+      toast("用户 ID 已复制", { tone: "success" });
+    } catch {
+      setError("复制失败，请手动复制用户 ID");
+    }
+  };
+
   const selectFriend = (friend: (typeof friends)[number]) => {
     setSelectedFriend(friend);
     setActiveRightTab("detail");
@@ -502,6 +512,14 @@ export default function ContactsPage() {
                   >
                     <span className="material-symbols-outlined text-lg">save</span>
                     保存备注
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyFriendId}
+                    className="im-secondary-button"
+                  >
+                    <span className="material-symbols-outlined text-lg">content_copy</span>
+                    复制 ID
                   </button>
                   <button
                     type="button"
