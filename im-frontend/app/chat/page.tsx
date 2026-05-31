@@ -37,10 +37,17 @@ type ChatItem = {
   lastMessage?: string;
   lastMessageTime?: string;
   unreadCount: number;
+  pinned?: boolean;
+  muted?: boolean;
+  hidden?: boolean;
   data: Conversation | Group;
 };
 
 type ChatFilterMode = "all" | "private" | "group" | "unread";
+type ConversationPrefs = Record<string, { pinned?: boolean; muted?: boolean; hidden?: boolean }>;
+
+const conversationPrefsKey = "esy-im:conversation-preferences";
+const userPreferencesKey = "esy-im:user-preferences";
 
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -108,6 +115,8 @@ export default function ChatPage() {
   const [chatFilter, setChatFilter] = useState("");
   const [chatMode, setChatMode] = useState<ChatFilterMode>("all");
   const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [conversationPrefs, setConversationPrefs] = useState<ConversationPrefs>({});
+  const [compactMessages, setCompactMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -130,6 +139,20 @@ export default function ChatPage() {
       loadCurrentUser();
     }
   }, [token]);
+
+  useEffect(() => {
+    try {
+      const rawPrefs = window.localStorage.getItem(conversationPrefsKey);
+      setConversationPrefs(rawPrefs ? JSON.parse(rawPrefs) : {});
+
+      const rawUserPrefs = window.localStorage.getItem(userPreferencesKey);
+      const userPrefs = rawUserPrefs ? (JSON.parse(rawUserPrefs) as { compactMessages?: boolean }) : {};
+      setCompactMessages(Boolean(userPrefs.compactMessages));
+    } catch {
+      setConversationPrefs({});
+      setCompactMessages(false);
+    }
+  }, []);
 
   // 初始化WebSocket连接
   useEffect(() => {
@@ -508,13 +531,21 @@ export default function ChatPage() {
       });
     });
 
-    // 按最后消息时间排序
-    return items.sort((a, b) => {
+    const visibleItems = items
+      .map((item) => ({
+        ...item,
+        ...conversationPrefs[item.id],
+      }))
+      .filter((item) => !item.hidden);
+
+    // 置顶优先，其次按最后消息时间排序
+    return visibleItems.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
       const timeA = new Date(a.lastMessageTime || 0).getTime();
       const timeB = new Date(b.lastMessageTime || 0).getTime();
       return timeB - timeA;
     });
-  }, [conversations, groups, currentUser, groupUnreadCounts]);
+  }, [conversations, groups, currentUser, groupUnreadCounts, conversationPrefs]);
 
   useEffect(() => {
     if (!selectedGroup) return;
@@ -616,6 +647,55 @@ export default function ChatPage() {
     }
   };
 
+  const updateConversationPref = (chatId: string, patch: ConversationPrefs[string]) => {
+    setConversationPrefs((current) => {
+      const next = {
+        ...current,
+        [chatId]: {
+          ...current[chatId],
+          ...patch,
+        },
+      };
+      window.localStorage.setItem(conversationPrefsKey, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const syncCurrentChatPref = (patch: ConversationPrefs[string]) => {
+    if (!currentChat) return;
+    updateConversationPref(currentChat.id, patch);
+    setCurrentChat({ ...currentChat, ...patch });
+  };
+
+  const handleTogglePinned = () => {
+    if (!currentChat) return;
+    syncCurrentChatPref({ pinned: !currentChat.pinned });
+    toast(currentChat.pinned ? "已取消置顶" : "已置顶会话", { tone: "success" });
+  };
+
+  const handleToggleMuted = () => {
+    if (!currentChat) return;
+    syncCurrentChatPref({ muted: !currentChat.muted });
+    toast(currentChat.muted ? "已取消免打扰" : "已设为免打扰", { tone: "success" });
+  };
+
+  const handleHideConversation = () => {
+    if (!currentChat) return;
+    updateConversationPref(currentChat.id, { hidden: true });
+    toast("会话已从列表隐藏", { tone: "success" });
+    setCurrentChat(null);
+    setInspectorOpen(false);
+  };
+
+  const handleCopyMessage = async (content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      toast("消息已复制", { tone: "success" });
+    } catch {
+      setError("复制失败，请手动复制消息内容");
+    }
+  };
+
   const renderMessage = (message: (typeof currentMessages)[number]) => {
     const isMyMessage = message.from_user_id === currentUser?.user_id;
     const messageUser = isMyMessage ? currentUser : message.from_user;
@@ -630,7 +710,12 @@ export default function ChatPage() {
       return (
         <div key={message.id} className="chat-bubble-row is-me">
           <div className="chat-bubble-stack is-me">
-            <div className="chat-bubble is-me">{message.content}</div>
+          <div className="chat-bubble is-me">{message.content}</div>
+            <div className="chat-message-actions">
+              <button type="button" onClick={() => handleCopyMessage(message.content)}>
+                复制
+              </button>
+            </div>
             <span className="chat-message-meta">
               {messageTime}
               <span className="material-symbols-outlined">done_all</span>
@@ -661,6 +746,11 @@ export default function ChatPage() {
             <p className="chat-message-sender">{messageUser?.nickname || `用户${message.from_user_id}`}</p>
           ) : null}
           <div className="chat-bubble">{message.content}</div>
+          <div className="chat-message-actions">
+            <button type="button" onClick={() => handleCopyMessage(message.content)}>
+              复制
+            </button>
+          </div>
           {messageTime ? <span className="chat-message-meta">{messageTime}</span> : null}
         </div>
       </div>
@@ -698,7 +788,7 @@ export default function ChatPage() {
       }
       mainClassName="bg-gradient-to-b from-slate-50/80 to-white dark:from-[#0f172a] dark:to-[#0f172a]"
       sidebar={
-        <WorkspaceSidebar>
+        <WorkspaceSidebar className={compactMessages ? "is-compact" : undefined}>
           <SidebarToolbar className="space-y-4">
             <WorkspaceSidebarHeader
               eyebrow="消息中心"
@@ -797,7 +887,11 @@ export default function ChatPage() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <p className={`truncate text-sm ${isActive ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>{chatItem.name}</p>
+                            <div className="flex min-w-0 items-center gap-1.5">
+                              {chatItem.pinned ? <span className="chat-list-indicator material-symbols-outlined">keep</span> : null}
+                              {chatItem.muted ? <span className="chat-list-indicator material-symbols-outlined">notifications_off</span> : null}
+                              <p className={`truncate text-sm ${isActive ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100"}`}>{chatItem.name}</p>
+                            </div>
                             <p className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
                               {formatListTime(chatItem.lastMessageTime)}
                             </p>
@@ -806,7 +900,7 @@ export default function ChatPage() {
                         </div>
 
                         {chatItem.unreadCount > 0 ? (
-                          <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold text-white ${chatItem.muted ? "bg-slate-400" : "bg-primary"}`}>
                             {chatItem.unreadCount > 99 ? "99+" : chatItem.unreadCount}
                           </span>
                         ) : null}
@@ -991,6 +1085,12 @@ export default function ChatPage() {
                   ) : null}
                 </div>
                 <div className="chat-inspector-actions">
+                  <button type="button" className="im-secondary-button" onClick={handleTogglePinned}>
+                    {currentChat.pinned ? "取消置顶" : "置顶会话"}
+                  </button>
+                  <button type="button" className="im-secondary-button" onClick={handleToggleMuted}>
+                    {currentChat.muted ? "取消免打扰" : "免打扰"}
+                  </button>
                   {currentChat.type === "group" ? (
                     <button type="button" className="im-secondary-button" onClick={() => router.push("/groups")}>
                       群聊详情
@@ -1000,6 +1100,9 @@ export default function ChatPage() {
                       联系人详情
                     </button>
                   )}
+                  <button type="button" className="im-danger-button" onClick={handleHideConversation}>
+                    隐藏会话
+                  </button>
                 </div>
               </aside>
             ) : null}

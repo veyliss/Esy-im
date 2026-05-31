@@ -153,6 +153,27 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
       </div>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
+        <section className="group-settings-panel">
+          <SectionTitle title="群公告" description="群聊说明会作为当前群公告展示。" />
+          <p>{group.description || "暂无群公告"}</p>
+          <div className="group-settings-grid">
+            <div>
+              <span>入群审核</span>
+              <strong>{group.join_approval ? "已开启" : "未开启"}</strong>
+            </div>
+            <div>
+              <span>公开搜索</span>
+              <strong>{group.is_public ? "允许" : "不允许"}</strong>
+            </div>
+            <div>
+              <span>群容量</span>
+              <strong>
+                {group.member_count}/{group.max_members}
+              </strong>
+            </div>
+          </div>
+        </section>
+
         <SectionTitle
           title={`群成员 · ${filteredMembers.length}`}
           description="成员角色和群内昵称会显示在这里。"
@@ -197,7 +218,10 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
                     {member.nickname || member.user?.nickname || `用户${member.user_id}`}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {member.role === 3 ? "群主" : member.role === 2 ? "管理员" : "成员"}
+                    <span className={`group-role-badge is-role-${member.role}`}>
+                      {member.role === 3 ? "群主" : member.role === 2 ? "管理员" : "成员"}
+                    </span>
+                    {member.is_muted ? <span className="ml-2 text-amber-500">已禁言</span> : null}
                   </p>
                 </div>
               </div>

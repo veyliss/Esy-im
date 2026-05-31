@@ -171,6 +171,25 @@ export default function MePage() {
     event.target.value = "";
   };
 
+  const handleDesktopNotificationsChange = async (enabled: boolean) => {
+    if (enabled && !("Notification" in window)) {
+      toast("当前浏览器不支持桌面通知", { tone: "warning" });
+      setDesktopNotifications(false);
+      return;
+    }
+
+    if (enabled && Notification.permission === "default") {
+      const permission = await Notification.requestPermission();
+      if (permission === "denied") {
+        toast("浏览器通知权限已被拒绝", { tone: "warning" });
+        setDesktopNotifications(false);
+        return;
+      }
+    }
+
+    setDesktopNotifications(enabled);
+  };
+
   const handleSave = async () => {
     if (saving) return;
 
@@ -516,7 +535,9 @@ export default function MePage() {
                     <input
                       type="checkbox"
                       checked={desktopNotifications}
-                      onChange={(event) => setDesktopNotifications(event.target.checked)}
+                      onChange={(event) => {
+                        void handleDesktopNotificationsChange(event.target.checked);
+                      }}
                     />
                   </label>
                   <label>

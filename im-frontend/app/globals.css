@@ -1536,6 +1536,18 @@ html, body {
   box-shadow: inset 3px 0 0 #137fec, var(--im-shadow-hover);
 }
 
+.workspace-sidebar.is-compact .workspace-sidebar-item {
+  min-height: 58px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.chat-list-indicator {
+  flex-shrink: 0;
+  color: #94a3b8;
+  font-size: 15px;
+}
+
 .workspace-main-panel {
   background: #ffffff;
 }
@@ -1644,6 +1656,14 @@ html, body {
 
 .sidebar-feature-row .workspace-sidebar-item {
   min-height: 62px;
+}
+
+.contact-alpha-group h4 {
+  margin-bottom: 8px;
+  padding-left: 6px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .im-primary-button,
@@ -1859,6 +1879,73 @@ html, body {
   color: #334155;
 }
 
+.group-settings-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-bottom: 24px;
+  padding: 18px;
+}
+
+.group-settings-panel > p {
+  margin-top: 14px;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.group-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.group-settings-grid > div {
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.group-settings-grid span,
+.group-settings-grid strong {
+  display: block;
+}
+
+.group-settings-grid span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.group-settings-grid strong {
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.group-role-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #f1f5f9;
+  padding: 2px 7px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.group-role-badge.is-role-2 {
+  background: #eff6ff;
+  color: #137fec;
+}
+
+.group-role-badge.is-role-3 {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
 .dark .im-topbar {
   background: rgba(15, 23, 42, 0.94);
 }
@@ -1930,6 +2017,16 @@ html, body {
   background: #0f172a;
 }
 
+.dark .chat-message-actions button {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.dark .chat-message-actions button:hover {
+  background: #273449;
+  color: #f8fafc;
+}
+
 .dark .im-panel,
 .dark .im-info-row,
 .dark .im-detail-stats > div {
@@ -1939,7 +2036,8 @@ html, body {
 .dark .im-detail-hero,
 .dark .im-info-grid,
 .dark .im-detail-stats > div,
-.dark .group-member-search {
+.dark .group-member-search,
+.dark .group-settings-panel {
   border-color: #1e293b;
 }
 
@@ -1964,6 +2062,35 @@ html, body {
 
 .dark .group-member-search {
   background: #0f172a;
+}
+
+.dark .group-settings-panel,
+.dark .group-settings-grid > div {
+  background: #0f172a;
+}
+
+.dark .group-settings-panel > p,
+.dark .group-settings-grid span {
+  color: #94a3b8;
+}
+
+.dark .group-settings-grid strong {
+  color: #f8fafc;
+}
+
+.dark .group-role-badge {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.dark .group-role-badge.is-role-2 {
+  background: rgba(19, 127, 236, 0.16);
+  color: #60a5fa;
+}
+
+.dark .group-role-badge.is-role-3 {
+  background: rgba(249, 115, 22, 0.14);
+  color: #fdba74;
 }
 
 .dark .group-member-search input {
@@ -2306,6 +2433,34 @@ html, body {
   font-size: 14px;
 }
 
+.chat-message-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.chat-bubble-row:hover .chat-message-actions,
+.chat-bubble-row:focus-within .chat-message-actions {
+  opacity: 1;
+}
+
+.chat-message-actions button {
+  border-radius: 999px;
+  background: #eef2f7;
+  padding: 3px 9px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.chat-message-actions button:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
 .chat-empty-state,
 .chat-start-panel {
   display: grid;
@@ -2469,7 +2624,9 @@ html, body {
 }
 
 .chat-inspector-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
   padding: 16px;
 }
 
@@ -3694,6 +3851,10 @@ html, body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .group-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
   .im-list-grid {
     grid-template-columns: 1fr;
   }
@@ -3752,6 +3913,10 @@ html, body {
     font-size: 14px;
   }
 
+  .chat-message-actions {
+    opacity: 1;
+  }
+
   .chat-bubble.is-me {
     border-top-right-radius: 4px;
   }
@@ -3794,6 +3959,19 @@ html, body {
     width: auto;
     max-height: min(72dvh, 560px);
     overflow-y: auto;
+  }
+
+  .chat-inspector-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .moment-preview-overlay {
+    padding: 14px;
+  }
+
+  .moment-preview-close {
+    right: 14px;
+    top: 14px;
   }
 
   .me-page-inner {

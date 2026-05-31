@@ -246,6 +246,28 @@ export default function ContactsPage() {
     });
   }, [filterKeyword, friends]);
 
+  const groupedFriends = useMemo(() => {
+    return filteredFriends.reduce<Array<{ key: string; items: typeof filteredFriends }>>((groups, friend) => {
+      const fu = friend.friend_user;
+      const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id || ""}`;
+      const firstChar = displayName.trim().charAt(0).toUpperCase();
+      const key = /[A-Z]/.test(firstChar) ? firstChar : "#";
+      const group = groups.find((item) => item.key === key);
+
+      if (group) {
+        group.items.push(friend);
+      } else {
+        groups.push({ key, items: [friend] });
+      }
+
+      return groups.sort((a, b) => {
+        if (a.key === "#") return 1;
+        if (b.key === "#") return -1;
+        return a.key.localeCompare(b.key);
+      });
+    }, []);
+  }, [filteredFriends]);
+
   const openRequests = () => {
     setSelectedFriend(null);
     setActiveRightTab("requests");
@@ -359,35 +381,42 @@ export default function ContactsPage() {
                     className="min-h-[120px] border-0 bg-transparent"
                   />
                 ) : (
-                  <div className="space-y-3">
-                    {filteredFriends.map((friend) => {
-                      const isActive = selectedFriend?.id === friend.id;
-                      const fu = friend.friend_user;
-                      const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
-                      return (
-                        <SidebarItem
-                          key={friend.id}
-                          type="button"
-                          active={isActive}
-                          onClick={() => selectFriend(friend)}
-                        >
-                          <UserAvatar
-                            src={fu?.avatar || "/default-avatar.png"}
-                            name={fu?.nickname || "用户"}
-                            size="md"
-                            status="online"
-                            border
-                          />
-                          <span className={`min-w-0 flex-1 text-sm ${isActive ? "font-semibold text-primary" : "text-slate-800 dark:text-slate-100"}`}>
-                            <span className="block truncate">{displayName}</span>
-                            <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
-                              用户 ID：{fu?.user_id || "-"}
-                            </span>
-                          </span>
-                          <span className="material-symbols-outlined text-base text-slate-300">chevron_right</span>
-                        </SidebarItem>
-                      );
-                    })}
+                  <div className="space-y-4">
+                    {groupedFriends.map((group) => (
+                      <div key={group.key} className="contact-alpha-group">
+                        <h4>{group.key}</h4>
+                        <div className="space-y-3">
+                          {group.items.map((friend) => {
+                            const isActive = selectedFriend?.id === friend.id;
+                            const fu = friend.friend_user;
+                            const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
+                            return (
+                              <SidebarItem
+                                key={friend.id}
+                                type="button"
+                                active={isActive}
+                                onClick={() => selectFriend(friend)}
+                              >
+                                <UserAvatar
+                                  src={fu?.avatar || "/default-avatar.png"}
+                                  name={fu?.nickname || "用户"}
+                                  size="md"
+                                  status="online"
+                                  border
+                                />
+                                <span className={`min-w-0 flex-1 text-sm ${isActive ? "font-semibold text-primary" : "text-slate-800 dark:text-slate-100"}`}>
+                                  <span className="block truncate">{displayName}</span>
+                                  <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">
+                                    用户 ID：{fu?.user_id || "-"}
+                                  </span>
+                                </span>
+                                <span className="material-symbols-outlined text-base text-slate-300">chevron_right</span>
+                              </SidebarItem>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </SidebarSection>
