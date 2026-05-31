@@ -65,6 +65,7 @@ export function Im4Shell({
           status={avatarStatus}
           showStatus={Boolean(avatarStatus)}
           border
+          className="im4-rail-user"
         />
       </aside>
 
@@ -87,4 +88,3 @@ export function Im4Shell({
 }
 
 export default Im4Shell;
-

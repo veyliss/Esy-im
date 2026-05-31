@@ -120,7 +120,11 @@ export function UserAvatar({
     return colors[Math.abs(hash) % colors.length];
   };
 
-  const shouldShowImage = src && !imageError;
+  const normalizedSrc =
+    src && !src.endsWith("/default-avatar.png") && !src.endsWith("/default-group-avatar.png")
+      ? src
+      : undefined;
+  const shouldShowImage = normalizedSrc && !imageError;
   const initials = getInitials(name);
   const backgroundColor = getBackgroundColor(name);
 
@@ -148,7 +152,7 @@ export function UserAvatar({
         {shouldShowImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={src}
+            src={normalizedSrc}
             alt={name}
             className="w-full h-full object-cover"
             onError={() => setImageError(true)}
