@@ -467,6 +467,189 @@
   background: rgba(15, 23, 42, 0.86);
 }
 
+.im3-icon-button.is-active {
+  border-color: rgba(15, 127, 238, 0.28);
+  background: rgba(15, 127, 238, 0.1);
+  color: var(--im3-accent);
+}
+
+.im3-conversation-item {
+  align-items: stretch;
+  gap: 8px;
+}
+
+.im3-conversation-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.im3-conversation-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.im3-conversation-item:hover .im3-conversation-actions,
+.im3-conversation-item:focus-within .im3-conversation-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.im3-conversation-actions button {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: #64748b;
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.im3-conversation-actions button:hover {
+  background: rgba(15, 127, 238, 0.1);
+  color: var(--im3-accent);
+}
+
+.im3-conversation-actions button:active {
+  transform: scale(0.94);
+}
+
+.im3-conversation-actions .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.chat-thread-search {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(219, 229, 239, 0.82);
+  background: rgba(248, 250, 252, 0.72);
+  padding: 14px 34px;
+  backdrop-filter: blur(18px) saturate(128%);
+}
+
+.chat-thread-search span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chat-reply-preview {
+  position: relative;
+  margin-bottom: 12px;
+  border: 1px solid rgba(219, 229, 239, 0.86);
+  border-left: 3px solid var(--im3-accent);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 12px 44px 12px 14px;
+  box-shadow: 0 16px 36px -34px rgba(15, 23, 42, 0.48);
+}
+
+.chat-reply-preview span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chat-reply-preview strong {
+  color: var(--im3-accent);
+}
+
+.chat-reply-preview p {
+  margin-top: 4px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-reply-preview button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #64748b;
+}
+
+.chat-reply-preview button:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.chat-reply-preview .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.chat-quick-replies {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.chat-quick-replies button {
+  flex-shrink: 0;
+  border: 1px solid rgba(219, 229, 239, 0.86);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 7px 12px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 850;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.chat-quick-replies button:hover {
+  border-color: rgba(15, 127, 238, 0.28);
+  background: rgba(15, 127, 238, 0.08);
+  color: var(--im3-accent);
+}
+
+.chat-quick-replies button:active {
+  transform: scale(0.98);
+}
+
+.chat-quick-replies button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dark .im3-icon-button.is-active,
+.dark .im3-conversation-actions button:hover {
+  background: rgba(15, 127, 238, 0.16);
+}
+
+.dark .chat-thread-search,
+.dark .chat-reply-preview,
+.dark .chat-quick-replies button {
+  border-color: rgba(51, 65, 85, 0.86);
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.dark .chat-reply-preview p {
+  color: #f8fafc;
+}
+
 @media (max-width: 700px) {
   .im3-desktop-heading {
     display: none;
@@ -486,6 +669,17 @@
 
   .im3-shell .chat-composer-shell {
     padding: 12px 14px 14px;
+  }
+
+  .chat-thread-search {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .im3-conversation-actions {
+    opacity: 1;
+    transform: none;
   }
 
   .im3-shell .chat-composer-tool {

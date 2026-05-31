@@ -34,6 +34,7 @@ import {
   ChatMessageList,
   ChatStartPanel,
   ConversationItem,
+  type ChatRenderableMessage,
   type ChatTimelineEntry,
 } from "@/components/im/chat";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -56,9 +57,11 @@ type ChatItem = {
 
 type ChatFilterMode = "all" | "private" | "group" | "unread";
 type ConversationPrefs = Record<string, { pinned?: boolean; muted?: boolean; hidden?: boolean }>;
+type ReplyDraft = { id: string; author: string; content: string };
 
 const conversationPrefsKey = "esy-im:conversation-preferences";
 const userPreferencesKey = "esy-im:user-preferences";
+const quickReplyItems = ["收到", "我稍后回复", "现在方便吗？", "我们群里同步一下"];
 
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -128,6 +131,9 @@ export default function ChatPage() {
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [conversationPrefs, setConversationPrefs] = useState<ConversationPrefs>({});
   const [compactMessages, setCompactMessages] = useState(false);
+  const [replyDraft, setReplyDraft] = useState<ReplyDraft | null>(null);
+  const [threadSearchOpen, setThreadSearchOpen] = useState(false);
+  const [threadKeyword, setThreadKeyword] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -393,6 +399,9 @@ export default function ChatPage() {
     setError(null);
     setCurrentChat(chatItem);
     setInspectorOpen(false);
+    setReplyDraft(null);
+    setThreadKeyword("");
+    setThreadSearchOpen(false);
     
     if (chatItem.type === 'private' && 'id' in chatItem.data) {
       await loadPrivateMessages(chatItem.data.id);
@@ -420,18 +429,22 @@ export default function ChatPage() {
     setError(null);
     
     try {
-      const content = messageInput.trim();
-      if (content.length === 0) {
+      const rawContent = messageInput.trim();
+      if (rawContent.length === 0) {
         setError("消息内容不能为空");
         return;
       }
       
-      if (content.length > 1000) {
+      if (rawContent.length > 1000) {
         setError("消息内容过长，请控制在1000字符以内");
         return;
       }
 
       const draftKey = getChatDraftKey(currentChat);
+      const quote = replyDraft
+        ? `「回复 ${replyDraft.author}：${replyDraft.content.slice(0, 80)}」\n`
+        : "";
+      const content = `${quote}${rawContent}`;
 
       if (currentChat.type === 'private' && 'id' in currentChat.data) {
         // 发送私聊消息
@@ -454,6 +467,7 @@ export default function ChatPage() {
           
           addPrivateMessage(message);
           setMessageInput("");
+          setReplyDraft(null);
           window.localStorage.removeItem(draftKey);
           await loadConversations();
         }
@@ -475,6 +489,7 @@ export default function ChatPage() {
           
           addGroupMessage(group.group_id, message);
           setMessageInput("");
+          setReplyDraft(null);
           window.localStorage.removeItem(draftKey);
           await loadGroups();
         }
@@ -625,12 +640,23 @@ export default function ChatPage() {
     });
   }, [currentMessages]);
 
+  const visibleMessageTimeline = useMemo<ChatTimelineEntry[]>(() => {
+    const keyword = threadKeyword.trim().toLowerCase();
+    if (!keyword) return messageTimeline;
+
+    return messageTimeline.filter((entry) => {
+      if (entry.type === "date") return false;
+      return entry.message.content.toLowerCase().includes(keyword);
+    });
+  }, [messageTimeline, threadKeyword]);
+
   const composerHint = useMemo(() => {
     if (!currentChat) return "选择一个会话后开始输入";
+    if (replyDraft) return "正在回复指定消息，Enter 发送";
     if (!wsConnected) return "连接恢复后消息可能延迟送达";
     if (messageInput.length > 900) return "消息接近长度上限";
     return "Enter 发送，Shift + Enter 换行";
-  }, [currentChat, messageInput.length, wsConnected]);
+  }, [currentChat, messageInput.length, replyDraft, wsConnected]);
 
   const firstAvailableChat = filteredChatList[0] || chatList[0] || null;
 
@@ -705,6 +731,39 @@ export default function ChatPage() {
     } catch {
       setError("复制失败，请手动复制消息内容");
     }
+  };
+
+  const handleReplyMessage = (message: ChatRenderableMessage) => {
+    const isMine = message.from_user_id === currentUser?.user_id;
+    setReplyDraft({
+      id: String(message.id),
+      author: isMine ? "我" : message.from_user?.nickname || `用户${message.from_user_id}`,
+      content: message.content,
+    });
+    window.setTimeout(() => composerInputRef.current?.focus(), 60);
+  };
+
+  const handleQuickReply = (value: string) => {
+    const nextValue = messageInput.trim() ? `${messageInput}\n${value}` : value;
+    handleComposerChange(nextValue);
+    window.setTimeout(() => composerInputRef.current?.focus(), 60);
+  };
+
+  const handleConversationPref = (chatItem: ChatItem, patch: ConversationPrefs[string], successMessage: string) => {
+    updateConversationPref(chatItem.id, patch);
+    if (currentChat?.id === chatItem.id) {
+      setCurrentChat({ ...currentChat, ...patch });
+    }
+    toast(successMessage, { tone: "success" });
+  };
+
+  const handleHideChatItem = (chatItem: ChatItem) => {
+    updateConversationPref(chatItem.id, { hidden: true });
+    if (currentChat?.id === chatItem.id) {
+      setCurrentChat(null);
+      setInspectorOpen(false);
+    }
+    toast("会话已隐藏", { tone: "success" });
   };
 
   // 计算总未读数
@@ -794,6 +853,21 @@ export default function ChatPage() {
                       pinned={chatItem.pinned}
                       muted={chatItem.muted}
                       onClick={() => handleSelectChat(chatItem)}
+                      onPin={() =>
+                        handleConversationPref(
+                          chatItem,
+                          { pinned: !chatItem.pinned },
+                          chatItem.pinned ? "已取消置顶" : "已置顶会话",
+                        )
+                      }
+                      onMute={() =>
+                        handleConversationPref(
+                          chatItem,
+                          { muted: !chatItem.muted },
+                          chatItem.muted ? "已取消免打扰" : "已设为免打扰",
+                        )
+                      }
+                      onHide={() => handleHideChatItem(chatItem)}
                     />
                   ))
                 )}
@@ -820,15 +894,44 @@ export default function ChatPage() {
               setInspectorOpen(false);
             }}
             actions={
-              <button
-                type="button"
-                className="im3-icon-button"
-                onClick={() => setInspectorOpen((value) => !value)}
-                aria-label="查看资料"
-                title="查看资料"
-              >
-                <span className="material-symbols-outlined">info</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={`im3-icon-button ${threadSearchOpen ? "is-active" : ""}`}
+                  onClick={() => setThreadSearchOpen((value) => !value)}
+                  aria-label="搜索当前聊天"
+                  title="搜索当前聊天"
+                >
+                  <span className="material-symbols-outlined">search</span>
+                </button>
+                <button
+                  type="button"
+                  className={`im3-icon-button ${currentChat.pinned ? "is-active" : ""}`}
+                  onClick={handleTogglePinned}
+                  aria-label={currentChat.pinned ? "取消置顶" : "置顶会话"}
+                  title={currentChat.pinned ? "取消置顶" : "置顶会话"}
+                >
+                  <span className="material-symbols-outlined">{currentChat.pinned ? "keep_off" : "keep"}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`im3-icon-button ${currentChat.muted ? "is-active" : ""}`}
+                  onClick={handleToggleMuted}
+                  aria-label={currentChat.muted ? "取消免打扰" : "免打扰"}
+                  title={currentChat.muted ? "取消免打扰" : "免打扰"}
+                >
+                  <span className="material-symbols-outlined">{currentChat.muted ? "notifications" : "notifications_off"}</span>
+                </button>
+                <button
+                  type="button"
+                  className="im3-icon-button"
+                  onClick={() => setInspectorOpen((value) => !value)}
+                  aria-label="查看资料"
+                  title="查看资料"
+                >
+                  <span className="material-symbols-outlined">info</span>
+                </button>
+              </>
             }
           />
 
@@ -840,12 +943,30 @@ export default function ChatPage() {
             />
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-3" />
 
+            {threadSearchOpen ? (
+              <div className="chat-thread-search">
+                <ImSearchBox
+                  type="text"
+                  placeholder="搜索当前聊天记录"
+                  value={threadKeyword}
+                  onChange={(e) => setThreadKeyword(e.target.value)}
+                  onClear={() => setThreadKeyword("")}
+                />
+                {threadKeyword.trim() ? (
+                  <span>{visibleMessageTimeline.filter((entry) => entry.type === "message").length} 条结果</span>
+                ) : (
+                  <span>输入关键词筛选消息</span>
+                )}
+              </div>
+            ) : null}
+
             <ChatMessageList
-              entries={messageTimeline}
+              entries={visibleMessageTimeline}
               currentUser={currentUser}
               showSender={currentChat.type === "group"}
               endRef={messagesEndRef}
               onCopyMessage={handleCopyMessage}
+              onReplyMessage={handleReplyMessage}
               onOpenInspector={() => setInspectorOpen(true)}
             />
 
@@ -854,10 +975,14 @@ export default function ChatPage() {
               value={messageInput}
               placeholder={currentChat.type === "group" ? "发送群消息" : "发送消息"}
               hint={composerHint}
+              replyPreview={replyDraft}
+              quickReplies={quickReplyItems}
               sending={sendingMessage}
               onChange={handleComposerChange}
               onSend={handleSendMessage}
               onAttach={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
+              onCancelReply={() => setReplyDraft(null)}
+              onQuickReply={handleQuickReply}
             />
 
             {inspectorOpen ? (

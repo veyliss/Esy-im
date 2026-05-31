@@ -12,6 +12,7 @@ interface ChatMessageListProps {
   showSender?: boolean;
   endRef: RefObject<HTMLDivElement | null>;
   onCopyMessage: (content: string) => void;
+  onReplyMessage: (message: ChatRenderableMessage) => void;
   onOpenInspector: () => void;
 }
 
@@ -21,6 +22,7 @@ export function ChatMessageList({
   showSender = false,
   endRef,
   onCopyMessage,
+  onReplyMessage,
   onOpenInspector,
 }: ChatMessageListProps) {
   return (
@@ -51,6 +53,7 @@ export function ChatMessageList({
               currentUser={currentUser}
               showSender={showSender}
               onCopy={onCopyMessage}
+              onReply={onReplyMessage}
             />
           );
         })

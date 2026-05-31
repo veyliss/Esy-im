@@ -8,9 +8,10 @@ interface ChatMessageBubbleProps {
   currentUser: User | null;
   showSender?: boolean;
   onCopy: (content: string) => void;
+  onReply: (message: ChatRenderableMessage) => void;
 }
 
-export function ChatMessageBubble({ message, currentUser, showSender = false, onCopy }: ChatMessageBubbleProps) {
+export function ChatMessageBubble({ message, currentUser, showSender = false, onCopy, onReply }: ChatMessageBubbleProps) {
   const isMyMessage = message.from_user_id === currentUser?.user_id;
   const messageUser = isMyMessage ? currentUser : message.from_user;
   const messageTime = message.created_at
@@ -26,6 +27,9 @@ export function ChatMessageBubble({ message, currentUser, showSender = false, on
         <div className="chat-bubble-stack is-me">
           <div className="chat-bubble is-me">{message.content}</div>
           <div className="chat-message-actions">
+            <button type="button" onClick={() => onReply(message)}>
+              回复
+            </button>
             <button type="button" onClick={() => onCopy(message.content)}>
               复制
             </button>
@@ -61,6 +65,9 @@ export function ChatMessageBubble({ message, currentUser, showSender = false, on
         ) : null}
         <div className="chat-bubble">{message.content}</div>
         <div className="chat-message-actions">
+          <button type="button" onClick={() => onReply(message)}>
+            回复
+          </button>
           <button type="button" onClick={() => onCopy(message.content)}>
             复制
           </button>
