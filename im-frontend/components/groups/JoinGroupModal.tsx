@@ -88,15 +88,15 @@ export function JoinGroupModal({
       labelledBy="join-group-title"
       onClose={onClose}
     >
-      <div className="space-y-4">
-        <ErrorAlert error={error} onClose={() => setError(null)} />
+      <div className="command-flow">
+        <ErrorAlert error={error} type="warning" onClose={() => setError(null)} className="command-inline-alert" />
 
-        <div>
-          <label htmlFor="join-group-keyword" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <div className="command-field">
+          <label htmlFor="join-group-keyword">
             搜索群聊
           </label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          <div className="command-search-row">
+            <div className="command-input-wrap">
               <input
                 ref={inputRef}
                 id="join-group-keyword"
@@ -107,12 +107,12 @@ export function JoinGroupModal({
                   if (e.key === "Enter") handleSearch();
                 }}
                 placeholder="输入群组关键词或群号"
-                className="h-11 w-full rounded-lg border border-slate-300 bg-background-light px-4 text-sm text-slate-900 transition-colors placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                className="command-input"
               />
               {keyword ? (
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                  className="command-clear-button"
                   onClick={() => handleKeywordChange("")}
                   aria-label="清空搜索"
                   title="清空搜索"
@@ -133,18 +133,18 @@ export function JoinGroupModal({
         </div>
 
         {searching ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <span className="material-symbols-outlined mb-3 animate-spin text-4xl text-slate-300 dark:text-slate-600">sync</span>
-            <p className="text-sm text-slate-500 dark:text-slate-400">正在搜索群聊</p>
+          <div className="command-state">
+            <span className="material-symbols-outlined command-state-icon is-spinning">sync</span>
+            <p>正在搜索群聊</p>
           </div>
         ) : results.length > 0 ? (
-          <div className="space-y-3">
+          <div className="command-result-list">
             {results.map((group) => (
               <div
                 key={group.group_id}
-                className="rounded-lg border border-blue-100 bg-blue-50/50 p-3 dark:border-blue-900/30 dark:bg-blue-950/20"
+                className="command-result-card"
               >
-                <div className="flex items-center gap-3">
+                <div className="command-result-row">
                   <UserAvatar
                     src={group.avatar || "/default-group-avatar.png"}
                     name={group.name}
@@ -152,20 +152,20 @@ export function JoinGroupModal({
                     shape="rounded"
                     border
                   />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{group.name}</p>
-                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                  <div className="command-result-copy">
+                    <p>{group.name}</p>
+                    <small>
                       {group.member_count} 人 · 群号 {group.group_id}
-                    </p>
+                    </small>
                     {group.description ? (
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-400 dark:text-slate-500">{group.description}</p>
+                      <small>{group.description}</small>
                     ) : null}
                   </div>
                   <button
                     type="button"
                     onClick={() => handleJoin(group.group_id)}
                     disabled={Boolean(joiningId)}
-                    className="im-primary-button min-h-8 shrink-0 px-3 text-xs"
+                    className="im-primary-button command-result-action"
                   >
                     {joiningId === group.group_id ? "加入中" : "加入"}
                   </button>
@@ -174,16 +174,16 @@ export function JoinGroupModal({
             ))}
           </div>
         ) : searched ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <span className="material-symbols-outlined mb-3 text-4xl text-slate-300 dark:text-slate-600">group_search</span>
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">没有找到匹配群聊</p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">请尝试更换关键词或输入完整群号</p>
+          <div className="command-state">
+            <span className="material-symbols-outlined command-state-icon">group_search</span>
+            <p>没有找到匹配群聊</p>
+            <small>请尝试更换关键词或输入完整群号</small>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <span className="material-symbols-outlined mb-3 text-4xl text-slate-300 dark:text-slate-600">manage_search</span>
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">输入关键词后按 Enter 搜索</p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">找到群聊后即可加入</p>
+          <div className="command-state">
+            <span className="material-symbols-outlined command-state-icon">manage_search</span>
+            <p>输入关键词后按 Enter 搜索</p>
+            <small>找到群聊后即可加入</small>
           </div>
         )}
       </div>

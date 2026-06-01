@@ -100,16 +100,16 @@ export function AddFriendModal({
       labelledBy="add-friend-title"
       onClose={onClose}
     >
-          <div className="space-y-4">
-            <ErrorAlert error={error} onClose={() => setError(null)} />
+          <div className="command-flow">
+            <ErrorAlert error={error} type="warning" onClose={() => setError(null)} className="command-inline-alert" />
 
             {/* Search section */}
-            <div>
-              <label htmlFor="add-friend-keyword" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <div className="command-field">
+              <label htmlFor="add-friend-keyword">
                 搜索用户
               </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
+              <div className="command-search-row">
+                <div className="command-input-wrap">
                   <input
                     ref={inputRef}
                     id="add-friend-keyword"
@@ -118,12 +118,12 @@ export function AddFriendModal({
                     onChange={(e) => handleKeywordChange(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
                     placeholder="输入用户账号、手机号或邮箱"
-                    className="w-full h-11 rounded-lg border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-slate-800 px-4 text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-colors"
+                    className="command-input"
                   />
                   {searchInput ? (
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                      className="command-clear-button"
                       onClick={() => handleKeywordChange("")}
                       aria-label="清空搜索"
                       title="清空搜索"
@@ -145,57 +145,57 @@ export function AddFriendModal({
 
             {/* Results / States */}
             {searching ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 animate-spin mb-3">sync</span>
-                <p className="text-sm text-slate-500 dark:text-slate-400">正在查找用户</p>
+              <div className="command-state">
+                <span className="material-symbols-outlined command-state-icon is-spinning">sync</span>
+                <p>正在查找用户</p>
               </div>
             ) : searchResult ? (
-              <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-3 dark:border-blue-900/30 dark:bg-blue-950/20">
-                <div className="flex items-center gap-3">
+              <div className="command-result-card">
+                <div className="command-result-row">
                   <UserAvatar
                     src={searchResult.avatar}
                     name={searchResult.nickname}
                     size="lg"
                     border
                   />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">{searchResult.nickname || "未设置昵称"}</p>
-                      <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-primary ring-1 ring-blue-100 dark:bg-slate-900 dark:ring-blue-900/50">
+                  <div className="command-result-copy">
+                    <div>
+                      <p>{searchResult.nickname || "未设置昵称"}</p>
+                      <span className="command-pill">
                         {relationshipCopy[searchResult.relationship_status].label}
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">用户 ID：{searchResult.user_id}</p>
+                    <small>用户 ID：{searchResult.user_id}</small>
                     {searchResult.email ? (
-                      <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">{searchResult.email}</p>
+                      <small>{searchResult.email}</small>
                     ) : null}
                   </div>
                   <button
                     type="button"
                     onClick={handleSendRequest}
                     disabled={sending || relationshipCopy[searchResult.relationship_status].disabled}
-                    className="im-primary-button min-h-8 shrink-0 px-3 text-xs disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
+                    className="im-primary-button command-result-action"
                   >
                     {sending ? "发送中" : relationshipCopy[searchResult.relationship_status].action}
                   </button>
                 </div>
                 {searchResult.relationship_status === "pending_received" ? (
-                  <p className="mt-3 rounded-lg bg-white/70 px-3 py-2 text-xs text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
+                  <p className="command-note">
                     对方已经向你发送好友申请，可以在“新的朋友”里处理。
                   </p>
                 ) : null}
               </div>
             ) : searched ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-3">person_search</span>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">没有找到匹配用户</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">请检查账号、手机号或邮箱是否正确</p>
+              <div className="command-state">
+                <span className="material-symbols-outlined command-state-icon">person_search</span>
+                <p>没有找到匹配用户</p>
+                <small>请检查账号、手机号或邮箱是否正确</small>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 mb-3">manage_search</span>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">输入关键词后按 Enter 搜索</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">找到用户后即可发送好友申请</p>
+              <div className="command-state">
+                <span className="material-symbols-outlined command-state-icon">manage_search</span>
+                <p>输入关键词后按 Enter 搜索</p>
+                <small>找到用户后即可发送好友申请</small>
               </div>
             )}
           </div>

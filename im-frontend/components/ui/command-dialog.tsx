@@ -28,12 +28,18 @@ export function CommandDialog({
 }: CommandDialogProps) {
   useEffect(() => {
     if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
 
     window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
+    return () => {
+      window.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -51,6 +57,7 @@ export function CommandDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
+        aria-describedby={description ? `${labelledBy}-description` : undefined}
       >
         <div className="command-dialog-head">
           <div className="command-dialog-title">
@@ -59,7 +66,7 @@ export function CommandDialog({
             </span>
             <span>
               <h2 id={labelledBy}>{title}</h2>
-              {description ? <p>{description}</p> : null}
+              {description ? <p id={`${labelledBy}-description`}>{description}</p> : null}
             </span>
           </div>
           <button

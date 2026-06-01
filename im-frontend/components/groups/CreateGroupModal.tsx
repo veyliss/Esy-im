@@ -77,11 +77,11 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
         </>
       }
     >
-      <form id="create-group-form" onSubmit={handleSubmit} className="space-y-4">
-        <ErrorAlert error={error} onClose={() => setError(null)} />
+      <form id="create-group-form" onSubmit={handleSubmit} className="command-form">
+        <ErrorAlert error={error} type="warning" onClose={() => setError(null)} className="command-inline-alert" />
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="create-group-name">
+        <div className="command-field">
+          <label htmlFor="create-group-name">
             群组名称 *
           </label>
           <input
@@ -90,29 +90,29 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="ui-input w-full rounded-lg px-3 py-2"
+            className="ui-input command-input"
             placeholder="请输入群组名称"
             maxLength={100}
           />
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="create-group-description">
+        <div className="command-field">
+          <label htmlFor="create-group-description">
             群组描述
           </label>
           <textarea
             id="create-group-description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="ui-textarea w-full rounded-lg px-3 py-2"
+            className="ui-textarea command-input"
             placeholder="请输入群组描述"
             rows={3}
             maxLength={500}
           />
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="create-group-max-members">
+        <div className="command-field">
+          <label htmlFor="create-group-max-members">
             最大成员数
           </label>
           <input
@@ -120,36 +120,34 @@ export function CreateGroupModal({ onClose, onSuccess }: { onClose: () => void; 
             type="number"
             value={formData.max_members}
             onChange={(e) => setFormData({ ...formData, max_members: parseInt(e.target.value) || 500 })}
-            className="ui-input w-full rounded-lg px-3 py-2"
+            className="ui-input command-input"
             min={2}
             max={2000}
           />
         </div>
 
-        <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/40">
-          <label className="flex cursor-pointer items-start gap-3">
+        <div className="command-toggle-list">
+          <label className="command-toggle">
             <input
               type="checkbox"
               checked={formData.is_public}
               onChange={(e) => setFormData({ ...formData, is_public: e.target.checked })}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
             />
             <span>
-              <strong className="text-sm font-semibold text-slate-900 dark:text-white">公开群聊</strong>
-              <small className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">允许其他用户搜索到该群</small>
+              <strong>公开群聊</strong>
+              <small>允许其他用户搜索到该群</small>
             </span>
           </label>
 
-          <label className="flex cursor-pointer items-start gap-3">
+          <label className="command-toggle">
             <input
               type="checkbox"
               checked={formData.join_approval}
               onChange={(e) => setFormData({ ...formData, join_approval: e.target.checked })}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
             />
             <span>
-              <strong className="text-sm font-semibold text-slate-900 dark:text-white">加入审批</strong>
-              <small className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">新成员需要通过审批</small>
+              <strong>加入审批</strong>
+              <small>新成员需要通过审批</small>
             </span>
           </label>
         </div>
