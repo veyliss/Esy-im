@@ -407,8 +407,8 @@ export default function MomentsPage() {
                       variant="borderless"
                     />
                   </div>
-                  <ActionBar className="mt-3 justify-between">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <ActionBar className="moment-composer-actions mt-3 justify-between">
+                    <div className="moment-composer-tools flex flex-wrap items-center gap-2">
                       <Button
                         onClick={handleImageSelect}
                         icon={<CameraOutlined />}
@@ -424,7 +424,7 @@ export default function MomentsPage() {
                         </Button>
                       ) : null}
                     </div>
-                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">{content.length}/500</span>
+                    <span className="moment-composer-count text-xs font-semibold text-slate-400 dark:text-slate-500">{content.length}/500</span>
                     <Button
                       onClick={handlePublish}
                       disabled={publishing || (!content.trim() && images.length === 0)}
@@ -436,7 +436,7 @@ export default function MomentsPage() {
                   </ActionBar>
 
                   {images.length > 0 ? (
-                    <div className="mt-3 grid grid-cols-3 gap-2">
+                    <div className="moment-image-grid mt-3 grid grid-cols-3 gap-2">
                       {images.map((img, index) => (
                         <div
                           key={index}
