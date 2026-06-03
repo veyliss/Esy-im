@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Switch } from "antd";
+import { Button, Card, Descriptions, Form, Input, Progress, Space, Switch, Typography } from "antd";
 import {
   CameraOutlined,
   EditOutlined,
@@ -136,12 +136,6 @@ export default function MePage() {
   const hasChanges = hasProfileChanges || hasPasswordInput || hasPreferenceChanges;
 
   const strength = useMemo(() => passwordStrength(newPassword), [newPassword]);
-
-  const profileCompletion = useMemo(() => {
-    const checks = [Boolean(currentUser?.nickname), Boolean(currentUser?.avatar), Boolean(currentUser?.email), Boolean(currentUser?.user_id)];
-    const done = checks.filter(Boolean).length;
-    return Math.round((done / checks.length) * 100);
-  }, [currentUser]);
 
   const handleCancel = () => {
     if (!currentUser) return;
@@ -401,13 +395,13 @@ export default function MePage() {
       avatarSrc={avatar || currentUser?.avatar}
       avatarName={nickname || currentUser?.nickname || "我"}
     >
-        <div className="me-page workspace-main-panel">
-          <div className="me-page-inner">
+        <div className="me-page ant-me-page workspace-main-panel">
+          <div className="ant-me-page-inner">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
 
-            <section className="me-hero" id="profile-section">
-              <div className="me-avatar-block">
-                <Button type="text" onClick={handleAvatarClick} className="me-avatar-button" aria-label="修改头像" title="修改头像">
+            <Card className="ant-me-profile-card" id="profile-section">
+              <div className="ant-me-profile">
+                <Button type="text" onClick={handleAvatarClick} className="me-avatar-button ant-me-avatar-button" aria-label="修改头像" title="修改头像">
                   <UserAvatar
                     src={avatar || currentUser?.avatar || "/default-avatar.png"}
                     name={nickname || currentUser?.nickname || "我"}
@@ -419,46 +413,30 @@ export default function MePage() {
                   </span>
                 </Button>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-              </div>
 
-              <div className="me-hero-copy">
-                <span className="me-eyebrow">个人资料</span>
-                <h1>{nickname || currentUser?.nickname || "未设置昵称"}</h1>
-                <p>这里管理你在聊天、通讯录和群聊中展示的资料。</p>
-                <div className="me-hero-meta">
-                  <span>
-                    <UserOutlined />
-                    {currentUser?.user_id || "未设置 ID"}
-                  </span>
-                  <span>
-                    <MailOutlined />
-                    {currentUser?.email || "未绑定邮箱"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="me-profile-score" aria-label={`资料完整度 ${profileCompletion}%`}>
-                <span>资料完整度</span>
-                <strong>{profileCompletion}%</strong>
-                <div>
-                  <i style={{ width: `${profileCompletion}%` }} />
-                </div>
-              </div>
-            </section>
-
-            <div className="me-grid">
-              <section className="me-panel" aria-labelledby="me-profile-title">
-                <div className="me-panel-head">
-                  <span className="me-panel-icon"><EditOutlined /></span>
-                  <div>
-                    <h2 id="me-profile-title">编辑资料</h2>
-                    <p>头像和昵称会显示在聊天气泡、通讯录和群聊成员列表中。</p>
-                  </div>
+                <div className="ant-me-profile-main">
+                  <Typography.Text type="secondary" strong>个人资料</Typography.Text>
+                  <Typography.Title level={2}>{nickname || currentUser?.nickname || "未设置昵称"}</Typography.Title>
+                  <Typography.Paragraph type="secondary" className="ant-me-profile-description">
+                    这里管理你在聊天、通讯录和群聊中展示的资料。
+                  </Typography.Paragraph>
+                  <Space wrap className="ant-me-meta">
+                    <Typography.Text><UserOutlined /> {currentUser?.user_id || "未设置 ID"}</Typography.Text>
+                    <Typography.Text><MailOutlined /> {currentUser?.email || "未绑定邮箱"}</Typography.Text>
+                  </Space>
                 </div>
 
-                <div className="me-form-grid">
-                  <label className="me-field">
-                    <span>昵称</span>
+              </div>
+            </Card>
+
+            <div className="ant-me-grid">
+              <Card
+                className="ant-me-card"
+                title={<Space><EditOutlined />编辑资料</Space>}
+                extra={<Typography.Text type="secondary">{nickname.length}/30</Typography.Text>}
+              >
+                <Form layout="vertical" className="ant-me-form">
+                  <Form.Item label="昵称" required>
                     <Input
                       value={nickname}
                       onChange={(event) => setNickname(event.target.value)}
@@ -466,130 +444,100 @@ export default function MePage() {
                       maxLength={30}
                       size="large"
                     />
-                    <small>{nickname.length}/30</small>
-                  </label>
-
-                  <label className="me-field">
-                    <span>头像</span>
-                    <Button type="text" onClick={handleAvatarClick} className="me-avatar-picker">
-                      <span>选择本地图片</span>
-                      <UploadOutlined />
+                  </Form.Item>
+                  <Form.Item label="头像" extra="支持常见图片格式，建议小于 2MB">
+                    <Button size="large" icon={<UploadOutlined />} onClick={handleAvatarClick}>
+                      选择本地图片
                     </Button>
-                    <small>支持常见图片格式，建议小于 2MB</small>
-                  </label>
+                  </Form.Item>
+                </Form>
+              </Card>
+
+              <Card
+                className="ant-me-card"
+                id="account-section"
+                title={<Space><IdcardOutlined />账号信息</Space>}
+              >
+                <Descriptions column={1} size="small" className="ant-me-descriptions">
+                  <Descriptions.Item label="用户 ID">{currentUser?.user_id || "未设置"}</Descriptions.Item>
+                  <Descriptions.Item label="邮箱">{currentUser?.email || "未绑定"}</Descriptions.Item>
+                  <Descriptions.Item label="创建时间">{formatDate(currentUser?.created_at)}</Descriptions.Item>
+                  <Descriptions.Item label="最近更新">{formatDate(currentUser?.updated_at)}</Descriptions.Item>
+                </Descriptions>
+              </Card>
+
+              <Card
+                className="ant-me-card ant-me-card-wide"
+                id="security-section"
+                title={<Space><SafetyCertificateOutlined />账号与安全</Space>}
+              >
+                <Typography.Paragraph type="secondary">
+                  修改密码后会自动退出当前登录，需要重新登录。
+                </Typography.Paragraph>
+                <Form layout="vertical" className="ant-me-form">
+                  <div className="ant-me-form-grid">
+                    <Form.Item label="新密码">
+                      <Input.Password
+                        placeholder="请输入新密码（最少8位）"
+                        value={newPassword}
+                        onChange={(event) => setNewPassword(event.target.value)}
+                        size="large"
+                      />
+                    </Form.Item>
+                    <Form.Item label="确认密码">
+                      <Input.Password
+                        placeholder="请再次输入密码"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                        size="large"
+                      />
+                    </Form.Item>
+                  </div>
+                </Form>
+                <div className="ant-me-password-strength">
+                  <Typography.Text type="secondary">密码强度</Typography.Text>
+                  <Typography.Text strong className={`is-${strength.tone}`}>{strength.label}</Typography.Text>
+                  <Progress
+                    percent={strength.score * 25}
+                    showInfo={false}
+                    strokeColor={strength.tone === "danger" ? "#ef4444" : strength.tone === "warning" ? "#f59e0b" : "#10b981"}
+                  />
                 </div>
-              </section>
+              </Card>
 
-              <section className="me-panel" id="account-section" aria-labelledby="me-account-title">
-                <div className="me-panel-head">
-                  <span className="me-panel-icon"><IdcardOutlined /></span>
-                  <div>
-                    <h2 id="me-account-title">账号信息</h2>
-                    <p>这些信息用于登录识别，不在这里直接修改。</p>
-                  </div>
-                </div>
-
-                <div className="me-info-list">
-                  <div>
-                    <span>用户 ID</span>
-                    <strong>{currentUser?.user_id || "未设置"}</strong>
-                  </div>
-                  <div>
-                    <span>邮箱</span>
-                    <strong>{currentUser?.email || "未绑定"}</strong>
-                  </div>
-                  <div>
-                    <span>创建时间</span>
-                    <strong>{formatDate(currentUser?.created_at)}</strong>
-                  </div>
-                  <div>
-                    <span>最近更新</span>
-                    <strong>{formatDate(currentUser?.updated_at)}</strong>
-                  </div>
-                </div>
-              </section>
-
-              <section className="me-panel is-wide" id="security-section" aria-labelledby="me-security-title">
-                <div className="me-panel-head">
-                  <span className="me-panel-icon"><SafetyCertificateOutlined /></span>
-                  <div>
-                    <h2 id="me-security-title">账号与安全</h2>
-                    <p>修改密码后会自动退出当前登录，需要重新登录。</p>
-                  </div>
-                </div>
-
-                <div className="me-form-grid">
-                  <label className="me-field">
-                    <span>新密码</span>
-                    <Input.Password
-                      placeholder="请输入新密码（最少8位）"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      size="large"
-                    />
-                  </label>
-
-                  <label className="me-field">
-                    <span>确认密码</span>
-                    <Input.Password
-                      placeholder="请再次输入密码"
-                      value={confirmPassword}
-                      onChange={(event) => setConfirmPassword(event.target.value)}
-                      size="large"
-                    />
-                  </label>
-                </div>
-
-                <div className="me-password-meter">
-                  <div>
-                    <span>密码强度</span>
-                    <strong className={`is-${strength.tone}`}>{strength.label}</strong>
-                  </div>
-                  <div className="me-password-bars" aria-hidden="true">
-                    {[1, 2, 3, 4].map((item) => (
-                      <i key={item} className={item <= strength.score ? `is-${strength.tone}` : ""} />
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              <section className="me-panel is-wide" id="preference-section" aria-labelledby="me-preference-title">
-                <div className="me-panel-head">
-                  <span className="me-panel-icon"><SettingOutlined /></span>
-                  <div>
-                    <h2 id="me-preference-title">偏好设置</h2>
-                    <p>这些设置先保存在当前前端会话中，后续可以接入后端持久化。</p>
-                  </div>
-                </div>
-
-                <div className="me-preference-list">
-                  <label>
-                    <span>
-                      <strong>桌面通知</strong>
-                      <small>收到新消息时显示浏览器通知提醒。</small>
-                    </span>
+              <Card
+                className="ant-me-card ant-me-card-wide"
+                id="preference-section"
+                title={<Space><SettingOutlined />偏好设置</Space>}
+              >
+                <div className="ant-me-settings">
+                  <div className="ant-me-setting-row">
+                    <div>
+                      <Typography.Text strong>桌面通知</Typography.Text>
+                      <Typography.Text type="secondary">收到新消息时显示浏览器通知提醒。</Typography.Text>
+                    </div>
                     <Switch
                       checked={desktopNotifications}
                       onChange={(checked) => {
                         void handleDesktopNotificationsChange(checked);
                       }}
                     />
-                  </label>
-                  <label>
-                    <span>
-                      <strong>紧凑消息列表</strong>
-                      <small>提高会话列表密度，适合小屏或高频切换。</small>
-                    </span>
+                  </div>
+                  <div className="ant-me-setting-row">
+                    <div>
+                      <Typography.Text strong>紧凑消息列表</Typography.Text>
+                      <Typography.Text type="secondary">提高会话列表密度，适合小屏或高频切换。</Typography.Text>
+                    </div>
                     <Switch
                       checked={compactMessages}
                       onChange={(checked) => setCompactMessages(checked)}
                     />
-                  </label>
+                  </div>
                 </div>
-              </section>
+              </Card>
             </div>
 
-            <div className="me-save-bar">
+            <Card className="ant-me-save-bar">
               <div>
                 <strong>{hasChanges ? "有未保存修改" : "资料与偏好已同步"}</strong>
                 <span>
@@ -608,7 +556,7 @@ export default function MePage() {
                   {saving ? "保存中..." : "保存修改"}
                 </Button>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
     </Im4Shell>

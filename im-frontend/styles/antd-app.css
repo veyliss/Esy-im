@@ -397,6 +397,200 @@
   margin-bottom: 18px;
 }
 
+.ant-me-page {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 45%, #f3f7fb 100%);
+}
+
+.ant-me-page-inner {
+  display: grid;
+  width: min(100%, 980px);
+  margin: 0 auto;
+  gap: 16px;
+}
+
+.ant-me-profile-card,
+.ant-me-card,
+.ant-me-save-bar {
+  border-color: #dfe8f2;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.055);
+}
+
+.ant-me-profile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+}
+
+.ant-me-avatar-button.ant-btn {
+  padding: 0;
+}
+
+.ant-me-profile-main {
+  min-width: 0;
+}
+
+.ant-me-profile-main .ant-typography {
+  margin-bottom: 0;
+}
+
+.ant-me-profile-main h2.ant-typography {
+  margin: 4px 0 6px;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.ant-me-profile-main .ant-typography-secondary {
+  font-size: 13px;
+}
+
+.ant-me-meta {
+  margin-top: 14px;
+}
+
+.ant-me-meta .ant-typography {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: #edf2f7;
+  padding: 6px 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ant-me-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ant-me-card-wide {
+  grid-column: 1 / -1;
+}
+
+.ant-me-card .ant-card-head {
+  min-height: 54px;
+  border-bottom-color: #e7eef6;
+}
+
+.ant-me-card .ant-card-head-title {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.ant-me-card .ant-card-head-title .anticon {
+  color: #2563eb;
+}
+
+.ant-me-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.ant-me-form .ant-form-item:last-child {
+  margin-bottom: 0;
+}
+
+.ant-me-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ant-me-descriptions .ant-descriptions-item-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ant-me-descriptions .ant-descriptions-item-content {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.ant-me-password-strength {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.ant-me-password-strength .ant-progress {
+  grid-column: 1 / -1;
+}
+
+.ant-me-password-strength .is-danger {
+  color: #ef4444;
+}
+
+.ant-me-password-strength .is-warning {
+  color: #b45309;
+}
+
+.ant-me-password-strength .is-success {
+  color: #047857;
+}
+
+.ant-me-password-strength .is-muted {
+  color: #64748b;
+}
+
+.ant-me-settings {
+  display: grid;
+  gap: 10px;
+}
+
+.ant-me-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #e7eef6;
+  border-radius: 8px;
+  background: #fbfdff;
+  padding: 13px 14px;
+}
+
+.ant-me-setting-row > div {
+  display: grid;
+  gap: 3px;
+}
+
+.ant-me-save-bar {
+  position: sticky;
+  bottom: 0;
+}
+
+.ant-me-save-bar .ant-card-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.ant-me-save-bar strong {
+  display: block;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 880;
+}
+
+.ant-me-save-bar span {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 @media (max-width: 640px) {
   .ant-app-result {
     grid-template-columns: auto minmax(0, 1fr);
@@ -431,6 +625,11 @@
   .im4-feed-column,
   .me-page-inner {
     width: 100%;
+  }
+
+  .ant-me-page-inner {
+    width: 100%;
+    gap: 12px;
   }
 
   .ant-moment-tabs {
@@ -515,6 +714,95 @@
 
   .me-page-inner {
     gap: 12px;
+  }
+
+  .ant-me-profile-card,
+  .ant-me-card,
+  .ant-me-save-bar {
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  .ant-me-profile-card .ant-card-body,
+  .ant-me-card .ant-card-body {
+    padding: 16px;
+  }
+
+  .ant-me-profile {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .ant-me-avatar-button.ant-btn .w-32 {
+    width: 72px;
+  }
+
+  .ant-me-avatar-button.ant-btn .h-32 {
+    height: 72px;
+  }
+
+  .ant-me-avatar-button.ant-btn .text-4xl {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .ant-me-profile-main h2.ant-typography {
+    overflow: hidden;
+    margin: 2px 0 0;
+    font-size: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ant-me-profile-description {
+    display: none;
+  }
+
+  .ant-me-meta {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .ant-me-meta .ant-typography {
+    width: 100%;
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+
+  .ant-me-grid,
+  .ant-me-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ant-me-card .ant-card-head {
+    min-height: 48px;
+    padding: 0 16px;
+  }
+
+  .ant-me-card .ant-card-head-title {
+    font-size: 15px;
+  }
+
+  .ant-me-setting-row {
+    align-items: flex-start;
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .ant-me-save-bar {
+    margin: 0 -2px;
+  }
+
+  .ant-me-save-bar .ant-card-body {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .ant-me-save-bar span {
+    font-size: 12px;
   }
 
   .me-hero {
