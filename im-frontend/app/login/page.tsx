@@ -2,44 +2,60 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Alert, Button, Checkbox, Form, Input, Segmented } from "antd";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { handleApiError } from "@/lib/utils/errors";
-import {
-  MainTabButton,
-  SegmentedTab,
-  FormField,
-  AuthInput,
-  PrimaryButton,
-} from "@/components/login/LoginFormComponents";
 
 type MainTabKey = "login" | "register";
 type LoginTabKey = "email" | "account";
 
+type PasswordLoginValues = {
+  account: string;
+  password: string;
+  remember?: boolean;
+};
+
+type EmailLoginValues = {
+  email: string;
+  code: string;
+};
+
+type RegisterValues = {
+  userId: string;
+  nickname?: string;
+  email: string;
+  code: string;
+};
+
+const mainTabOptions = [
+  { label: "登录", value: "login" },
+  { label: "注册", value: "register" },
+];
+
+const loginTabOptions = [
+  { label: "邮箱验证码", value: "email" },
+  { label: "账号密码", value: "account" },
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const { setToken, token, clearToken } = useAuthStore();
+  const [passwordForm] = Form.useForm<PasswordLoginValues>();
+  const [emailLoginForm] = Form.useForm<EmailLoginValues>();
+  const [registerForm] = Form.useForm<RegisterValues>();
 
   const [mainTab, setMainTab] = useState<MainTabKey>("login");
   const [loginTab, setLoginTab] = useState<LoginTabKey>("email");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  const [account, setAccount] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
   const [sendLoading, setSendLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
-  const [regUserId, setRegUserId] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regCode, setRegCode] = useState("");
-
   const hasCheckedStoredTokenRef = useRef(false);
+  const emailLoginAddress = Form.useWatch("email", emailLoginForm);
+  const registerAddress = Form.useWatch("email", registerForm);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -48,7 +64,16 @@ export default function LoginPage() {
     if (params.get("tab") === "register" || params.get("mode") === "register") {
       setMainTab("register");
     }
-  }, []);
+
+    const rememberedAccount = localStorage.getItem("remember_account");
+    const rememberedEmail = localStorage.getItem("remember_email");
+    if (rememberedAccount) {
+      passwordForm.setFieldsValue({ account: rememberedAccount, remember: true });
+    }
+    if (rememberedEmail) {
+      emailLoginForm.setFieldsValue({ email: rememberedEmail });
+    }
+  }, [emailLoginForm, passwordForm]);
 
   useEffect(() => {
     if (!token) return;
@@ -61,7 +86,6 @@ export default function LoginPage() {
           await AuthAPI.getCurrentUser();
           router.replace("/chat");
         } catch {
-          console.log("Token 已过期或无效，已清除");
           clearToken();
         }
       };
@@ -85,18 +109,19 @@ export default function LoginPage() {
     setSuccessMsg(null);
   };
 
-  const switchMainTab = (tab: MainTabKey) => {
+  const switchMainTab = (value: MainTabKey) => {
     clearMessages();
-    setMainTab(tab);
+    setMainTab(value);
   };
 
-  const switchLoginTab = (tab: LoginTabKey) => {
+  const switchLoginTab = (value: LoginTabKey) => {
     clearMessages();
-    setLoginTab(tab);
+    setLoginTab(value);
   };
 
-  const onSendEmailCode = async (targetEmail: string) => {
-    if (!targetEmail) {
+  const onSendEmailCode = async (targetEmail?: string) => {
+    const email = targetEmail?.trim();
+    if (!email) {
       setErrorMsg("请输入邮箱地址");
       return;
     }
@@ -104,7 +129,7 @@ export default function LoginPage() {
     try {
       setSendLoading(true);
       setErrorMsg(null);
-      await AuthAPI.sendEmailCode(targetEmail);
+      await AuthAPI.sendEmailCode(email);
       setCountdown(60);
       setSuccessMsg("验证码已发送，请查收邮箱");
       window.setTimeout(() => setSuccessMsg(null), 3000);
@@ -116,31 +141,25 @@ export default function LoginPage() {
     }
   };
 
-  const onLogin = async () => {
+  const onPasswordLogin = async (values: PasswordLoginValues) => {
     setErrorMsg(null);
     setLoading(true);
 
     try {
-      let response;
-
-      if (loginTab === "account") {
-        if (!account || !password) {
-          setErrorMsg("请输入账号与密码");
-          return;
-        }
-        response = await AuthAPI.loginByPassword({ email: account, password });
-      } else {
-        if (!email || !code) {
-          setErrorMsg("请输入邮箱与验证码");
-          return;
-        }
-        response = await AuthAPI.loginByCode({ email, code });
-      }
-
+      const response = await AuthAPI.loginByPassword({
+        email: values.account.trim(),
+        password: values.password,
+      });
       const accessToken = response?.data?.data?.token || "";
       if (!accessToken) {
         setErrorMsg("登录失败：未获取到访问令牌");
         return;
+      }
+
+      if (values.remember) {
+        localStorage.setItem("remember_account", values.account.trim());
+      } else {
+        localStorage.removeItem("remember_account");
       }
 
       setToken(accessToken);
@@ -153,31 +172,24 @@ export default function LoginPage() {
     }
   };
 
-  const onRegister = async () => {
+  const onEmailLogin = async (values: EmailLoginValues) => {
     setErrorMsg(null);
-    setSuccessMsg(null);
     setLoading(true);
 
     try {
-      if (!regUserId || !regEmail || !regCode) {
-        setErrorMsg("请输入账号/手机号、邮箱与验证码");
+      const response = await AuthAPI.loginByCode({
+        email: values.email.trim(),
+        code: values.code.trim(),
+      });
+      const accessToken = response?.data?.data?.token || "";
+      if (!accessToken) {
+        setErrorMsg("登录失败：未获取到访问令牌");
         return;
       }
 
-      await AuthAPI.registerByCode({
-        user_id: regUserId,
-        nickname: regUserId,
-        email: regEmail,
-        code: regCode,
-      });
-
-      setSuccessMsg("注册成功！正在跳转登录...");
-      window.setTimeout(() => {
-        setMainTab("login");
-        setLoginTab("email");
-        setEmail(regEmail);
-        setSuccessMsg(null);
-      }, 2000);
+      localStorage.setItem("remember_email", values.email.trim());
+      setToken(accessToken);
+      router.replace("/chat");
     } catch (err) {
       const apiError = handleApiError(err);
       setErrorMsg(apiError.message);
@@ -186,172 +198,246 @@ export default function LoginPage() {
     }
   };
 
-  const renderLoginSwitcher = () => {
-    return (
-      <div className="px-4 py-3 mt-5">
-        <SegmentedTab
-          options={[
-            { key: "email", label: "邮箱登录" },
-            { key: "account", label: "账号密码登录" },
-          ]}
-          active={loginTab}
-          onChange={(key) => switchLoginTab(key as LoginTabKey)}
-        />
-      </div>
-    );
+  const onRegister = async (values: RegisterValues) => {
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setLoading(true);
+
+    try {
+      const userId = values.userId.trim();
+      const email = values.email.trim();
+
+      await AuthAPI.registerByCode({
+        user_id: userId,
+        nickname: values.nickname?.trim() || userId,
+        email,
+        code: values.code.trim(),
+      });
+
+      setSuccessMsg("注册成功，已为你切回登录");
+      setMainTab("login");
+      setLoginTab("email");
+      emailLoginForm.setFieldsValue({ email, code: "" });
+      registerForm.resetFields(["code"]);
+    } catch (err) {
+      const apiError = handleApiError(err);
+      setErrorMsg(apiError.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const renderAccountLoginForm = () => (
-    <div className="flex flex-col gap-5 px-4 pb-5">
-      <FormField label="账号">
-        <AuthInput
-          placeholder="请输入您的账号"
-          name="username"
-          autoComplete="username"
-          value={account}
-          onChange={setAccount}
-          onEnter={onLogin}
-        />
-      </FormField>
+  const codeButtonLabel = countdown > 0 ? `${countdown} 秒` : "发送验证码";
 
-      <FormField label="密码">
-        <AuthInput
-          placeholder="请输入您的密码"
-          type="password"
-          name="current-password"
-          autoComplete="current-password"
-          value={password}
-          onChange={setPassword}
-          onEnter={onLogin}
-        />
-      </FormField>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <input
-            id="remember-me"
-            type="checkbox"
-            checked={remember}
-            onChange={(event) => setRemember(event.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/50"
-          />
-          <label htmlFor="remember-me" className="text-sm text-gray-600 dark:text-gray-400">
-            记住密码
-          </label>
-        </div>
-        <a className="text-sm text-primary hover:text-primary/90" href="#">
-          忘记密码？
-        </a>
-      </div>
-
-      <PrimaryButton loading={loading} loadingText="登录中..." text="登录" disabled={loading} onClick={onLogin} />
-    </div>
-  );
-
-  const renderEmailLoginForm = () => (
-    <div className="flex flex-col gap-5 px-4 pb-5">
-      <FormField label="邮箱">
-        <AuthInput
-          placeholder="请输入您的邮箱"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          withCodeButton
-          codeButtonProps={{
-            disabled: sendLoading || countdown > 0,
-            countdown,
-            onClick: () => onSendEmailCode(email),
-          }}
-        />
-      </FormField>
-
-      <FormField label="验证码">
-        <AuthInput placeholder="请输入验证码" value={code} onChange={setCode} onEnter={onLogin} />
-      </FormField>
-
-      <div className="mt-2 flex justify-end">
-        <a className="text-sm text-primary hover:text-primary/90" href="#">
-          忘记密码？
-        </a>
-      </div>
-
-      <PrimaryButton loading={loading} loadingText="登录中..." text="登录" disabled={loading} onClick={onLogin} />
-    </div>
-  );
-
-  const renderRegisterForm = () => (
-    <div className="flex flex-col gap-5 px-4 pb-5">
-      <FormField label="账号/手机号">
-        <AuthInput placeholder="请输入您的账号或手机号" value={regUserId} onChange={setRegUserId} />
-      </FormField>
-
-      <FormField label="邮箱">
-        <AuthInput placeholder="请输入您的邮箱地址" type="email" value={regEmail} onChange={setRegEmail} />
-      </FormField>
-
-      <FormField label="验证码">
-        <AuthInput
-          placeholder="请输入验证码"
-          value={regCode}
-          onChange={setRegCode}
-          withCodeButton
-          codeButtonProps={{
-            disabled: sendLoading || countdown > 0,
-            countdown,
-            onClick: () => onSendEmailCode(regEmail),
-          }}
-        />
-      </FormField>
-
-      <PrimaryButton loading={loading} loadingText="注册中..." text="注册" disabled={loading} onClick={onRegister} />
-    </div>
+  const renderCodeAddon = (email?: string) => (
+    <Button
+      className="ant-auth-code-button"
+      disabled={sendLoading || countdown > 0}
+      loading={sendLoading}
+      type="link"
+      onClick={() => onSendEmailCode(email)}
+    >
+      {codeButtonLabel}
+    </Button>
   );
 
   return (
-    <main
-      className="auth-page min-h-screen w-full flex flex-col items-center justify-center overflow-x-hidden px-4 py-8 bg-background-light dark:bg-background-dark"
-      style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
-    >
-      <div className="auth-brand mb-6 text-center">
-        <h1 className="text-2xl font-extrabold text-primary">Esy-IM</h1>
-        <p className="text-sm text-slate-500 mt-1">即时通讯系统</p>
-      </div>
+    <main className="ant-auth-page">
+      <section className="ant-auth-product" aria-label="Esy-IM 入口">
+        <div className="ant-auth-brand">
+          <span className="ant-auth-logo">E</span>
+          <span>Esy-IM</span>
+        </div>
 
-      <div className="auth-card w-full max-w-md bg-white dark:bg-slate-900 rounded-xl shadow-lg p-4 sm:p-8">
-        <div className="flex flex-1 flex-col">
-          <div className="pb-3">
-            <div className="flex border-b border-[#cfdbe7] dark:border-slate-700 px-4 gap-8">
-              <MainTabButton active={mainTab === "login"} onClick={() => switchMainTab("login")}>
-                登录
-              </MainTabButton>
-              <MainTabButton active={mainTab === "register"} onClick={() => switchMainTab("register")}>
-                注册
-              </MainTabButton>
+        <div className="ant-auth-product-copy">
+          <p>CHAT · CONTACTS · MOMENTS</p>
+          <h1>进入你的即时通讯工作台</h1>
+          <span>会话、好友、群组和动态统一收纳，登录后直接进入最近消息。</span>
+        </div>
+
+        <div className="ant-auth-preview" aria-hidden="true">
+          <div className="ant-auth-preview-sidebar">
+            <div className="ant-auth-preview-title">
+              <span>消息</span>
+              <em>在线</em>
+            </div>
+            <div className="ant-auth-preview-item is-active">
+              <i>产</i>
+              <span>
+                <strong>产品讨论组</strong>
+                <small>新版界面已经准备好了</small>
+              </span>
+              <b>2</b>
+            </div>
+            <div className="ant-auth-preview-item">
+              <i>S</i>
+              <span>
+                <strong>Sophia</strong>
+                <small>会议纪要发你了</small>
+              </span>
+            </div>
+            <div className="ant-auth-preview-item">
+              <i>友</i>
+              <span>
+                <strong>好友请求</strong>
+                <small>有新的联系人申请</small>
+              </span>
+              <b>1</b>
             </div>
           </div>
 
-          {errorMsg && (
-            <div className="mx-4 mb-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-              {errorMsg}
+          <div className="ant-auth-preview-chat">
+            <div className="ant-auth-preview-head">
+              <span>
+                <strong>产品讨论组</strong>
+                <small>8 位成员在线</small>
+              </span>
+              <i />
             </div>
-          )}
-
-          {successMsg && (
-            <div className="mx-4 mb-4 rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 px-4 py-3 text-sm text-green-600 dark:text-green-400">
-              {successMsg}
+            <div className="ant-auth-bubble is-in">新的 IM 首页保留欢迎入口就好。</div>
+            <div className="ant-auth-bubble is-out">收到，登录和注册会直接进入对应流程。</div>
+            <div className="ant-auth-bubble is-in is-short">样式按应用界面来。</div>
+            <div className="ant-auth-composer">
+              <span>输入消息</span>
+              <strong>send</strong>
             </div>
-          )}
-
-          {mainTab === "login" ? (
-            <div>
-              {renderLoginSwitcher()}
-              {loginTab === "account" ? renderAccountLoginForm() : renderEmailLoginForm()}
-            </div>
-          ) : (
-            renderRegisterForm()
-          )}
+          </div>
         </div>
-      </div>
+      </section>
+
+      <section className="ant-auth-panel" aria-label="账号入口">
+        <div className="ant-auth-panel-head">
+          <span>欢迎回来</span>
+          <h2>{mainTab === "login" ? "登录账号" : "创建账号"}</h2>
+        </div>
+
+        <Segmented
+          block
+          className="ant-auth-main-tabs"
+          options={mainTabOptions}
+          value={mainTab}
+          onChange={(value) => switchMainTab(value as MainTabKey)}
+        />
+
+        {mainTab === "login" ? (
+          <Segmented
+            block
+            className="ant-auth-login-tabs"
+            options={loginTabOptions}
+            value={loginTab}
+            onChange={(value) => switchLoginTab(value as LoginTabKey)}
+          />
+        ) : null}
+
+        <div className="ant-auth-alerts">
+          {errorMsg ? <Alert showIcon message={errorMsg} type="error" /> : null}
+          {successMsg ? <Alert showIcon message={successMsg} type="success" /> : null}
+        </div>
+
+        {mainTab === "login" && loginTab === "account" ? (
+          <Form
+            className="ant-auth-form"
+            form={passwordForm}
+            layout="vertical"
+            requiredMark={false}
+            onFinish={onPasswordLogin}
+          >
+            <Form.Item name="account" label="账号或邮箱" rules={[{ required: true, message: "请输入账号或邮箱" }]}>
+              <Input autoComplete="username" placeholder="请输入账号 ID 或邮箱" size="large" />
+            </Form.Item>
+
+            <Form.Item name="password" label="密码" rules={[{ required: true, message: "请输入密码" }]}>
+              <Input.Password autoComplete="current-password" placeholder="请输入密码" size="large" />
+            </Form.Item>
+
+            <div className="ant-auth-form-row">
+              <Form.Item name="remember" valuePropName="checked">
+                <Checkbox>记住账号</Checkbox>
+              </Form.Item>
+              <Button type="link" onClick={() => switchLoginTab("email")}>
+                用验证码登录
+              </Button>
+            </div>
+
+            <Button block htmlType="submit" loading={loading} size="large" type="primary">
+              登录
+            </Button>
+          </Form>
+        ) : null}
+
+        {mainTab === "login" && loginTab === "email" ? (
+          <Form
+            className="ant-auth-form"
+            form={emailLoginForm}
+            layout="vertical"
+            requiredMark={false}
+            onFinish={onEmailLogin}
+          >
+            <Form.Item
+              name="email"
+              label="邮箱"
+              rules={[
+                { required: true, message: "请输入邮箱地址" },
+                { type: "email", message: "邮箱格式不正确" },
+              ]}
+            >
+              <Input autoComplete="email" placeholder="请输入邮箱地址" size="large" type="email" />
+            </Form.Item>
+
+            <Form.Item name="code" label="验证码" rules={[{ required: true, message: "请输入验证码" }]}>
+              <Input addonAfter={renderCodeAddon(emailLoginAddress)} placeholder="请输入邮箱验证码" size="large" />
+            </Form.Item>
+
+            <Button block htmlType="submit" loading={loading} size="large" type="primary">
+              登录
+            </Button>
+          </Form>
+        ) : null}
+
+        {mainTab === "register" ? (
+          <Form
+            className="ant-auth-form"
+            form={registerForm}
+            layout="vertical"
+            requiredMark={false}
+            onFinish={onRegister}
+          >
+            <Form.Item
+              name="userId"
+              label="账号 ID"
+              rules={[
+                { required: true, message: "请输入账号 ID" },
+                { min: 3, message: "账号 ID 至少 3 位" },
+              ]}
+            >
+              <Input autoComplete="username" placeholder="用于登录和好友搜索" size="large" />
+            </Form.Item>
+
+            <Form.Item name="nickname" label="昵称">
+              <Input autoComplete="nickname" placeholder="不填则默认使用账号 ID" size="large" />
+            </Form.Item>
+
+            <Form.Item
+              name="email"
+              label="邮箱"
+              rules={[
+                { required: true, message: "请输入邮箱地址" },
+                { type: "email", message: "邮箱格式不正确" },
+              ]}
+            >
+              <Input autoComplete="email" placeholder="请输入邮箱地址" size="large" type="email" />
+            </Form.Item>
+
+            <Form.Item name="code" label="验证码" rules={[{ required: true, message: "请输入验证码" }]}>
+              <Input addonAfter={renderCodeAddon(registerAddress)} placeholder="请输入邮箱验证码" size="large" />
+            </Form.Item>
+
+            <Button block htmlType="submit" loading={loading} size="large" type="primary">
+              创建账号
+            </Button>
+          </Form>
+        ) : null}
+      </section>
     </main>
   );
 }

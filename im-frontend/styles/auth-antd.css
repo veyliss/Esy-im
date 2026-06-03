@@ -1,0 +1,558 @@
+.ant-auth-page {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  gap: 40px;
+  align-items: center;
+  overflow: hidden;
+  padding: 48px;
+  background:
+    linear-gradient(120deg, rgba(246, 248, 251, 0.94), rgba(255, 255, 255, 0.96)),
+    #f6f8fb;
+  color: #0f172a;
+  font-family: var(--font-display);
+}
+
+.ant-auth-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.72;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black 0%, black 74%, transparent 100%);
+}
+
+.ant-auth-product,
+.ant-auth-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.ant-auth-product {
+  min-height: calc(100svh - 96px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.ant-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.ant-auth-logo {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+}
+
+.ant-auth-product-copy {
+  max-width: 660px;
+  padding: 48px 0 32px;
+  animation: antAuthRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ant-auth-product-copy p {
+  margin: 0 0 18px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.ant-auth-product-copy h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 56px;
+  line-height: 1.08;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.ant-auth-product-copy span {
+  display: block;
+  max-width: 500px;
+  margin-top: 20px;
+  color: #475569;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.ant-auth-preview {
+  width: min(760px, 100%);
+  min-height: 320px;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(203, 213, 225, 0.82);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 28px 70px rgba(15, 23, 42, 0.14),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(18px);
+  animation: antAuthPreviewIn 0.82s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ant-auth-preview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.72);
+  padding: 18px;
+}
+
+.ant-auth-preview-title,
+.ant-auth-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ant-auth-preview-title span,
+.ant-auth-preview-head strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.ant-auth-preview-title em {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.ant-auth-preview-title em::before,
+.ant-auth-preview-head i {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #10b981;
+}
+
+.ant-auth-preview-item {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border-radius: 8px;
+  padding: 9px;
+  color: #334155;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.ant-auth-preview-item.is-active,
+.ant-auth-preview-item:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+
+.ant-auth-preview-item i {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.ant-auth-preview-item span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.ant-auth-preview-item strong,
+.ant-auth-preview-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ant-auth-preview-item strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.ant-auth-preview-item small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.ant-auth-preview-item b {
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 11px;
+}
+
+.ant-auth-preview-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(248, 250, 252, 0.9)),
+    #ffffff;
+}
+
+.ant-auth-preview-head {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ant-auth-preview-head span {
+  display: grid;
+  gap: 4px;
+}
+
+.ant-auth-preview-head small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.ant-auth-bubble {
+  width: fit-content;
+  max-width: min(310px, 86%);
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-size: 13px;
+  line-height: 1.55;
+  animation: antAuthMessageIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ant-auth-bubble.is-in {
+  background: #edf2f8;
+  color: #334155;
+}
+
+.ant-auth-bubble.is-out {
+  align-self: flex-end;
+  background: #2563eb;
+  color: #ffffff;
+  animation-delay: 0.12s;
+}
+
+.ant-auth-bubble.is-short {
+  max-width: 210px;
+  animation-delay: 0.22s;
+}
+
+.ant-auth-composer {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  border: 1px solid #dbe5f0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 8px 0 14px;
+}
+
+.ant-auth-composer span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.ant-auth-composer strong {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #10b981;
+  color: #ffffff;
+  font-family: "Material Symbols Outlined";
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.ant-auth-panel {
+  width: 100%;
+  align-self: center;
+  border: 1px solid rgba(203, 213, 225, 0.86);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 28px;
+  box-shadow:
+    0 30px 80px rgba(15, 23, 42, 0.15),
+    0 1px 0 rgba(255, 255, 255, 0.82) inset;
+  backdrop-filter: blur(20px);
+  animation: antAuthPanelIn 0.62s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ant-auth-panel-head {
+  margin-bottom: 22px;
+}
+
+.ant-auth-panel-head span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ant-auth-panel-head h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.ant-auth-main-tabs,
+.ant-auth-login-tabs {
+  width: 100%;
+}
+
+.ant-auth-login-tabs {
+  margin-top: 14px;
+}
+
+.ant-auth-alerts {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  margin-top: 18px;
+}
+
+.ant-auth-alerts:empty {
+  display: none;
+}
+
+.ant-auth-form {
+  margin-top: 22px;
+}
+
+.ant-auth-form .ant-form-item-label > label {
+  height: auto;
+  font-weight: 800;
+}
+
+.ant-auth-form .ant-input,
+.ant-auth-form .ant-input-password,
+.ant-auth-form .ant-input-affix-wrapper,
+.ant-auth-form .ant-input-group-addon {
+  border-color: #d9e2ef;
+}
+
+.ant-auth-form .ant-input-group-addon {
+  padding: 0;
+  background: #ffffff;
+}
+
+.ant-auth-code-button {
+  min-width: 104px;
+  height: 44px;
+  padding: 0 12px;
+  border: 0;
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.ant-auth-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -4px;
+}
+
+.ant-auth-form-row .ant-form-item {
+  margin-bottom: 0;
+}
+
+.ant-auth-form-row .ant-btn {
+  padding-right: 0;
+  font-weight: 800;
+}
+
+.ant-auth-panel .ant-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes antAuthRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes antAuthPanelIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes antAuthPreviewIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes antAuthMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1040px) {
+  .ant-auth-page {
+    grid-template-columns: 1fr;
+    padding: 32px 20px;
+  }
+
+  .ant-auth-product {
+    min-height: auto;
+    gap: 28px;
+  }
+
+  .ant-auth-product-copy {
+    max-width: 720px;
+    padding: 28px 0 0;
+  }
+
+  .ant-auth-product-copy h1 {
+    font-size: 42px;
+  }
+
+  .ant-auth-preview {
+    width: 100%;
+  }
+
+  .ant-auth-panel {
+    max-width: 560px;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .ant-auth-page {
+    min-height: 100svh;
+    padding: 22px 14px;
+  }
+
+  .ant-auth-brand {
+    font-size: 15px;
+  }
+
+  .ant-auth-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ant-auth-product-copy {
+    padding-top: 22px;
+  }
+
+  .ant-auth-product-copy p {
+    margin-bottom: 14px;
+  }
+
+  .ant-auth-product-copy h1 {
+    font-size: 34px;
+  }
+
+  .ant-auth-product-copy span {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .ant-auth-preview {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .ant-auth-preview-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  }
+
+  .ant-auth-preview-chat {
+    display: none;
+  }
+
+  .ant-auth-panel {
+    padding: 20px;
+  }
+
+  .ant-auth-panel-head {
+    margin-bottom: 18px;
+  }
+
+  .ant-auth-panel-head h2 {
+    font-size: 24px;
+  }
+
+  .ant-auth-code-button {
+    min-width: 88px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .ant-auth-form-row {
+    align-items: flex-start;
+  }
+}

@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/google-font-display, @next/next/no-page-custom-font */
+import "antd/dist/reset.css";
 import "./globals.css";
+import "../styles/auth-antd.css";
+import { AntdProvider } from "@/components/ui/antd-provider";
 import { AppInteractionProvider } from "@/components/ui/app-interactions";
 
 export const metadata = {
@@ -16,7 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=block" rel="stylesheet" />
       </head>
       <body className="font-display bg-background-light dark:bg-background-dark" suppressHydrationWarning>
-        <AppInteractionProvider>{children}</AppInteractionProvider>
+        <AntdProvider>
+          <AppInteractionProvider>{children}</AppInteractionProvider>
+        </AntdProvider>
       </body>
     </html>
   );
