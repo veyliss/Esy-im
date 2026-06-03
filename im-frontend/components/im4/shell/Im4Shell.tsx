@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CameraOutlined, ContactsOutlined, MessageOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { NavKey } from "@/components/ui/nav-tabs";
 
@@ -31,6 +31,8 @@ const navItems: Array<{ key: NavKey; label: string; href: string; icon: ReactNod
   { key: "me", label: "我的", href: "/me", icon: <UserOutlined /> },
 ];
 
+const prefetchedRoutes = new Set<string>();
+
 export function Im4Shell({
   active,
   title,
@@ -46,14 +48,32 @@ export function Im4Shell({
   className,
 }: Im4ShellProps) {
   const router = useRouter();
+  const [optimisticActive, setOptimisticActive] = useState<NavKey>(active);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   useEffect(() => {
-    navItems.forEach((item) => {
-      if (item.key !== active) {
-        router.prefetch(item.href);
+    setOptimisticActive(active);
+    setPendingHref(null);
+  }, [active]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      for (const item of navItems) {
+        if (!prefetchedRoutes.has(item.href)) {
+          router.prefetch(item.href);
+          prefetchedRoutes.add(item.href);
+        }
       }
-    });
-  }, [active, router]);
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [router]);
+
+  const handleNavClick = (item: (typeof navItems)[number], event: MouseEvent<HTMLAnchorElement>) => {
+    if (item.key === active || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    setOptimisticActive(item.key);
+    setPendingHref(item.href);
+  };
 
   return (
     <div className={clsx("im4-shell", className)}>
@@ -63,8 +83,14 @@ export function Im4Shell({
             <Link
               key={item.key}
               href={item.href}
+              aria-busy={pendingHref === item.href ? "true" : undefined}
               aria-current={active === item.key ? "page" : undefined}
-              className={clsx("im4-rail-link", active === item.key && "is-active")}
+              className={clsx(
+                "im4-rail-link",
+                optimisticActive === item.key && "is-active",
+                pendingHref === item.href && active !== item.key && "is-pending",
+              )}
+              onClick={(event) => handleNavClick(item, event)}
               title={item.label}
             >
               <span className="im4-rail-icon" aria-hidden="true">{item.icon}</span>
