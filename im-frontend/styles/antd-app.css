@@ -388,6 +388,10 @@
   align-items: center;
   gap: 6px;
   border: 0;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
   box-shadow: none;
 }
 
@@ -396,8 +400,432 @@
   background: #eff6ff;
 }
 
+.ant-moment-page {
+  background: #f5f7fb;
+}
+
+.ant-moment-shell {
+  width: min(100%, 760px);
+}
+
+.ant-moment-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -30px -28px 18px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.82);
+  background: rgba(245, 247, 251, 0.92);
+  padding: 18px 28px 14px;
+  backdrop-filter: blur(14px);
+}
+
+.ant-moment-title {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.ant-moment-title .ant-typography {
+  margin: 0;
+}
+
+.ant-moment-title h3.ant-typography {
+  color: #0f172a;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.ant-moment-toolbar-actions {
+  flex-shrink: 0;
+}
+
 .ant-moment-tabs {
-  margin-bottom: 14px;
+  margin-bottom: 0;
+}
+
+.ant-moment-session-panel {
+  gap: 16px;
+  padding: 16px;
+}
+
+.ant-moment-profile-card.ant-card {
+  border-color: #e2e8f0;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.ant-moment-profile-card .ant-avatar,
+.ant-moment-composer-head .ant-avatar,
+.ant-moment-header .ant-avatar {
+  background: #e0edff;
+  color: #1d4ed8;
+  font-weight: 850;
+}
+
+.ant-moment-profile-text,
+.ant-moment-composer-name {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.ant-moment-profile-text .ant-typography:first-child,
+.ant-moment-composer-name .ant-typography:first-child {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.ant-moment-profile-text .ant-typography:last-child,
+.ant-moment-composer-name .ant-typography:last-child {
+  font-size: 12px;
+}
+
+.ant-moment-session-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ant-moment-session-label {
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ant-moment-session-item.ant-btn {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 11px;
+  align-items: center;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.ant-moment-session-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #eef2f7;
+  color: #475569;
+  font-size: 16px;
+}
+
+.ant-moment-session-item.is-active .ant-moment-session-icon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.ant-moment-session-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.ant-moment-session-copy strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ant-moment-session-copy small {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ant-moment-composer.ant-card,
+.ant-moment-card.ant-card,
+.ant-moment-empty-card.ant-card {
+  overflow: hidden;
+  border-color: #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+}
+
+.ant-moment-composer {
+  margin-bottom: 16px;
+}
+
+.ant-moment-composer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid #eef2f7;
+  padding: 14px 16px;
+}
+
+.ant-moment-composer-body {
+  padding: 14px 16px 16px;
+}
+
+.ant-moment-composer-main {
+  min-width: 0;
+}
+
+.ant-moment-editor.ant-input {
+  min-height: 92px;
+  width: 100%;
+  border-color: #e2e8f0;
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+}
+
+.ant-moment-location-field {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 10px;
+  color: #94a3b8;
+}
+
+.ant-moment-location-field .ant-input {
+  min-width: 0;
+  padding-inline: 0;
+  background: transparent;
+  font-size: 13px;
+}
+
+.ant-moment-composer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ant-moment-composer-actions .ant-btn {
+  border-radius: 8px;
+}
+
+.moment-composer-count {
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ant-moment-draft-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ant-moment-draft-image {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-position: center;
+  background-size: cover;
+}
+
+.ant-moment-remove-image.ant-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.92);
+  color: #ffffff;
+}
+
+.ant-moment-list {
+  display: grid;
+  gap: 14px;
+}
+
+.ant-moment-empty-card {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+}
+
+.ant-moment-empty {
+  padding: 42px 18px;
+}
+
+.ant-moment-empty .ant-empty-description > span {
+  display: grid;
+  gap: 7px;
+}
+
+.ant-moment-empty .ant-empty-description strong {
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.ant-moment-empty .ant-empty-description small {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.ant-moment-main {
+  padding: 16px 16px 14px;
+}
+
+.ant-moment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ant-moment-author {
+  display: grid;
+  gap: 2px;
+}
+
+.ant-moment-author .ant-typography:first-child {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.ant-moment-author .ant-typography:last-child {
+  font-size: 12px;
+}
+
+.ant-moment-content.ant-typography {
+  margin: 13px 0 0;
+  white-space: pre-wrap;
+  color: #1f2937;
+  font-size: 15px;
+  line-height: 1.68;
+}
+
+.ant-moment-location.ant-tag {
+  margin-top: 12px;
+  margin-inline-end: 0;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.ant-moment-image-strip {
+  display: grid;
+  gap: 6px;
+  padding: 0 16px 14px;
+}
+
+.ant-moment-image-strip.is-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ant-moment-image-strip.is-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ant-moment-image-strip.is-single .moment-image-button.ant-btn {
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+}
+
+.ant-moment-image-strip.is-pair .moment-image-button.ant-btn {
+  aspect-ratio: 1;
+  border-radius: 8px;
+}
+
+.ant-moment-image-strip.is-grid .moment-image-button.ant-btn {
+  aspect-ratio: 1;
+  border-radius: 8px;
+}
+
+.ant-moment-footer {
+  border-top: 1px solid #eef2f7;
+  background: #ffffff;
+  padding: 8px 14px 14px;
+}
+
+.ant-moment-action-row {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.ant-moment-meta,
+.ant-moment-comments,
+.ant-moment-comment-form {
+  margin-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 10px;
+}
+
+.ant-moment-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.ant-moment-meta .anticon {
+  color: #2563eb;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ant-moment-comments.ant-list {
+  display: block;
+}
+
+.ant-moment-comment.ant-list-item {
+  align-items: flex-start;
+  border-block-end: 0;
+  padding: 7px 0;
+}
+
+.ant-moment-comment .ant-list-item-meta {
+  align-items: flex-start;
+  margin-block-end: 0;
+}
+
+.ant-moment-comment .ant-list-item-meta-title {
+  margin-bottom: 1px;
+  font-size: 13px;
+}
+
+.ant-moment-comment .ant-list-item-meta-description {
+  font-size: 13px;
+}
+
+.ant-moment-reply.ant-btn {
+  height: auto;
+  padding: 0 0 0 8px;
+}
+
+.ant-moment-replying {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ant-moment-comment-input {
+  width: 100%;
 }
 
 .ant-group-member-search {
@@ -891,11 +1319,29 @@
     gap: 12px;
   }
 
-  .ant-moment-tabs {
+  .ant-moment-toolbar {
     position: sticky;
     top: 0;
-    z-index: 6;
-    margin: -2px 0 12px;
+    display: grid;
+    gap: 10px;
+    margin: -12px -12px 12px;
+    padding: 12px;
+  }
+
+  .ant-moment-title h3.ant-typography {
+    font-size: 18px;
+  }
+
+  .ant-moment-toolbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ant-moment-tabs {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
     border: 1px solid #dfe8f2;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.94);
@@ -903,30 +1349,31 @@
     backdrop-filter: blur(12px);
   }
 
-  .moment-composer {
-    border-top: 0;
+  .ant-moment-composer.ant-card,
+  .ant-moment-card.ant-card,
+  .ant-moment-empty-card.ant-card {
     border-radius: 10px;
+    box-shadow: none;
+  }
+
+  .ant-moment-composer-head {
+    padding: 13px 14px;
+  }
+
+  .ant-moment-composer-body {
     padding: 14px;
   }
 
-  .moment-composer > .flex {
-    display: block;
-  }
-
-  .moment-composer > .flex > .shrink-0 {
-    display: none;
-  }
-
-  .moment-composer textarea.ant-input {
+  .ant-moment-editor.ant-input {
     min-height: 88px !important;
     padding: 12px;
     font-size: 14px;
     line-height: 1.55;
   }
 
-  .moment-composer-actions {
+  .ant-moment-composer-actions {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
   }
@@ -943,7 +1390,7 @@
     justify-self: end;
   }
 
-  .moment-composer-actions > .ant-btn-primary {
+  .ant-moment-composer-actions > .ant-btn-primary {
     grid-column: 1 / -1;
     width: 100%;
     height: 40px;
@@ -953,22 +1400,22 @@
     gap: 6px;
   }
 
-  .moment-item {
+  .ant-moment-card.ant-card {
     overflow: hidden;
     border-radius: 10px !important;
     box-shadow: none !important;
   }
 
-  .moment-item > div:first-child {
-    padding: 16px;
+  .ant-moment-main {
+    padding: 15px;
   }
 
   .moment-item .moment-action-button.ant-btn {
-    min-width: 76px;
+    min-width: 72px;
   }
 
-  .moment-item > .border-t > .flex {
-    justify-content: space-between;
+  .ant-moment-action-row {
+    justify-content: flex-start;
   }
 
   .me-page-inner {

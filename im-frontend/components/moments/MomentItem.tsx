@@ -1,10 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
-import { Button, Input, Modal } from "antd";
+import { Avatar, Button, Card, Input, List, Modal, Space, Tag, Typography } from "antd";
 import { DeleteOutlined, EnvironmentOutlined, LikeFilled, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 import type { Moment, User, MomentLike, MomentComment } from "@/lib/types/api";
 import { formatTime } from "@/lib/utils/time";
-import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface MomentItemProps {
   moment: Moment;
@@ -40,6 +39,8 @@ export function MomentItem({
   const isLiked = moment.likes?.some(
     (like: MomentLike) => like.user_id === currentUser?.user_id
   );
+  const authorName = moment.user?.nickname || "用户";
+  const imageLayout = images.length === 1 ? "is-single" : images.length === 2 ? "is-pair" : "is-grid";
 
   const handleLikeClick = () => {
     if (isLiked) {
@@ -65,25 +66,16 @@ export function MomentItem({
   };
 
   return (
-    <article className="moment-item im-panel overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div className="p-5">
-        <div className="mb-3 flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <UserAvatar
-              src={moment.user?.avatar || "/default-avatar.png"}
-              name={moment.user?.nickname || "用户"}
-              size="md"
-              border
-            />
-            <div>
-              <p className="font-bold text-slate-800 dark:text-slate-200">
-                {moment.user?.nickname}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {formatTime(moment.created_at)}
-              </p>
+    <Card className="moment-item ant-moment-card" styles={{ body: { padding: 0 } }}>
+      <div className="ant-moment-main">
+        <div className="ant-moment-header">
+          <Space align="center" size={12}>
+            <Avatar src={moment.user?.avatar || undefined} size={42}>{authorName.slice(0, 1).toUpperCase()}</Avatar>
+            <div className="ant-moment-author">
+              <Typography.Text strong>{authorName}</Typography.Text>
+              <Typography.Text type="secondary">{formatTime(moment.created_at)}</Typography.Text>
             </div>
-          </div>
+          </Space>
           {currentUser?.user_id === moment.user_id && (
             <Button
               aria-label="删除动态"
@@ -97,25 +89,26 @@ export function MomentItem({
           )}
         </div>
 
-        <p className="mb-4 whitespace-pre-wrap text-[15px] leading-6 text-slate-700 dark:text-slate-300">
-          {moment.content}
-        </p>
+        {moment.content ? (
+          <Typography.Paragraph className="ant-moment-content">
+            {moment.content}
+          </Typography.Paragraph>
+        ) : null}
 
         {moment.location && (
-          <div className="mb-3 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-            <EnvironmentOutlined />
-            <span>{moment.location}</span>
-          </div>
+          <Tag className="ant-moment-location" icon={<EnvironmentOutlined />}>
+            {moment.location}
+          </Tag>
         )}
       </div>
 
       {images.length > 0 && (
-        <div className={`grid gap-1 bg-slate-100 p-px dark:bg-slate-800 ${images.length === 1 ? "" : "grid-cols-3"}`}>
+        <div className={`ant-moment-image-strip ${imageLayout}`}>
           {images.map((img: string, index: number) => (
             <Button
               type="text"
               key={index}
-              className={`moment-image-button ${images.length === 1 ? "aspect-video" : "aspect-square"}`}
+              className="moment-image-button"
               style={{ backgroundImage: `url(${img})` }}
               onClick={() => setPreviewImage(img)}
               aria-label="预览图片"
@@ -124,77 +117,80 @@ export function MomentItem({
         </div>
       )}
 
-      <div className="border-t border-slate-200 p-2 dark:border-slate-800">
-        <div className="flex justify-end gap-2">
+      <div className="ant-moment-footer">
+        <Space className="ant-moment-action-row" size={4}>
           <Button
             onClick={handleLikeClick}
+            icon={isLiked ? <LikeFilled /> : <LikeOutlined />}
             className={`moment-action-button ${
               isLiked
                 ? "is-active"
                 : ""
             }`}
+            type="text"
           >
-            {isLiked ? <LikeFilled /> : <LikeOutlined />}
             <span>{moment.like_count || 0}</span>
           </Button>
           <Button
             onClick={() => setShowCommentInput(!showCommentInput)}
             className="moment-action-button"
+            icon={<MessageOutlined />}
+            type="text"
           >
-            <MessageOutlined />
             <span>{moment.comment_count || 0}</span>
           </Button>
-        </div>
+        </Space>
 
         {moment.likes && moment.likes.length > 0 && (
-          <div className="moment-meta mt-3 border-t border-slate-200 pt-3 dark:border-slate-800">
-            <div className="flex items-center gap-2 text-sm">
-              <LikeFilled className="text-primary text-base" />
-              <span className="text-slate-600 dark:text-slate-400">
-                {moment.likes
-                  .map((like: MomentLike) => like.user?.nickname)
-                  .join("、")}
-              </span>
-            </div>
+          <div className="ant-moment-meta">
+            <LikeFilled />
+            <Typography.Text type="secondary">
+              {moment.likes
+                .map((like: MomentLike) => like.user?.nickname)
+                .join("、")}
+            </Typography.Text>
           </div>
         )}
 
         {moment.comments && moment.comments.length > 0 && (
-          <div className="mt-3 space-y-2 border-t border-slate-200 pt-3 dark:border-slate-800">
-            {moment.comments.map((comment: MomentComment) => (
-              <div key={comment.id} className="text-sm">
-                <span className="font-semibold text-slate-800 dark:text-slate-200">
-                  {comment.user?.nickname}
-                </span>
-                {comment.reply_to?.user && (
-                  <>
-                    <span className="text-slate-500 dark:text-slate-400"> 回复 </span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">
-                      {comment.reply_to.user.nickname}
+          <List
+            className="ant-moment-comments"
+            dataSource={moment.comments}
+            renderItem={(comment: MomentComment) => (
+              <List.Item className="ant-moment-comment">
+                <List.Item.Meta
+                  avatar={<Avatar src={comment.user?.avatar || undefined} size={24}>{comment.user?.nickname?.slice(0, 1) || "用"}</Avatar>}
+                  title={
+                    <span>
+                      <Typography.Text strong>{comment.user?.nickname}</Typography.Text>
+                      {comment.reply_to?.user ? (
+                        <>
+                          <Typography.Text type="secondary"> 回复 </Typography.Text>
+                          <Typography.Text strong>{comment.reply_to.user.nickname}</Typography.Text>
+                        </>
+                      ) : null}
                     </span>
-                  </>
-                )}
-                <span className="text-slate-600 dark:text-slate-400">
-                  : {comment.content}
-                </span>
+                  }
+                  description={<Typography.Text type="secondary">{comment.content}</Typography.Text>}
+                />
                 <Button
-                  className="ml-2"
+                  className="ant-moment-reply"
                   size="small"
                   type="link"
                   onClick={() => handleReply(comment)}
                 >
                   回复
                 </Button>
-              </div>
-            ))}
-          </div>
+              </List.Item>
+            )}
+          />
         )}
 
         {showCommentInput && (
-          <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800">
+          <div className="ant-moment-comment-form">
             {replyTo && (
-              <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
-                回复 @{replyTo.user?.nickname}
+              <div className="ant-moment-replying">
+                <Typography.Text type="secondary">回复 @{replyTo.user?.nickname}</Typography.Text>
                 <Button
                   size="small"
                   type="link"
@@ -207,7 +203,7 @@ export function MomentItem({
                 </Button>
               </div>
             )}
-            <div className="flex gap-2">
+            <Space.Compact className="ant-moment-comment-input">
               <Input
                 placeholder="写评论..."
                 value={commentContent}
@@ -217,7 +213,6 @@ export function MomentItem({
                     handleCommentSubmit();
                   }
                 }}
-                className="flex-1"
               />
               <Button
                 type="primary"
@@ -225,7 +220,7 @@ export function MomentItem({
               >
                 发送
               </Button>
-            </div>
+            </Space.Compact>
           </div>
         )}
       </div>
@@ -239,6 +234,6 @@ export function MomentItem({
       >
         {previewImage ? <img src={previewImage} alt="动态图片预览" /> : null}
       </Modal>
-    </article>
+    </Card>
   );
 }

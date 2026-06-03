@@ -22,9 +22,13 @@ func NewMomentService(momentRepo *repository.MomentRepository, friendRepo *repos
 
 // CreateMoment 发布朋友圈动态
 func (s *MomentService) CreateMoment(userID, content, images, location string, visible int) error {
-	// 校验内容不能为空
-	if len(strings.TrimSpace(content)) == 0 {
-		return errors.New("动态内容不能为空")
+	content = strings.TrimSpace(content)
+	images = strings.TrimSpace(images)
+	location = strings.TrimSpace(location)
+
+	// 允许纯文字、纯图片或图文动态，但不能完全为空。
+	if content == "" && images == "" {
+		return errors.New("动态内容或图片不能为空")
 	}
 
 	moment := &model.Moment{
@@ -172,6 +176,11 @@ func (s *MomentService) GetLikeList(momentID uint, userID string) ([]model.Momen
 
 // CommentMoment 评论动态
 func (s *MomentService) CommentMoment(momentID uint, userID, content string, replyToID *uint) error {
+	content = strings.TrimSpace(content)
+	if content == "" {
+		return errors.New("评论内容不能为空")
+	}
+
 	// 检查动态是否存在
 	moment, err := s.momentRepo.FindMomentByID(momentID)
 	if err != nil {
@@ -192,9 +201,12 @@ func (s *MomentService) CommentMoment(momentID uint, userID, content string, rep
 
 	// 如果是回复评论，检查被回复的评论是否存在
 	if replyToID != nil {
-		_, err := s.momentRepo.FindCommentByID(*replyToID)
+		replyTo, err := s.momentRepo.FindCommentByID(*replyToID)
 		if err != nil {
 			return errors.New("被回复的评论不存在")
+		}
+		if replyTo.MomentID != momentID {
+			return errors.New("不能回复其他动态下的评论")
 		}
 	}
 
