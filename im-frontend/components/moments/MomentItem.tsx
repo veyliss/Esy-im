@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import { Button, Input, Modal } from "antd";
+import { DeleteOutlined, EnvironmentOutlined, LikeFilled, LikeOutlined, MessageOutlined } from "@ant-design/icons";
 import type { Moment, User, MomentLike, MomentComment } from "@/lib/types/api";
 import { formatTime } from "@/lib/utils/time";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -87,7 +88,7 @@ export function MomentItem({
             <Button
               aria-label="删除动态"
               danger
-              icon={<span className="material-symbols-outlined text-lg">delete</span>}
+              icon={<DeleteOutlined />}
               shape="circle"
               title="删除动态"
               type="text"
@@ -102,7 +103,7 @@ export function MomentItem({
 
         {moment.location && (
           <div className="mb-3 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-            <span className="material-symbols-outlined text-sm">location_on</span>
+            <EnvironmentOutlined />
             <span>{moment.location}</span>
           </div>
         )}
@@ -111,8 +112,8 @@ export function MomentItem({
       {images.length > 0 && (
         <div className={`grid gap-1 bg-slate-100 p-px dark:bg-slate-800 ${images.length === 1 ? "" : "grid-cols-3"}`}>
           {images.map((img: string, index: number) => (
-            <button
-              type="button"
+            <Button
+              type="text"
               key={index}
               className={`moment-image-button ${images.length === 1 ? "aspect-video" : "aspect-square"}`}
               style={{ backgroundImage: `url(${img})` }}
@@ -133,16 +134,14 @@ export function MomentItem({
                 : ""
             }`}
           >
-            <span className="material-symbols-outlined text-lg">
-              {isLiked ? "thumb_up" : "thumb_up"}
-            </span>
+            {isLiked ? <LikeFilled /> : <LikeOutlined />}
             <span>{moment.like_count || 0}</span>
           </Button>
           <Button
             onClick={() => setShowCommentInput(!showCommentInput)}
             className="moment-action-button"
           >
-            <span className="material-symbols-outlined text-lg">chat_bubble</span>
+            <MessageOutlined />
             <span>{moment.comment_count || 0}</span>
           </Button>
         </div>
@@ -150,9 +149,7 @@ export function MomentItem({
         {moment.likes && moment.likes.length > 0 && (
           <div className="moment-meta mt-3 border-t border-slate-200 pt-3 dark:border-slate-800">
             <div className="flex items-center gap-2 text-sm">
-              <span className="material-symbols-outlined text-primary text-base">
-                thumb_up
-              </span>
+              <LikeFilled className="text-primary text-base" />
               <span className="text-slate-600 dark:text-slate-400">
                 {moment.likes
                   .map((like: MomentLike) => like.user?.nickname)

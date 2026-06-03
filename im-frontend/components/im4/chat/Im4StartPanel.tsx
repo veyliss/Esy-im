@@ -1,3 +1,4 @@
+import { MessageOutlined } from "@ant-design/icons";
 import { Im4Button } from "../common";
 
 interface Im4StartPanelProps {
@@ -9,7 +10,7 @@ export function Im4StartPanel({ onOpenRecent, onOpenContacts }: Im4StartPanelPro
   return (
     <div className="im4-start-panel">
       <div>
-        <span className="material-symbols-outlined">forum</span>
+        <MessageOutlined />
         <h2>选择会话开始聊天</h2>
         <p>会话列表会展示私聊、群聊、未读、草稿和置顶状态。聊天区专注消息流，不做后台页面。</p>
         <div>
@@ -22,4 +23,3 @@ export function Im4StartPanel({ onOpenRecent, onOpenContacts }: Im4StartPanelPro
 }
 
 export default Im4StartPanel;
-

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, Input } from "antd";
+import { CopyOutlined, DeleteOutlined, MessageOutlined, SaveOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/lib/store";
 import { useContactStore } from "@/lib/store/contact";
 import { useChatStore } from "@/lib/store/chat";
@@ -297,15 +298,15 @@ export default function ContactsPage() {
       </div>
 
       <div className="im4-session-list">
-        <button
-          type="button"
+        <Button
+          type="text"
           className={`im4-contact-request ${activeRightTab === "requests" ? "is-active" : ""}`}
           onClick={openRequests}
         >
           <span>新的朋友</span>
           <small>好友申请与记录</small>
           {pendingRequestCount > 0 ? <em>{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</em> : null}
-        </button>
+        </Button>
 
         <h2 className="im4-session-section-label">我的好友 · {filteredFriends.length}</h2>
         {filteredFriends.length === 0 ? (
@@ -454,27 +455,27 @@ export default function ContactsPage() {
 
                 <div className="mt-10 flex flex-wrap justify-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
                   <Button
-                    icon={<span className="material-symbols-outlined text-lg">chat</span>}
+                    icon={<MessageOutlined />}
                     onClick={handleSendMessage}
                     type="primary"
                   >
                     发送消息
                   </Button>
                   <Button
-                    icon={<span className="material-symbols-outlined text-lg">save</span>}
+                    icon={<SaveOutlined />}
                     onClick={handleUpdateRemark}
                   >
                     保存备注
                   </Button>
                   <Button
-                    icon={<span className="material-symbols-outlined text-lg">content_copy</span>}
+                    icon={<CopyOutlined />}
                     onClick={handleCopyFriendId}
                   >
                     复制 ID
                   </Button>
                   <Button
                     danger
-                    icon={<span className="material-symbols-outlined text-lg">delete</span>}
+                    icon={<DeleteOutlined />}
                     onClick={handleDeleteFriend}
                   >
                     删除联系人

@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button, Input, Segmented } from "antd";
+import { CameraOutlined, CloseOutlined, EnvironmentOutlined, PictureOutlined, ReloadOutlined } from "@ant-design/icons";
 import { MomentItem } from "@/components/moments/MomentItem";
 import {
   ActionBar,
   EmptyPanel,
   SectionCard,
 } from "@/components/workspace/section";
-import { Im4IconButton, Im4Shell } from "@/components/im4";
+import { Im4Shell } from "@/components/im4";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { PageLoading } from "@/components/ui/loading-states";
@@ -308,22 +309,22 @@ export default function MomentsPage() {
       </div>
       <div className="im4-session-list">
         <h2 className="im4-session-section-label">时间流视图</h2>
-        <button
-          type="button"
+        <Button
+          type="text"
           className={`im4-contact-request ${activeTab === "timeline" ? "is-active" : ""}`}
           onClick={() => setActiveTab("timeline")}
         >
           <span>朋友动态</span>
           <small>{timeline.length} 条可见动态</small>
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          type="text"
           className={`im4-contact-request ${activeTab === "my" ? "is-active" : ""}`}
           onClick={() => setActiveTab("my")}
         >
           <span>我的朋友圈</span>
           <small>{myMoments.length} 条我的动态</small>
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -339,10 +340,22 @@ export default function MomentsPage() {
       avatarName={currentUser?.nickname || "我"}
       rightSlot={
         <div className="flex items-center gap-2">
-          <Im4IconButton icon="add_photo_alternate" label="发布图片" onClick={handleImageSelect} />
-          <Im4IconButton
-            icon="refresh"
-            label="刷新动态"
+          <Button
+            aria-label="发布图片"
+            className="im4-icon-button ant-im4-icon-button"
+            icon={<PictureOutlined />}
+            shape="circle"
+            title="发布图片"
+            type="text"
+            onClick={handleImageSelect}
+          />
+          <Button
+            aria-label="刷新动态"
+            className="im4-icon-button ant-im4-icon-button"
+            icon={<ReloadOutlined />}
+            shape="circle"
+            title="刷新动态"
+            type="text"
             onClick={() => {
               if (activeTab === "timeline") {
                 loadTimeline();
@@ -385,7 +398,7 @@ export default function MomentsPage() {
                     maxLength={500}
                   />
                   <div className="mt-3 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-base text-slate-400">location_on</span>
+                    <EnvironmentOutlined className="text-base text-slate-400" />
                     <Input
                       className="min-w-0 flex-1"
                       value={location}
@@ -398,7 +411,7 @@ export default function MomentsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <Button
                         onClick={handleImageSelect}
-                        icon={<span className="material-symbols-outlined text-xl">image</span>}
+                        icon={<CameraOutlined />}
                       >
                         {images.length > 0 ? `${images.length}/9` : "图片"}
                       </Button>
@@ -438,7 +451,7 @@ export default function MomentsPage() {
                             onClick={() => removeImage(index)}
                             aria-label="移除图片"
                             title="移除"
-                            icon={<span className="material-symbols-outlined text-sm">close</span>}
+                            icon={<CloseOutlined />}
                           >
                           </Button>
                         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { TextAreaRef } from "antd/es/input/TextArea";
 import { useAuthStore } from "@/lib/store";
 import { useChatStore } from "@/lib/store/chat";
 import { useGroupStore } from "@/lib/store/group";
@@ -127,7 +128,7 @@ export default function ChatPage() {
   const [threadSearchOpen, setThreadSearchOpen] = useState(false);
   const [threadKeyword, setThreadKeyword] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const composerInputRef = useRef<HTMLTextAreaElement>(null);
+  const composerInputRef = useRef<TextAreaRef>(null);
 
   // 加载当前用户信息
   useEffect(() => {

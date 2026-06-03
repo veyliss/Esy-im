@@ -1,5 +1,8 @@
 import clsx from "clsx";
-import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+import { Button, Empty, Input } from "antd";
+import { InboxOutlined, MessageOutlined, PictureOutlined, SearchOutlined, SendOutlined } from "@ant-design/icons";
+import type { HTMLAttributes, ReactNode } from "react";
+import type { ButtonProps, InputProps } from "antd";
 
 interface SectionCardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -105,19 +108,18 @@ export function SidebarToolbar({ children, className }: SidebarToolbarProps) {
   );
 }
 
-interface SidebarSearchProps extends InputHTMLAttributes<HTMLInputElement> {
+interface SidebarSearchProps extends InputProps {
   icon?: string;
 }
 
 export function SidebarSearch({ icon = "search", className, ...props }: SidebarSearchProps) {
   return (
-    <div className="workspace-search relative">
-      <span className="workspace-search-icon" aria-hidden="true" data-icon={icon} />
-      <input
-        {...props}
-        className={clsx("workspace-search-input ui-input h-11 w-full rounded-full py-2.5 pl-14 pr-5 text-sm shadow-none", className)}
-      />
-    </div>
+    <Input
+      {...props}
+      allowClear={props.allowClear ?? true}
+      className={clsx("workspace-search-input ui-input h-11 w-full rounded-full text-sm shadow-none", className)}
+      prefix={icon === "search" ? <SearchOutlined aria-hidden="true" /> : null}
+    />
   );
 }
 
@@ -130,7 +132,7 @@ export function SidebarScrollArea({ children, className }: SidebarScrollAreaProp
   return <div className={clsx("workspace-sidebar-scroll flex-1 overflow-y-auto", className)}>{children}</div>;
 }
 
-interface SidebarItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title"> {
+interface SidebarItemProps extends Omit<ButtonProps, "title" | "children" | "type"> {
   active?: boolean;
   leading?: ReactNode;
   title?: ReactNode;
@@ -147,12 +149,11 @@ export function SidebarItem({
   trailing,
   children,
   className,
-  type = "button",
   ...props
 }: SidebarItemProps) {
   return (
-    <button
-      type={type}
+    <Button
+      type="text"
       aria-current={active ? "true" : undefined}
       className={clsx(
         "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-slate-700 transition-colors hover:bg-slate-100 active:scale-[0.98] dark:text-slate-300 dark:hover:bg-slate-800",
@@ -179,7 +180,7 @@ export function SidebarItem({
           {trailing ? <span className="shrink-0">{trailing}</span> : null}
         </>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -191,6 +192,13 @@ interface EmptyPanelProps {
   action?: ReactNode;
 }
 
+const emptyIconMap: Record<string, ReactNode> = {
+  add_photo_alternate: <PictureOutlined />,
+  dynamic_feed: <MessageOutlined />,
+  inbox: <InboxOutlined />,
+  send: <SendOutlined />,
+};
+
 export function EmptyPanel({ title, description, className, icon, action }: EmptyPanelProps) {
   return (
     <div
@@ -199,16 +207,17 @@ export function EmptyPanel({ title, description, className, icon, action }: Empt
         className,
       )}
     >
-      <div>
-        {icon ? (
-          <span className="workspace-empty-icon material-symbols-outlined" aria-hidden="true">
-            {icon}
+      <Empty
+        image={icon ? <span className="workspace-empty-icon">{emptyIconMap[icon] || <InboxOutlined />}</span> : Empty.PRESENTED_IMAGE_SIMPLE}
+        description={
+          <span>
+            <strong>{title}</strong>
+            {description ? <small>{description}</small> : null}
           </span>
-        ) : null}
-        <p className="text-base font-semibold text-slate-700 dark:text-slate-200">{title}</p>
-        {description ? <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{description}</p> : null}
+        }
+      >
         {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
-      </div>
+      </Empty>
     </div>
   );
 }

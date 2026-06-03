@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Button } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 
 interface MobileDetailHeaderProps {
@@ -18,15 +20,15 @@ export function MobileDetailHeader({
 }: MobileDetailHeaderProps) {
   return (
     <div className={clsx("mobile-detail-header", className)}>
-      <button
-        type="button"
+      <Button
+        type="text"
         className="mobile-detail-back"
         onClick={onBack}
         aria-label="返回列表"
         title="返回"
-      >
-        <span className="material-symbols-outlined text-xl">arrow_back</span>
-      </button>
+        icon={<ArrowLeftOutlined />}
+        shape="circle"
+      />
       <div className="min-w-0 flex-1">
         <h2>{title}</h2>
         {description ? <p>{description}</p> : null}

@@ -1,5 +1,7 @@
 import type { KeyboardEvent, Ref } from "react";
-import { Button } from "antd";
+import { Button, Input } from "antd";
+import { CloseOutlined, PlusOutlined, SendOutlined, SyncOutlined } from "@ant-design/icons";
+import type { TextAreaRef } from "antd/es/input/TextArea";
 
 interface Im4ComposerProps {
   value: string;
@@ -8,7 +10,7 @@ interface Im4ComposerProps {
   replyPreview?: { author: string; content: string } | null;
   quickReplies?: string[];
   sending?: boolean;
-  inputRef?: Ref<HTMLTextAreaElement>;
+  inputRef?: Ref<TextAreaRef>;
   onChange: (value: string) => void;
   onSend: () => void;
   onAttach: () => void;
@@ -48,7 +50,7 @@ export function Im4Composer({
           {onCancelReply ? (
             <Button
               aria-label="取消回复"
-              icon={<span className="material-symbols-outlined">close</span>}
+              icon={<CloseOutlined />}
               shape="circle"
               size="small"
               title="取消回复"
@@ -71,19 +73,21 @@ export function Im4Composer({
         <Button
           aria-label="添加附件"
           className="im4-compose-tool"
-          icon={<span className="material-symbols-outlined">add</span>}
+          icon={<PlusOutlined />}
           shape="circle"
           title="添加附件"
           type="text"
           onClick={onAttach}
         />
         <div className="im4-compose-input">
-          <textarea
+          <Input.TextArea
             ref={inputRef}
             rows={1}
             value={value}
             placeholder={placeholder}
             disabled={sending}
+            autoSize={{ minRows: 1, maxRows: 5 }}
+            variant="borderless"
             onChange={(event) => onChange(event.target.value)}
             onKeyDown={handleKeyDown}
           />
@@ -95,7 +99,7 @@ export function Im4Composer({
         <Button
           className="im4-send-button"
           disabled={sending || !value.trim()}
-          icon={<span className="material-symbols-outlined">{sending ? "sync" : "send"}</span>}
+          icon={sending ? <SyncOutlined /> : <SendOutlined />}
           loading={sending}
           shape="circle"
           type="primary"

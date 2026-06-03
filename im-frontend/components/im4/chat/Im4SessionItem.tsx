@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Button, Tooltip } from "antd";
+import { BellOutlined, EyeInvisibleOutlined, MutedOutlined, PushpinFilled, PushpinOutlined } from "@ant-design/icons";
 import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface Im4SessionItemProps {
@@ -35,7 +36,7 @@ export function Im4SessionItem({
 }: Im4SessionItemProps) {
   return (
     <div className={clsx("im4-session-item", active && "is-active", unreadCount > 0 && "has-unread")}>
-      <button type="button" className="im4-session-main" onClick={onClick}>
+      <Button type="text" className="im4-session-main" onClick={onClick}>
         <UserAvatar src={avatar} name={name} size="md" shape={type === "group" ? "rounded" : "circle"} border />
         <div className="im4-session-copy">
           <div>
@@ -45,17 +46,17 @@ export function Im4SessionItem({
           <p>{lastMessage || (type === "group" ? "群聊暂无消息" : "暂无消息")}</p>
         </div>
         <div className="im4-session-flags">
-          {pinned ? <span className="material-symbols-outlined">keep</span> : null}
-          {muted ? <span className="material-symbols-outlined">notifications_off</span> : null}
+          {pinned ? <PushpinFilled /> : null}
+          {muted ? <MutedOutlined /> : null}
           {unreadCount > 0 ? <em>{unreadCount > 99 ? "99+" : unreadCount}</em> : null}
         </div>
-      </button>
+      </Button>
       <div className="im4-session-actions">
         {onPin ? (
           <Tooltip title={pinned ? "取消置顶" : "置顶"}>
             <Button
               aria-label={pinned ? "取消置顶" : "置顶会话"}
-              icon={<span className="material-symbols-outlined">{pinned ? "keep_off" : "keep"}</span>}
+              icon={<PushpinOutlined />}
               shape="circle"
               size="small"
               type="text"
@@ -67,7 +68,7 @@ export function Im4SessionItem({
           <Tooltip title={muted ? "取消免打扰" : "免打扰"}>
             <Button
               aria-label={muted ? "取消免打扰" : "免打扰"}
-              icon={<span className="material-symbols-outlined">{muted ? "notifications" : "notifications_off"}</span>}
+              icon={muted ? <BellOutlined /> : <MutedOutlined />}
               shape="circle"
               size="small"
               type="text"
@@ -79,7 +80,7 @@ export function Im4SessionItem({
           <Tooltip title="隐藏">
             <Button
               aria-label="隐藏会话"
-              icon={<span className="material-symbols-outlined">visibility_off</span>}
+              icon={<EyeInvisibleOutlined />}
               shape="circle"
               size="small"
               type="text"

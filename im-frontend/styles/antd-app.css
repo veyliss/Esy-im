@@ -186,6 +186,186 @@
   justify-content: center;
 }
 
+.im4-contact-request.ant-btn,
+.im4-session-main.ant-btn,
+.me-avatar-button.ant-btn,
+.me-avatar-picker.ant-btn,
+.moment-image-button.ant-btn {
+  height: auto;
+  box-shadow: none;
+}
+
+.im4-contact-request.ant-btn,
+.im4-session-main.ant-btn {
+  justify-content: flex-start;
+  white-space: normal;
+}
+
+.im4-contact-request.ant-btn {
+  padding: 13px 14px;
+}
+
+.im4-contact-request.ant-btn > span {
+  display: contents;
+}
+
+.im4-session-main.ant-btn {
+  padding: 6px;
+}
+
+.im4-session-main.ant-btn > span {
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  align-items: center;
+  gap: 11px;
+}
+
+.me-avatar-button.ant-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.me-avatar-button.ant-btn > span {
+  position: relative;
+  display: inline-flex;
+}
+
+.me-avatar-picker.ant-btn {
+  width: 100%;
+  padding: 0 13px;
+}
+
+.me-avatar-picker.ant-btn > span {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.moment-image-button.ant-btn {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background-position: center;
+  background-size: cover;
+}
+
+.moment-image-button.ant-btn > span {
+  display: none;
+}
+
+.workspace-sidebar-item.ant-btn,
+.mobile-detail-back.ant-btn {
+  box-shadow: none;
+}
+
+.workspace-sidebar-item.ant-btn {
+  height: auto;
+  justify-content: flex-start;
+  white-space: normal;
+}
+
+.workspace-sidebar-item.ant-btn > span {
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-detail-back.ant-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workspace-empty-panel .ant-empty {
+  margin: 0;
+}
+
+.workspace-empty-panel .ant-empty-image {
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.workspace-empty-panel .ant-empty-description > span {
+  display: grid;
+  gap: 8px;
+}
+
+.workspace-empty-panel .ant-empty-description strong {
+  color: #334155;
+  font-size: 16px;
+}
+
+.workspace-empty-panel .ant-empty-description small {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.workspace-empty-icon {
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 24px;
+}
+
+.im4-compose-input .ant-input {
+  min-height: 24px;
+  padding: 0;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.55;
+  resize: none;
+}
+
+.im4-compose-input .ant-input:focus {
+  box-shadow: none;
+}
+
+.me-panel-icon {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #edf2f7;
+  color: #2563eb;
+  font-size: 18px;
+}
+
+.me-hero-meta .anticon {
+  font-size: 14px;
+}
+
+.im4-session-flags .anticon {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.im4-message-meta .anticon {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.im4-start-panel .anticon {
+  color: #2563eb;
+  font-size: 34px;
+}
+
 .im4-quick-replies .ant-btn {
   border-radius: 999px;
 }

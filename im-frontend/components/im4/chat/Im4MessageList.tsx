@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import { Button } from "antd";
+import { CheckCircleOutlined } from "@ant-design/icons";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { GroupMessage, Message, User } from "@/lib/types/api";
 import { Im4Button } from "../common";
@@ -72,7 +73,7 @@ export function Im4MessageList({
                 <div className="im4-message-bubble">{message.content}</div>
                 <div className="im4-message-meta">
                   <time>{formatMessageTime(message.created_at)}</time>
-                  {isMine ? <span className="material-symbols-outlined">done_all</span> : null}
+                  {isMine ? <CheckCircleOutlined /> : null}
                   <Button size="small" type="link" onClick={() => onReplyMessage(message)}>回复</Button>
                   <Button size="small" type="link" onClick={() => onCopyMessage(message.content)}>复制</Button>
                 </div>

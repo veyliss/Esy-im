@@ -3,6 +3,16 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Switch } from "antd";
+import {
+  CameraOutlined,
+  EditOutlined,
+  IdcardOutlined,
+  MailOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
+  UploadOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Im4Button, Im4Shell, Im4Status } from "@/components/im4";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -309,38 +319,38 @@ export default function MePage() {
 
       <div className="im4-session-list">
         <h2 className="im4-session-section-label">设置目录</h2>
-        <button
-          type="button"
+        <Button
+          type="text"
           className="im4-contact-request is-active"
           onClick={() => scrollToSection("profile-section")}
         >
           <span>我的资料</span>
           <small>头像、昵称和展示信息</small>
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          type="text"
           className="im4-contact-request"
           onClick={() => scrollToSection("account-section")}
         >
           <span>账号信息</span>
           <small>用户 ID、邮箱和创建时间</small>
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          type="text"
           className="im4-contact-request"
           onClick={() => scrollToSection("security-section")}
         >
           <span>账号与安全</span>
           <small>密码与登录状态</small>
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          type="text"
           className="im4-contact-request"
           onClick={() => scrollToSection("preference-section")}
         >
           <span>偏好设置</span>
           <small>通知和显示习惯</small>
-        </button>
+        </Button>
       </div>
 
       <div className="im4-me-footer">
@@ -397,7 +407,7 @@ export default function MePage() {
 
             <section className="me-hero" id="profile-section">
               <div className="me-avatar-block">
-                <button type="button" onClick={handleAvatarClick} className="me-avatar-button" aria-label="修改头像" title="修改头像">
+                <Button type="text" onClick={handleAvatarClick} className="me-avatar-button" aria-label="修改头像" title="修改头像">
                   <UserAvatar
                     src={avatar || currentUser?.avatar || "/default-avatar.png"}
                     name={nickname || currentUser?.nickname || "我"}
@@ -405,9 +415,9 @@ export default function MePage() {
                     border
                   />
                   <span className="me-avatar-edit">
-                    <span className="material-symbols-outlined text-lg">photo_camera</span>
+                    <CameraOutlined />
                   </span>
-                </button>
+                </Button>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
               </div>
 
@@ -417,11 +427,11 @@ export default function MePage() {
                 <p>这里管理你在聊天、通讯录和群聊中展示的资料。</p>
                 <div className="me-hero-meta">
                   <span>
-                    <span className="material-symbols-outlined">alternate_email</span>
+                    <UserOutlined />
                     {currentUser?.user_id || "未设置 ID"}
                   </span>
                   <span>
-                    <span className="material-symbols-outlined">mail</span>
+                    <MailOutlined />
                     {currentUser?.email || "未绑定邮箱"}
                   </span>
                 </div>
@@ -439,7 +449,7 @@ export default function MePage() {
             <div className="me-grid">
               <section className="me-panel" aria-labelledby="me-profile-title">
                 <div className="me-panel-head">
-                  <span className="material-symbols-outlined">edit_square</span>
+                  <span className="me-panel-icon"><EditOutlined /></span>
                   <div>
                     <h2 id="me-profile-title">编辑资料</h2>
                     <p>头像和昵称会显示在聊天气泡、通讯录和群聊成员列表中。</p>
@@ -461,10 +471,10 @@ export default function MePage() {
 
                   <label className="me-field">
                     <span>头像</span>
-                    <button type="button" onClick={handleAvatarClick} className="me-avatar-picker">
+                    <Button type="text" onClick={handleAvatarClick} className="me-avatar-picker">
                       <span>选择本地图片</span>
-                      <span className="material-symbols-outlined text-lg">upload</span>
-                    </button>
+                      <UploadOutlined />
+                    </Button>
                     <small>支持常见图片格式，建议小于 2MB</small>
                   </label>
                 </div>
@@ -472,7 +482,7 @@ export default function MePage() {
 
               <section className="me-panel" id="account-section" aria-labelledby="me-account-title">
                 <div className="me-panel-head">
-                  <span className="material-symbols-outlined">badge</span>
+                  <span className="me-panel-icon"><IdcardOutlined /></span>
                   <div>
                     <h2 id="me-account-title">账号信息</h2>
                     <p>这些信息用于登录识别，不在这里直接修改。</p>
@@ -501,7 +511,7 @@ export default function MePage() {
 
               <section className="me-panel is-wide" id="security-section" aria-labelledby="me-security-title">
                 <div className="me-panel-head">
-                  <span className="material-symbols-outlined">shield_lock</span>
+                  <span className="me-panel-icon"><SafetyCertificateOutlined /></span>
                   <div>
                     <h2 id="me-security-title">账号与安全</h2>
                     <p>修改密码后会自动退出当前登录，需要重新登录。</p>
@@ -545,7 +555,7 @@ export default function MePage() {
 
               <section className="me-panel is-wide" id="preference-section" aria-labelledby="me-preference-title">
                 <div className="me-panel-head">
-                  <span className="material-symbols-outlined">tune</span>
+                  <span className="me-panel-icon"><SettingOutlined /></span>
                   <div>
                     <h2 id="me-preference-title">偏好设置</h2>
                     <p>这些设置先保存在当前前端会话中，后续可以接入后端持久化。</p>

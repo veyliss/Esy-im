@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Button } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface Im4ConversationHeaderProps {
@@ -26,7 +27,7 @@ export function Im4ConversationHeader({
           <Button
             aria-label="返回会话列表"
             className="im4-back-button"
-            icon={<span className="material-symbols-outlined">arrow_back</span>}
+            icon={<ArrowLeftOutlined />}
             shape="circle"
             title="返回"
             type="text"

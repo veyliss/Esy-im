@@ -1,9 +1,33 @@
 "use client";
 
 import { Button, Empty, Input, Segmented, Tag, Tooltip } from "antd";
+import {
+  BellOutlined,
+  CloseOutlined,
+  InfoCircleOutlined,
+  PlusOutlined,
+  PushpinOutlined,
+  QuestionCircleOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import clsx from "clsx";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import type { ButtonProps, InputProps } from "antd";
+
+const iconMap: Record<string, ReactNode> = {
+  add: <PlusOutlined />,
+  close: <CloseOutlined />,
+  info: <InfoCircleOutlined />,
+  keep: <PushpinOutlined />,
+  keep_off: <PushpinOutlined />,
+  notifications: <BellOutlined />,
+  notifications_off: <BellOutlined />,
+  search: <SearchOutlined />,
+};
+
+function renderIm4Icon(icon: string) {
+  return iconMap[icon] || <QuestionCircleOutlined />;
+}
 
 interface Im4IconButtonProps extends Omit<ButtonProps, "type" | "icon" | "children"> {
   active?: boolean;
@@ -27,7 +51,7 @@ export function Im4IconButton({
         aria-label={label}
         className={clsx("im4-icon-button ant-im4-icon-button", active && "is-active", className)}
         htmlType={type}
-        icon={<span className="material-symbols-outlined">{icon}</span>}
+        icon={renderIm4Icon(icon)}
         shape="circle"
         type={active ? "primary" : "text"}
       />
@@ -49,7 +73,7 @@ export function Im4Search({ value, onClear, className, onChange, ...props }: Im4
         if (event.target.value === "") onClear?.();
         onChange?.(event);
       }}
-      prefix={<span className="material-symbols-outlined" aria-hidden="true">search</span>}
+      prefix={<SearchOutlined aria-hidden="true" />}
       size="large"
       value={value}
     />
