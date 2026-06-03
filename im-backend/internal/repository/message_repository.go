@@ -15,14 +15,19 @@ func NewMessageRepository(db *gorm.DB) *MessageRepository {
 	return &MessageRepository{db: db}
 }
 
+func normalizeConversationUsers(user1ID, user2ID string) (string, string) {
+	if user1ID > user2ID {
+		return user2ID, user1ID
+	}
+	return user1ID, user2ID
+}
+
 // ==================== Conversation 相关方法 ====================
 
 // FindOrCreateConversation 查找或创建会话（确保user1_id < user2_id）
 func (r *MessageRepository) FindOrCreateConversation(user1ID, user2ID string) (*model.Conversation, error) {
 	// 确保user1ID字母序小于user2ID
-	if user1ID > user2ID {
-		user1ID, user2ID = user2ID, user1ID
-	}
+	user1ID, user2ID = normalizeConversationUsers(user1ID, user2ID)
 
 	var conversation model.Conversation
 	err := r.db.Where("user1_id = ? AND user2_id = ?", user1ID, user2ID).
@@ -46,6 +51,65 @@ func (r *MessageRepository) FindOrCreateConversation(user1ID, user2ID string) (*
 	}
 
 	return &conversation, nil
+}
+
+// CreatePrivateMessageInTx 在同一事务内创建会话、消息、更新最后消息和未读数。
+func (r *MessageRepository) CreatePrivateMessageInTx(fromUserID, toUserID string, messageType int, content, mediaURL string) (*model.Message, error) {
+	var messageID uint
+
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		user1ID, user2ID := normalizeConversationUsers(fromUserID, toUserID)
+		now := time.Now()
+
+		var conversation model.Conversation
+		err := tx.Where("user1_id = ? AND user2_id = ?", user1ID, user2ID).
+			First(&conversation).Error
+		if err == gorm.ErrRecordNotFound {
+			conversation = model.Conversation{
+				User1ID:   user1ID,
+				User2ID:   user2ID,
+				CreatedAt: now,
+			}
+			if err := tx.Create(&conversation).Error; err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+
+		message := &model.Message{
+			ConversationID: conversation.ID,
+			FromUserID:     fromUserID,
+			ToUserID:       toUserID,
+			MessageType:    messageType,
+			Content:        content,
+			MediaURL:       mediaURL,
+			IsRead:         false,
+			CreatedAt:      now,
+		}
+		if err := tx.Create(message).Error; err != nil {
+			return err
+		}
+		messageID = message.ID
+
+		updates := map[string]interface{}{
+			"last_message_id":   message.ID,
+			"last_message_time": message.CreatedAt,
+		}
+		if conversation.User1ID == toUserID {
+			updates["user1_unread"] = gorm.Expr("user1_unread + ?", 1)
+		} else {
+			updates["user2_unread"] = gorm.Expr("user2_unread + ?", 1)
+		}
+
+		return tx.Model(&model.Conversation{}).
+			Where("id = ?", conversation.ID).
+			Updates(updates).Error
+	}); err != nil {
+		return nil, err
+	}
+
+	return r.GetMessageByID(messageID)
 }
 
 // GetConversationByID 根据ID获取会话
@@ -140,19 +204,29 @@ func (r *MessageRepository) GetMessageByID(id uint) (*model.Message, error) {
 }
 
 // GetConversationMessages 获取会话的消息列表（分页）
-func (r *MessageRepository) GetConversationMessages(conversationID uint, page, pageSize int) ([]model.Message, error) {
+func (r *MessageRepository) GetConversationMessages(conversationID uint, page, pageSize int) ([]model.Message, bool, error) {
 	var messages []model.Message
 	offset := (page - 1) * pageSize
 
 	err := r.db.Where("conversation_id = ?", conversationID).
 		Preload("FromUser").
 		Preload("ToUser").
-		Order("created_at ASC").
+		Order("created_at DESC").
 		Offset(offset).
-		Limit(pageSize).
+		Limit(pageSize + 1).
 		Find(&messages).Error
 
-	return messages, err
+	hasMore := len(messages) > pageSize
+	if hasMore {
+		messages = messages[:pageSize]
+	}
+
+	// 返回给前端时保持时间正序，方便直接渲染和向上追加历史。
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
+	}
+
+	return messages, hasMore, err
 }
 
 // GetLatestMessages 获取会话的最新N条消息

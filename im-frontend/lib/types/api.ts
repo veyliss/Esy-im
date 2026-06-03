@@ -19,9 +19,10 @@ export interface PaginationParams {
 
 export interface PaginatedResponse<T> {
   list: T[];
-  total: number;
+  total?: number;
   page: number;
   page_size: number;
+  has_more?: boolean;
 }
 
 // ============ 用户相关类型 ============
@@ -139,6 +140,8 @@ export interface Message {
   updated_at: string;
   from_user?: User;
   to_user?: User;
+  client_status?: 'sending' | 'sent' | 'failed';
+  client_temp_id?: string;
 }
 
 export interface Conversation {

@@ -159,6 +159,8 @@ func CodeFromMessage(message string, fallback ErrorCode) ErrorCode {
 		return CodeUnauthorized
 	case strings.Contains(message, "无权") || strings.Contains(message, "权限") || strings.Contains(message, "不是该群组的成员"):
 		return CodePermissionDenied
+	case strings.Contains(message, "只能给好友") || strings.Contains(message, "只能与好友"):
+		return CodeForbidden
 	case strings.Contains(message, "邮箱已被注册") || strings.Contains(message, "用户ID已存在"):
 		return CodeUserExists
 	case strings.Contains(message, "不存在"):

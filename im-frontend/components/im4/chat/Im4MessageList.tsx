@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
-import { Button } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
+import { Button, Image } from "antd";
+import { CheckCircleOutlined, ExclamationCircleOutlined, LoadingOutlined } from "@ant-design/icons";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { GroupMessage, Message, User } from "@/lib/types/api";
 import { Im4Button } from "../common";
@@ -18,6 +18,9 @@ interface Im4MessageListProps {
   onCopyMessage: (content: string) => void;
   onReplyMessage: (message: Im4RenderableMessage) => void;
   onOpenInspector: () => void;
+  hasMore?: boolean;
+  loadingOlder?: boolean;
+  onLoadOlder?: () => void;
 }
 
 function formatMessageTime(value?: string) {
@@ -33,9 +36,19 @@ export function Im4MessageList({
   onCopyMessage,
   onReplyMessage,
   onOpenInspector,
+  hasMore = false,
+  loadingOlder = false,
+  onLoadOlder,
 }: Im4MessageListProps) {
   return (
     <div className="im4-message-list">
+      {hasMore ? (
+        <div className="im4-load-older">
+          <Button loading={loadingOlder} size="small" onClick={onLoadOlder}>
+            加载更早消息
+          </Button>
+        </div>
+      ) : null}
       {entries.length === 0 ? (
         <div className="im4-chat-empty">
           <h2>还没有消息</h2>
@@ -70,10 +83,27 @@ export function Im4MessageList({
                 {!isMine && showSender ? (
                   <strong className="im4-message-sender">{messageUser?.nickname || `用户${message.from_user_id}`}</strong>
                 ) : null}
-                <div className="im4-message-bubble">{message.content}</div>
+                <div className={`im4-message-bubble ${message.media_url ? "has-media" : ""}`}>
+                  {message.media_url ? (
+                    <Image
+                      alt={message.content || "聊天图片"}
+                      className="im4-message-image"
+                      src={message.media_url}
+                      width={220}
+                    />
+                  ) : (
+                    message.content
+                  )}
+                </div>
                 <div className="im4-message-meta">
                   <time>{formatMessageTime(message.created_at)}</time>
-                  {isMine ? <CheckCircleOutlined /> : null}
+                  {isMine && "client_status" in message && message.client_status === "sending" ? (
+                    <span className="im4-message-state is-sending"><LoadingOutlined /> 发送中</span>
+                  ) : null}
+                  {isMine && "client_status" in message && message.client_status === "failed" ? (
+                    <span className="im4-message-state is-failed"><ExclamationCircleOutlined /> 发送失败</span>
+                  ) : null}
+                  {isMine && (!("client_status" in message) || message.client_status === "sent") ? <CheckCircleOutlined /> : null}
                   <Button size="small" type="link" onClick={() => onReplyMessage(message)}>回复</Button>
                   <Button size="small" type="link" onClick={() => onCopyMessage(message.content)}>复制</Button>
                 </div>

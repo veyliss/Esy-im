@@ -4,12 +4,20 @@ import (
 	"errors"
 	"im-backend/internal/model"
 	"im-backend/internal/repository"
+	"strings"
 	"time"
 )
 
 type MessageService struct {
 	messageRepo *repository.MessageRepository
 	friendRepo  *repository.FriendRepository
+}
+
+type MessagePage struct {
+	List     []model.Message `json:"list"`
+	Page     int             `json:"page"`
+	PageSize int             `json:"page_size"`
+	HasMore  bool            `json:"has_more"`
 }
 
 func NewMessageService(messageRepo *repository.MessageRepository, friendRepo *repository.FriendRepository) *MessageService {
@@ -21,6 +29,19 @@ func NewMessageService(messageRepo *repository.MessageRepository, friendRepo *re
 
 // SendMessage 发送消息
 func (s *MessageService) SendMessage(fromUserID, toUserID string, messageType int, content, mediaURL string) (*model.Message, error) {
+	content = strings.TrimSpace(content)
+	mediaURL = strings.TrimSpace(mediaURL)
+
+	if toUserID == "" {
+		return nil, errors.New("接收方不能为空")
+	}
+	if messageType == model.MessageTypeText && content == "" {
+		return nil, errors.New("文本消息内容不能为空")
+	}
+	if messageType != model.MessageTypeText && content == "" && mediaURL == "" {
+		return nil, errors.New("消息内容或媒体地址不能为空")
+	}
+
 	// 检查是否为好友关系
 	isFriend, err := s.friendRepo.IsFriend(fromUserID, toUserID)
 	if err != nil {
@@ -30,40 +51,7 @@ func (s *MessageService) SendMessage(fromUserID, toUserID string, messageType in
 		return nil, errors.New("只能给好友发送消息")
 	}
 
-	// 查找或创建会话
-	conversation, err := s.messageRepo.FindOrCreateConversation(fromUserID, toUserID)
-	if err != nil {
-		return nil, err
-	}
-
-	// 创建消息
-	message := &model.Message{
-		ConversationID: conversation.ID,
-		FromUserID:     fromUserID,
-		ToUserID:       toUserID,
-		MessageType:    messageType,
-		Content:        content,
-		MediaURL:       mediaURL,
-		IsRead:         false,
-		CreatedAt:      time.Now(),
-	}
-
-	if err := s.messageRepo.CreateMessage(message); err != nil {
-		return nil, err
-	}
-
-	// 更新会话的最后一条消息
-	if err := s.messageRepo.UpdateConversationLastMessage(conversation.ID, message.ID, message.CreatedAt); err != nil {
-		return nil, err
-	}
-
-	// 增加接收方的未读消息数
-	if err := s.messageRepo.IncrementUnreadCount(conversation.ID, toUserID); err != nil {
-		return nil, err
-	}
-
-	// 重新加载消息（包含关联的用户信息）
-	return s.messageRepo.GetMessageByID(message.ID)
+	return s.messageRepo.CreatePrivateMessageInTx(fromUserID, toUserID, messageType, content, mediaURL)
 }
 
 // GetConversationList 获取会话列表
@@ -72,7 +60,7 @@ func (s *MessageService) GetConversationList(userID string, page, pageSize int) 
 }
 
 // GetConversationMessages 获取会话消息历史
-func (s *MessageService) GetConversationMessages(conversationID uint, userID string, page, pageSize int) ([]model.Message, error) {
+func (s *MessageService) GetConversationMessages(conversationID uint, userID string, page, pageSize int) (*MessagePage, error) {
 	// 验证用户是否属于该会话
 	conversation, err := s.messageRepo.GetConversationByID(conversationID)
 	if err != nil {
@@ -83,7 +71,27 @@ func (s *MessageService) GetConversationMessages(conversationID uint, userID str
 		return nil, errors.New("无权访问该会话")
 	}
 
-	return s.messageRepo.GetConversationMessages(conversationID, page, pageSize)
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 50
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	messages, hasMore, err := s.messageRepo.GetConversationMessages(conversationID, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MessagePage{
+		List:     messages,
+		Page:     page,
+		PageSize: pageSize,
+		HasMore:  hasMore,
+	}, nil
 }
 
 // GetLatestMessages 获取会话的最新消息

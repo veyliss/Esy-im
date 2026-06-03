@@ -21,6 +21,7 @@ import { useAuthStore } from "@/lib/store";
 import { useMomentStore } from "@/lib/store/moment";
 import { MomentAPI } from "@/lib/api/moment";
 import { UserAPI } from "@/lib/api/user";
+import { UploadAPI } from "@/lib/api/upload";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { User } from "@/lib/types/api";
 
@@ -50,14 +51,6 @@ export default function MomentsPage() {
   const [error, setError] = useState<string | null>(null);
   const visible: 0 | 1 | 2 = 0;
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const readImageAsDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
 
   // 加载当前用户信息
   useEffect(() => {
@@ -267,11 +260,17 @@ export default function MomentsPage() {
       if (files.length > remainingSlots) {
         toast("最多只能添加 9 张图片", { tone: "warning" });
       }
-      const newImages = await Promise.all(pickedFiles.map(readImageAsDataUrl));
+      const newImages = await Promise.all(
+        pickedFiles.map(async (file) => {
+          const res = await UploadAPI.uploadImage(file);
+          return res.data.data.url;
+        }),
+      );
       setImages([...images, ...newImages].slice(0, 9));
       e.target.value = "";
-    } catch {
-      setError("图片读取失败，请重新选择");
+    } catch (error) {
+      const apiError = handleApiError(error);
+      setError(createUserFriendlyErrorMessage(apiError));
     }
   };
 

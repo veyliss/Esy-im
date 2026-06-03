@@ -383,6 +383,42 @@
   font-size: 12px;
 }
 
+.im4-load-older {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 12px;
+}
+
+.im4-message-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.im4-message-state.is-sending {
+  color: #64748b;
+}
+
+.im4-message-state.is-failed {
+  color: #dc2626;
+}
+
+.im4-message-bubble.has-media {
+  overflow: hidden;
+  padding: 4px;
+  background: #ffffff;
+}
+
+.im4-message-image {
+  display: block;
+  max-width: min(220px, 58vw);
+  max-height: 260px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .moment-action-button.ant-btn {
   display: inline-flex;
   align-items: center;
@@ -1290,6 +1326,39 @@
 }
 
 @media (max-width: 640px) {
+  .im4-conversation.is-active {
+    background: #f8fafc;
+  }
+
+  .im4-message-list {
+    padding-bottom: 18px;
+  }
+
+  .im4-composer-shell {
+    border-top: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.96);
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    backdrop-filter: blur(14px);
+  }
+
+  .im4-compose-tool.ant-btn {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .im4-send-button.ant-btn {
+    flex-shrink: 0;
+  }
+
+  .im4-message-bubble.has-media {
+    max-width: 64vw;
+  }
+
+  .im4-message-image {
+    max-width: 64vw;
+    max-height: 220px;
+  }
+
   .im4-conversation:has(.im4-feed-page) .im4-mobile-titlebar,
   .im4-conversation:has(.me-page) .im4-mobile-titlebar {
     min-height: 58px;

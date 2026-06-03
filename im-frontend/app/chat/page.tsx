@@ -8,6 +8,7 @@ import { useChatStore } from "@/lib/store/chat";
 import { useGroupStore } from "@/lib/store/group";
 import { MessageAPI } from "@/lib/api/message";
 import { GroupAPI } from "@/lib/api/group";
+import { UploadAPI } from "@/lib/api/upload";
 import { wsClient } from "@/lib/websocket/client";
 import type { Message, MessageType, Conversation, Group, GroupMessage, GroupMessageType } from "@/lib/types/api";
 import { UserAPI } from "@/lib/api/user";
@@ -127,8 +128,12 @@ export default function ChatPage() {
   const [replyDraft, setReplyDraft] = useState<ReplyDraft | null>(null);
   const [threadSearchOpen, setThreadSearchOpen] = useState(false);
   const [threadKeyword, setThreadKeyword] = useState("");
+  const [privateMessagePage, setPrivateMessagePage] = useState(1);
+  const [privateHasMore, setPrivateHasMore] = useState(false);
+  const [loadingOlderPrivate, setLoadingOlderPrivate] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerInputRef = useRef<TextAreaRef>(null);
+  const chatImageInputRef = useRef<HTMLInputElement>(null);
 
   // 加载当前用户信息
   useEffect(() => {
@@ -206,7 +211,10 @@ export default function ChatPage() {
             currentChat.data && 
             'id' in currentChat.data && 
             message.conversation_id === currentChat.data.id) {
-          addPrivateMessage(message);
+          const existingMessages = useChatStore.getState().messages;
+          if (!existingMessages.some((item) => item.id === message.id)) {
+            addPrivateMessage(message);
+          }
           // 标记为已读
           MessageAPI.markConversationAsRead(currentChat.data.id).catch(err => {
             console.error("标记消息已读失败:", err);
@@ -331,8 +339,10 @@ export default function ChatPage() {
         page_size: 50,
       });
       if (res.data.code === 0) {
-        const messages = res.data.data.filter(msg => msg.id && msg.conversation_id);
+        const messages = res.data.data.list.filter(msg => msg.id && msg.conversation_id);
         setPrivateMessages(messages);
+        setPrivateMessagePage(res.data.data.page);
+        setPrivateHasMore(Boolean(res.data.data.has_more));
         // 标记为已读
         await MessageAPI.markConversationAsRead(conversationId);
         // 刷新未读数和会话列表
@@ -343,6 +353,35 @@ export default function ChatPage() {
       console.error("加载私聊消息失败:", error);
       const apiError = handleApiError(error);
       setError(createUserFriendlyErrorMessage(apiError));
+    }
+  };
+
+  const loadOlderPrivateMessages = async () => {
+    if (!currentChat || currentChat.type !== "private" || !("id" in currentChat.data)) return;
+    if (!privateHasMore || loadingOlderPrivate) return;
+
+    setLoadingOlderPrivate(true);
+    try {
+      const nextPage = privateMessagePage + 1;
+      const res = await MessageAPI.getConversationMessages(currentChat.data.id, {
+        page: nextPage,
+        page_size: 50,
+      });
+
+      if (res.data.code === 0) {
+        const olderMessages = res.data.data.list.filter(msg => msg.id && msg.conversation_id);
+        const current = useChatStore.getState().messages;
+        const currentIds = new Set(current.map((message) => message.id));
+        setPrivateMessages([...olderMessages.filter((message) => !currentIds.has(message.id)), ...current]);
+        setPrivateMessagePage(res.data.data.page);
+        setPrivateHasMore(Boolean(res.data.data.has_more));
+      }
+    } catch (error) {
+      console.error("加载更早私聊消息失败:", error);
+      const apiError = handleApiError(error);
+      setError(createUserFriendlyErrorMessage(apiError));
+    } finally {
+      setLoadingOlderPrivate(false);
     }
   };
 
@@ -395,6 +434,8 @@ export default function ChatPage() {
     setReplyDraft(null);
     setThreadKeyword("");
     setThreadSearchOpen(false);
+    setPrivateMessagePage(1);
+    setPrivateHasMore(false);
     
     if (chatItem.type === 'private' && 'id' in chatItem.data) {
       await loadPrivateMessages(chatItem.data.id);
@@ -445,6 +486,33 @@ export default function ChatPage() {
         const toUserId = conversation.user1_id === currentUser.user_id
           ? conversation.user2_id
           : conversation.user1_id;
+        const toUser = conversation.user1_id === currentUser.user_id
+          ? conversation.user2
+          : conversation.user1;
+        const tempId = `private-${conversation.id}-${Date.now()}`;
+        const optimisticMessage: Message = {
+          id: -Date.now(),
+          conversation_id: conversation.id,
+          from_user_id: currentUser.user_id,
+          to_user_id: toUserId,
+          message_type: 1 as MessageType,
+          content,
+          media_url: "",
+          is_read: false,
+          read_at: null,
+          is_recalled: false,
+          recalled_at: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          from_user: currentUser,
+          to_user: toUser,
+          client_status: "sending",
+          client_temp_id: tempId,
+        };
+
+        setPrivateMessages([...useChatStore.getState().messages, optimisticMessage]);
+        setMessageInput("");
+        setReplyDraft(null);
 
         const res = await MessageAPI.sendMessage({
           to_user_id: toUserId,
@@ -458,9 +526,10 @@ export default function ChatPage() {
             throw new Error("发送成功但返回的消息数据不完整");
           }
           
-          addPrivateMessage(message);
-          setMessageInput("");
-          setReplyDraft(null);
+          const current = useChatStore.getState().messages;
+          setPrivateMessages(current.map((item) => (
+            item.client_temp_id === tempId ? { ...message, client_status: "sent" } : item
+          )));
           window.localStorage.removeItem(draftKey);
           await loadConversations();
         }
@@ -499,7 +568,97 @@ export default function ChatPage() {
       } else {
         setError(userMessage);
       }
+      if (currentChat?.type === "private") {
+        const current = useChatStore.getState().messages;
+        setPrivateMessages(current.map((item) => (
+          item.client_status === "sending" ? { ...item, client_status: "failed" } : item
+        )));
+        setMessageInput((value) => value || window.localStorage.getItem(getChatDraftKey(currentChat)) || "");
+      }
       toast(userMessage, { tone: "error", title: "发送失败" });
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleChatImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !currentChat || !currentUser) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("请选择图片文件");
+      return;
+    }
+
+    setSendingMessage(true);
+    setError(null);
+    try {
+      const uploadRes = await UploadAPI.uploadImage(file);
+      const imageUrl = uploadRes.data.data.url;
+
+      if (currentChat.type === "private" && "id" in currentChat.data) {
+        const conversation = currentChat.data as Conversation;
+        const toUserId = conversation.user1_id === currentUser.user_id
+          ? conversation.user2_id
+          : conversation.user1_id;
+        const toUser = conversation.user1_id === currentUser.user_id
+          ? conversation.user2
+          : conversation.user1;
+        const tempId = `image-${conversation.id}-${Date.now()}`;
+        const optimisticMessage: Message = {
+          id: -Date.now(),
+          conversation_id: conversation.id,
+          from_user_id: currentUser.user_id,
+          to_user_id: toUserId,
+          message_type: 2 as MessageType,
+          content: "[图片]",
+          media_url: imageUrl,
+          is_read: false,
+          read_at: null,
+          is_recalled: false,
+          recalled_at: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          from_user: currentUser,
+          to_user: toUser,
+          client_status: "sending",
+          client_temp_id: tempId,
+        };
+
+        setPrivateMessages([...useChatStore.getState().messages, optimisticMessage]);
+        const res = await MessageAPI.sendMessage({
+          to_user_id: toUserId,
+          message_type: 2 as MessageType,
+          content: "[图片]",
+          media_url: imageUrl,
+        });
+        if (res.data.code === 0) {
+          const current = useChatStore.getState().messages;
+          setPrivateMessages(current.map((item) => (
+            item.client_temp_id === tempId ? { ...res.data.data, client_status: "sent" } : item
+          )));
+          await loadConversations();
+        }
+      } else if (currentChat.type === "group" && "group_id" in currentChat.data) {
+        const group = currentChat.data as Group;
+        const res = await GroupAPI.sendGroupMessage({
+          group_id: group.group_id,
+          message_type: 2 as GroupMessageType,
+          content: "[图片]",
+          media_url: imageUrl,
+        });
+        if (res.data.code === 0) {
+          addGroupMessage(group.group_id, res.data.data);
+          await loadGroups();
+        }
+      }
+    } catch (error) {
+      console.error("发送图片失败:", error);
+      const apiError = handleApiError(error);
+      const userMessage = createUserFriendlyErrorMessage(apiError);
+      setError(userMessage);
+      toast(userMessage, { tone: "error", title: "图片发送失败" });
     } finally {
       setSendingMessage(false);
     }
@@ -947,11 +1106,21 @@ export default function ChatPage() {
             currentUser={currentUser}
             showSender={currentChat.type === "group"}
             endRef={messagesEndRef}
+            hasMore={currentChat.type === "private" && privateHasMore && !threadKeyword.trim()}
+            loadingOlder={loadingOlderPrivate}
+            onLoadOlder={loadOlderPrivateMessages}
             onCopyMessage={handleCopyMessage}
             onReplyMessage={handleReplyMessage}
             onOpenInspector={() => setInspectorOpen(true)}
           />
 
+          <input
+            ref={chatImageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleChatImageChange}
+          />
           <Im4Composer
             inputRef={composerInputRef}
             value={messageInput}
@@ -962,7 +1131,7 @@ export default function ChatPage() {
             sending={sendingMessage}
             onChange={handleComposerChange}
             onSend={handleSendMessage}
-            onAttach={() => toast("附件发送能力还未接入后端接口", { tone: "info" })}
+            onAttach={() => chatImageInputRef.current?.click()}
             onCancelReply={() => setReplyDraft(null)}
             onQuickReply={handleQuickReply}
           />

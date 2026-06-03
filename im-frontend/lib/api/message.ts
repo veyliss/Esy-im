@@ -4,7 +4,8 @@ import type {
   Message, 
   Conversation,
   MessageType,
-  PaginationParams 
+  PaginationParams,
+  PaginatedResponse,
 } from "@/lib/types/api";
 
 // ============ 请求参数类型 ============
@@ -52,7 +53,7 @@ export const MessageAPI = {
     const queryString = params 
       ? `?page=${params.page || 1}&page_size=${params.page_size || 50}`
       : '';
-    return api.get<ApiResponse<Message[]>>(
+    return api.get<ApiResponse<PaginatedResponse<Message>>>(
       `/messages/conversations/${conversationId}/messages${queryString}`
     );
   },

@@ -13,6 +13,7 @@ import (
 
 func InitRouter() *mux.Router {
 	r := mux.NewRouter()
+	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
 	// API 统一前缀
 	api := r.PathPrefix("/api/v1").Subrouter()
@@ -53,6 +54,7 @@ func InitRouter() *mux.Router {
 	// 替换这里：为MessageHandler注入userRepo
 	messageHandler := handler.NewMessageHandler(messageController, userRepo)
 	groupHandler := handler.NewGroupHandler(groupController, userRepo)
+	uploadHandler := handler.NewUploadHandler()
 
 	// 健康检查
 	api.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +74,7 @@ func InitRouter() *mux.Router {
 	api.HandleFunc("/users/me", pkg.AuthMiddleware(pkg.RDB, userHandler.UpdateProfile)).Methods("PUT")
 	api.HandleFunc("/users/logout", pkg.AuthMiddleware(pkg.RDB, userHandler.Logout)).Methods("POST")
 	api.HandleFunc("/users/set-password", pkg.AuthMiddleware(pkg.RDB, userHandler.SetPassword)).Methods("POST")
+	api.HandleFunc("/upload/image", pkg.AuthMiddleware(pkg.RDB, uploadHandler.UploadImage)).Methods("POST")
 
 	// friends 好友系统
 	api.HandleFunc("/friends/send-request", pkg.AuthMiddleware(pkg.RDB, friendHandler.SendRequest)).Methods("POST")
