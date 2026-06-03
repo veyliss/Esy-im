@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Alert, Button, Checkbox, Form, Input, Segmented } from "antd";
+import { Alert, Button, Checkbox, Form, Input, Segmented, Space } from "antd";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { handleApiError } from "@/lib/utils/errors";
@@ -234,7 +234,6 @@ export default function LoginPage() {
       className="ant-auth-code-button"
       disabled={sendLoading || countdown > 0}
       loading={sendLoading}
-      type="link"
       onClick={() => onSendEmailCode(email)}
     >
       {codeButtonLabel}
@@ -384,8 +383,13 @@ export default function LoginPage() {
               <Input autoComplete="email" placeholder="请输入邮箱地址" size="large" type="email" />
             </Form.Item>
 
-            <Form.Item name="code" label="验证码" rules={[{ required: true, message: "请输入验证码" }]}>
-              <Input addonAfter={renderCodeAddon(emailLoginAddress)} placeholder="请输入邮箱验证码" size="large" />
+            <Form.Item label="验证码">
+              <Space.Compact className="w-full">
+                <Form.Item name="code" noStyle rules={[{ required: true, message: "请输入验证码" }]}>
+                  <Input placeholder="请输入邮箱验证码" size="large" />
+                </Form.Item>
+                {renderCodeAddon(emailLoginAddress)}
+              </Space.Compact>
             </Form.Item>
 
             <Button block htmlType="submit" loading={loading} size="large" type="primary">
@@ -428,8 +432,13 @@ export default function LoginPage() {
               <Input autoComplete="email" placeholder="请输入邮箱地址" size="large" type="email" />
             </Form.Item>
 
-            <Form.Item name="code" label="验证码" rules={[{ required: true, message: "请输入验证码" }]}>
-              <Input addonAfter={renderCodeAddon(registerAddress)} placeholder="请输入邮箱验证码" size="large" />
+            <Form.Item label="验证码">
+              <Space.Compact className="w-full">
+                <Form.Item name="code" noStyle rules={[{ required: true, message: "请输入验证码" }]}>
+                  <Input placeholder="请输入邮箱验证码" size="large" />
+                </Form.Item>
+                {renderCodeAddon(registerAddress)}
+              </Space.Compact>
             </Form.Item>
 
             <Button block htmlType="submit" loading={loading} size="large" type="primary">

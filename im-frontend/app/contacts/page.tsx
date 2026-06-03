@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Button, Input } from "antd";
 import { useAuthStore } from "@/lib/store";
 import { useContactStore } from "@/lib/store/contact";
 import { useChatStore } from "@/lib/store/chat";
@@ -443,48 +444,41 @@ export default function ContactsPage() {
 
                 <section className="mt-8">
                   <SectionTitle title="备注信息" className="mb-4" />
-                  <input
-                    className="ui-input w-full rounded-lg px-4 py-3 text-sm"
+                  <Input
                     placeholder="添加备注"
-                    type="text"
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
+                    size="large"
                   />
                 </section>
 
                 <div className="mt-10 flex flex-wrap justify-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
-                  <button
-                    type="button"
+                  <Button
+                    icon={<span className="material-symbols-outlined text-lg">chat</span>}
                     onClick={handleSendMessage}
-                    className="im-primary-button"
+                    type="primary"
                   >
-                    <span className="material-symbols-outlined text-lg">chat</span>
                     发送消息
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    icon={<span className="material-symbols-outlined text-lg">save</span>}
                     onClick={handleUpdateRemark}
-                    className="im-secondary-button"
                   >
-                    <span className="material-symbols-outlined text-lg">save</span>
                     保存备注
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    icon={<span className="material-symbols-outlined text-lg">content_copy</span>}
                     onClick={handleCopyFriendId}
-                    className="im-secondary-button"
                   >
-                    <span className="material-symbols-outlined text-lg">content_copy</span>
                     复制 ID
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    danger
+                    icon={<span className="material-symbols-outlined text-lg">delete</span>}
                     onClick={handleDeleteFriend}
-                    className="im-danger-button"
                   >
-                    <span className="material-symbols-outlined text-lg">delete</span>
                     删除联系人
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (

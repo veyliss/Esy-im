@@ -61,8 +61,18 @@
   transform: scale(0.96);
 }
 
-.im4-rail-link .material-symbols-outlined {
-  font-size: 24px;
+.im4-rail-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  line-height: 1;
+}
+
+.im4-rail-icon .anticon {
+  color: currentColor;
+  font-size: 21px;
+  stroke-width: 1.6;
 }
 
 .im4-rail-link em {
@@ -1695,6 +1705,11 @@
   color: #64748b;
 }
 
+.im4-rail-icon {
+  border-radius: 10px;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
 .im4-rail-link::after {
   position: absolute;
   left: 50%;
@@ -1713,6 +1728,12 @@
 .im4-rail-link.is-active {
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.im4-rail-link:hover .im4-rail-icon,
+.im4-rail-link.is-active .im4-rail-icon {
+  color: var(--im4-blue-deep);
+  transform: translateY(-1px);
 }
 
 .im4-rail-link.is-active::after {

@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CameraOutlined, ContactsOutlined, MessageOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import type { NavKey } from "@/components/ui/nav-tabs";
 
@@ -19,12 +23,12 @@ interface Im4ShellProps {
   className?: string;
 }
 
-const navItems: Array<{ key: NavKey; label: string; href: string; icon: string }> = [
-  { key: "chat", label: "聊天", href: "/chat", icon: "chat" },
-  { key: "contacts", label: "通讯录", href: "/contacts", icon: "contacts" },
-  { key: "groups", label: "群聊", href: "/groups", icon: "groups" },
-  { key: "moments", label: "朋友圈", href: "/moments", icon: "photo_camera" },
-  { key: "me", label: "我的", href: "/me", icon: "person" },
+const navItems: Array<{ key: NavKey; label: string; href: string; icon: ReactNode }> = [
+  { key: "chat", label: "聊天", href: "/chat", icon: <MessageOutlined /> },
+  { key: "contacts", label: "通讯录", href: "/contacts", icon: <ContactsOutlined /> },
+  { key: "groups", label: "群聊", href: "/groups", icon: <TeamOutlined /> },
+  { key: "moments", label: "朋友圈", href: "/moments", icon: <CameraOutlined /> },
+  { key: "me", label: "我的", href: "/me", icon: <UserOutlined /> },
 ];
 
 export function Im4Shell({
@@ -41,6 +45,16 @@ export function Im4Shell({
   avatarStatus,
   className,
 }: Im4ShellProps) {
+  const router = useRouter();
+
+  useEffect(() => {
+    navItems.forEach((item) => {
+      if (item.key !== active) {
+        router.prefetch(item.href);
+      }
+    });
+  }, [active, router]);
+
   return (
     <div className={clsx("im4-shell", className)}>
       <aside className="im4-rail" aria-label="主导航">
@@ -53,7 +67,7 @@ export function Im4Shell({
               className={clsx("im4-rail-link", active === item.key && "is-active")}
               title={item.label}
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
+              <span className="im4-rail-icon" aria-hidden="true">{item.icon}</span>
               <em>{item.label}</em>
             </Link>
           ))}

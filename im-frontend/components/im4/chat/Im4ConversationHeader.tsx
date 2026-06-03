@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Button } from "antd";
 import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface Im4ConversationHeaderProps {
@@ -22,9 +23,15 @@ export function Im4ConversationHeader({
     <div className="im4-chat-head">
       <div className="im4-chat-identity">
         {onBack ? (
-          <button type="button" className="im4-back-button" onClick={onBack} aria-label="返回会话列表" title="返回">
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
+          <Button
+            aria-label="返回会话列表"
+            className="im4-back-button"
+            icon={<span className="material-symbols-outlined">arrow_back</span>}
+            shape="circle"
+            title="返回"
+            type="text"
+            onClick={onBack}
+          />
         ) : null}
         <UserAvatar src={avatar} name={name} size="md" shape={shape} showStatus={shape === "circle"} status="online" border />
         <div>
@@ -38,4 +45,3 @@ export function Im4ConversationHeader({
 }
 
 export default Im4ConversationHeader;
-

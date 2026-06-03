@@ -1,4 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
+import { Button, Input, Modal } from "antd";
 import type { Moment, User, MomentLike, MomentComment } from "@/lib/types/api";
 import { formatTime } from "@/lib/utils/time";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -82,15 +84,15 @@ export function MomentItem({
             </div>
           </div>
           {currentUser?.user_id === moment.user_id && (
-            <button
-              type="button"
-              onClick={() => onDelete(moment.id)}
-              className="workspace-icon-button"
+            <Button
               aria-label="删除动态"
+              danger
+              icon={<span className="material-symbols-outlined text-lg">delete</span>}
+              shape="circle"
               title="删除动态"
-            >
-              <span className="material-symbols-outlined text-lg">delete</span>
-            </button>
+              type="text"
+              onClick={() => onDelete(moment.id)}
+            />
           )}
         </div>
 
@@ -123,8 +125,7 @@ export function MomentItem({
 
       <div className="border-t border-slate-200 p-2 dark:border-slate-800">
         <div className="flex justify-end gap-2">
-          <button
-            type="button"
+          <Button
             onClick={handleLikeClick}
             className={`moment-action-button ${
               isLiked
@@ -136,15 +137,14 @@ export function MomentItem({
               {isLiked ? "thumb_up" : "thumb_up"}
             </span>
             <span>{moment.like_count || 0}</span>
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => setShowCommentInput(!showCommentInput)}
             className="moment-action-button"
           >
             <span className="material-symbols-outlined text-lg">chat_bubble</span>
             <span>{moment.comment_count || 0}</span>
-          </button>
+          </Button>
         </div>
 
         {moment.likes && moment.likes.length > 0 && (
@@ -180,13 +180,14 @@ export function MomentItem({
                 <span className="text-slate-600 dark:text-slate-400">
                   : {comment.content}
                 </span>
-                <button
-                  type="button"
+                <Button
+                  className="ml-2"
+                  size="small"
+                  type="link"
                   onClick={() => handleReply(comment)}
-                  className="ml-2 text-xs text-primary hover:underline"
                 >
                   回复
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -197,21 +198,20 @@ export function MomentItem({
             {replyTo && (
               <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">
                 回复 @{replyTo.user?.nickname}
-                <button
-                  type="button"
+                <Button
+                  size="small"
+                  type="link"
                   onClick={() => {
                     setReplyTo(null);
                     setCommentContent("");
                   }}
-                  className="ml-2 text-primary hover:underline"
                 >
                   取消
-                </button>
+                </Button>
               </div>
             )}
             <div className="flex gap-2">
-              <input
-                type="text"
+              <Input
                 placeholder="写评论..."
                 value={commentContent}
                 onChange={(e) => setCommentContent(e.target.value)}
@@ -220,35 +220,28 @@ export function MomentItem({
                     handleCommentSubmit();
                   }
                 }}
-                className="ui-input flex-1 rounded-lg px-3 py-2 text-sm"
+                className="flex-1"
               />
-              <button
-                type="button"
+              <Button
+                type="primary"
                 onClick={handleCommentSubmit}
-                className="im-primary-button"
               >
                 发送
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </div>
 
-      {previewImage ? (
-        <div className="moment-preview-overlay" role="dialog" aria-modal="true" onClick={() => setPreviewImage(null)}>
-          <button
-            type="button"
-            className="moment-preview-close"
-            onClick={() => setPreviewImage(null)}
-            aria-label="关闭预览"
-            title="关闭"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previewImage} alt="动态图片预览" onClick={(event) => event.stopPropagation()} />
-        </div>
-      ) : null}
+      <Modal
+        className="ant-app-image-modal"
+        footer={null}
+        open={Boolean(previewImage)}
+        width="min(920px, calc(100vw - 32px))"
+        onCancel={() => setPreviewImage(null)}
+      >
+        {previewImage ? <img src={previewImage} alt="动态图片预览" /> : null}
+      </Modal>
     </article>
   );
 }

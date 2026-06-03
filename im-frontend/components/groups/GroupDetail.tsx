@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button, Input } from "antd";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
@@ -136,19 +137,18 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
         </div>
 
         <ActionBar className="mt-8 justify-start">
-          <button type="button" onClick={handleSendMessage} className="im-primary-button">
+          <Button type="primary" onClick={handleSendMessage}>
             发消息
-          </button>
-          <button type="button" onClick={handleCopyGroupId} className="im-secondary-button">
+          </Button>
+          <Button onClick={handleCopyGroupId}>
             复制群号
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            danger
             onClick={handleLeave}
-            className="im-secondary-button"
           >
             退出群聊
-          </button>
+          </Button>
         </ActionBar>
       </div>
 
@@ -179,19 +179,14 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
           description="成员角色和群内昵称会显示在这里。"
           className="mb-5 border-b border-slate-200 pb-3 dark:border-slate-800"
         />
-        <div className="group-member-search">
-          <span className="material-symbols-outlined">search</span>
-          <input
-            value={memberKeyword}
-            onChange={(event) => setMemberKeyword(event.target.value)}
-            placeholder="搜索成员昵称或用户 ID"
-          />
-          {memberKeyword ? (
-            <button type="button" onClick={() => setMemberKeyword("")} aria-label="清空成员搜索" title="清空搜索">
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          ) : null}
-        </div>
+        <Input
+          allowClear
+          className="group-member-search ant-group-member-search"
+          placeholder="搜索成员昵称或用户 ID"
+          size="large"
+          value={memberKeyword}
+          onChange={(event) => setMemberKeyword(event.target.value)}
+        />
         {loading ? (
           <PageLoading message="加载群成员中..." size="sm" />
         ) : filteredMembers.length === 0 ? (

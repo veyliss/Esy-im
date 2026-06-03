@@ -1,4 +1,5 @@
 import type { KeyboardEvent, Ref } from "react";
+import { Button } from "antd";
 
 interface Im4ComposerProps {
   value: string;
@@ -45,25 +46,37 @@ export function Im4Composer({
             <p>{replyPreview.content}</p>
           </div>
           {onCancelReply ? (
-            <button type="button" onClick={onCancelReply} aria-label="取消回复" title="取消回复">
-              <span className="material-symbols-outlined">close</span>
-            </button>
+            <Button
+              aria-label="取消回复"
+              icon={<span className="material-symbols-outlined">close</span>}
+              shape="circle"
+              size="small"
+              title="取消回复"
+              type="text"
+              onClick={onCancelReply}
+            />
           ) : null}
         </div>
       ) : null}
       {quickReplies.length > 0 ? (
         <div className="im4-quick-replies" aria-label="快捷回复">
           {quickReplies.map((item) => (
-            <button key={item} type="button" onClick={() => onQuickReply?.(item)} disabled={sending}>
+            <Button key={item} size="small" onClick={() => onQuickReply?.(item)} disabled={sending}>
               {item}
-            </button>
+            </Button>
           ))}
         </div>
       ) : null}
       <div className="im4-composer">
-        <button type="button" className="im4-compose-tool" onClick={onAttach} aria-label="添加附件" title="添加附件">
-          <span className="material-symbols-outlined">add</span>
-        </button>
+        <Button
+          aria-label="添加附件"
+          className="im4-compose-tool"
+          icon={<span className="material-symbols-outlined">add</span>}
+          shape="circle"
+          title="添加附件"
+          type="text"
+          onClick={onAttach}
+        />
         <div className="im4-compose-input">
           <textarea
             ref={inputRef}
@@ -79,13 +92,18 @@ export function Im4Composer({
             <strong>{value.length}/1000</strong>
           </div>
         </div>
-        <button type="button" className="im4-send-button" onClick={onSend} disabled={sending || !value.trim()}>
-          <span className="material-symbols-outlined">{sending ? "sync" : "send"}</span>
-        </button>
+        <Button
+          className="im4-send-button"
+          disabled={sending || !value.trim()}
+          icon={<span className="material-symbols-outlined">{sending ? "sync" : "send"}</span>}
+          loading={sending}
+          shape="circle"
+          type="primary"
+          onClick={onSend}
+        />
       </div>
     </div>
   );
 }
 
 export default Im4Composer;
-

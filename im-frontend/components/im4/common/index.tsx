@@ -1,10 +1,15 @@
-import clsx from "clsx";
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
+"use client";
 
-interface Im4IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+import { Button, Empty, Input, Segmented, Tag, Tooltip } from "antd";
+import clsx from "clsx";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonProps, InputProps } from "antd";
+
+interface Im4IconButtonProps extends Omit<ButtonProps, "type" | "icon" | "children"> {
   active?: boolean;
   label: string;
   icon: string;
+  type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 }
 
 export function Im4IconButton({
@@ -16,35 +21,38 @@ export function Im4IconButton({
   ...props
 }: Im4IconButtonProps) {
   return (
-    <button
-      type={type}
-      aria-label={label}
-      title={label}
-      className={clsx("im4-icon-button", active && "is-active", className)}
-      {...props}
-    >
-      <span className="material-symbols-outlined">{icon}</span>
-    </button>
+    <Tooltip mouseEnterDelay={0.35} title={label}>
+      <Button
+        {...props}
+        aria-label={label}
+        className={clsx("im4-icon-button ant-im4-icon-button", active && "is-active", className)}
+        htmlType={type}
+        icon={<span className="material-symbols-outlined">{icon}</span>}
+        shape="circle"
+        type={active ? "primary" : "text"}
+      />
+    </Tooltip>
   );
 }
 
-interface Im4SearchProps extends InputHTMLAttributes<HTMLInputElement> {
+interface Im4SearchProps extends Omit<InputProps, "prefix" | "size"> {
   onClear?: () => void;
 }
 
-export function Im4Search({ value, onClear, className, ...props }: Im4SearchProps) {
-  const hasValue = typeof value === "string" && value.length > 0;
-
+export function Im4Search({ value, onClear, className, onChange, ...props }: Im4SearchProps) {
   return (
-    <div className={clsx("im4-search", className)}>
-      <span className="material-symbols-outlined" aria-hidden="true">search</span>
-      <input {...props} value={value} />
-      {hasValue && onClear ? (
-        <button type="button" onClick={onClear} aria-label="清空搜索" title="清空搜索">
-          <span className="material-symbols-outlined">close</span>
-        </button>
-      ) : null}
-    </div>
+    <Input
+      {...props}
+      allowClear
+      className={clsx("im4-search ant-im4-search", className)}
+      onChange={(event) => {
+        if (event.target.value === "") onClear?.();
+        onChange?.(event);
+      }}
+      prefix={<span className="material-symbols-outlined" aria-hidden="true">search</span>}
+      size="large"
+      value={value}
+    />
   );
 }
 
@@ -57,21 +65,22 @@ interface Im4SegmentedProps<T extends string> {
 
 export function Im4Segmented<T extends string>({ active, items, onChange, label }: Im4SegmentedProps<T>) {
   return (
-    <div className="im4-segmented" role="tablist" aria-label={label}>
-      {items.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          role="tab"
-          aria-selected={active === item.key}
-          className={active === item.key ? "is-active" : undefined}
-          onClick={() => onChange(item.key)}
-        >
-          <span>{item.label}</span>
-          {typeof item.count === "number" ? <strong>{item.count}</strong> : null}
-        </button>
-      ))}
-    </div>
+    <Segmented
+      aria-label={label}
+      block
+      className="im4-segmented ant-im4-segmented"
+      options={items.map((item) => ({
+        value: item.key,
+        label: (
+          <span className="ant-im4-segmented-label">
+            <span>{item.label}</span>
+            {typeof item.count === "number" ? <strong>{item.count}</strong> : null}
+          </span>
+        ),
+      }))}
+      value={active}
+      onChange={(value) => onChange(value as T)}
+    />
   );
 }
 
@@ -84,19 +93,24 @@ interface Im4EmptyProps {
 
 export function Im4Empty({ title, description, action, className }: Im4EmptyProps) {
   return (
-    <div className={clsx("im4-empty", className)}>
-      <div>
-        <h2>{title}</h2>
-        {description ? <p>{description}</p> : null}
-        {action ? <div className="im4-empty-actions">{action}</div> : null}
-      </div>
-    </div>
+    <Empty
+      className={clsx("im4-empty ant-im4-empty", className)}
+      description={
+        <span>
+          <strong>{title}</strong>
+          {description ? <small>{description}</small> : null}
+        </span>
+      }
+    >
+      {action ? <div className="im4-empty-actions">{action}</div> : null}
+    </Empty>
   );
 }
 
-interface Im4ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Im4ButtonProps extends Omit<ButtonProps, "type" | "children"> {
   tone?: "default" | "primary" | "danger";
   children: ReactNode;
+  type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 }
 
 export function Im4Button({
@@ -107,9 +121,15 @@ export function Im4Button({
   ...props
 }: Im4ButtonProps) {
   return (
-    <button type={type} className={clsx("im4-button", `is-${tone}`, className)} {...props}>
+    <Button
+      {...props}
+      className={clsx("im4-button ant-im4-button", `is-${tone}`, className)}
+      danger={tone === "danger"}
+      htmlType={type}
+      type={tone === "primary" ? "primary" : "default"}
+    >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -118,7 +138,17 @@ interface Im4StatusProps {
   children: ReactNode;
 }
 
-export function Im4Status({ tone = "default", children }: Im4StatusProps) {
-  return <span className={clsx("im4-status", `is-${tone}`)}>{children}</span>;
-}
+const statusColorMap: Record<NonNullable<Im4StatusProps["tone"]>, string> = {
+  default: "default",
+  online: "success",
+  primary: "processing",
+  warning: "warning",
+};
 
+export function Im4Status({ tone = "default", children }: Im4StatusProps) {
+  return (
+    <Tag className={clsx("im4-status ant-im4-status", `is-${tone}`)} color={statusColorMap[tone]}>
+      {children}
+    </Tag>
+  );
+}

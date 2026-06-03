@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Alert, Button, Empty, Input, List, Modal, Space, Spin } from "antd";
+import { useState } from "react";
 import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { Group } from "@/lib/types/api";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { ErrorAlert } from "@/components/ui/error-alert";
-import { CommandDialog } from "@/components/ui/command-dialog";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 
 export function JoinGroupModal({
@@ -22,12 +21,7 @@ export function JoinGroupModal({
   const [searched, setSearched] = useState(false);
   const [searching, setSearching] = useState(false);
   const [joiningId, setJoiningId] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useAppInteractions();
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   const handleKeywordChange = (value: string) => {
     setKeyword(value);
@@ -81,112 +75,81 @@ export function JoinGroupModal({
   };
 
   return (
-    <CommandDialog
+    <Modal
+      className="ant-app-modal"
+      footer={null}
+      open
       title="加入群聊"
-      description="搜索群号或关键词，找到后加入公开群聊"
-      icon="group_add"
-      labelledBy="join-group-title"
-      onClose={onClose}
+      width={620}
+      onCancel={onClose}
     >
-      <div className="command-flow">
-        <ErrorAlert error={error} type="warning" onClose={() => setError(null)} className="command-inline-alert" />
+      <div className="ant-app-modal-stack">
+        {error ? <Alert closable message={error} showIcon type="warning" onClose={() => setError(null)} /> : null}
 
-        <div className="command-field">
-          <label htmlFor="join-group-keyword">
-            搜索群聊
-          </label>
-          <div className="command-search-row">
-            <div className="command-input-wrap">
-              <input
-                ref={inputRef}
-                id="join-group-keyword"
-                type="text"
-                value={keyword}
-                onChange={(e) => handleKeywordChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                }}
-                placeholder="输入群组关键词或群号"
-                className="command-input"
-              />
-              {keyword ? (
-                <button
-                  type="button"
-                  className="command-clear-button"
-                  onClick={() => handleKeywordChange("")}
-                  aria-label="清空搜索"
-                  title="清空搜索"
-                >
-                  <span className="material-symbols-outlined text-base">close</span>
-                </button>
-              ) : null}
-            </div>
-            <button
-              type="button"
-              onClick={handleSearch}
-              disabled={searching}
-              className="im-primary-button shrink-0"
-            >
-              {searching ? "搜索中" : "搜索"}
-            </button>
-          </div>
-        </div>
+        <Space.Compact className="w-full">
+          <Input
+            autoFocus
+            placeholder="输入群组关键词或群号"
+            size="large"
+            value={keyword}
+            onChange={(event) => handleKeywordChange(event.target.value)}
+            onPressEnter={handleSearch}
+          />
+          <Button loading={searching} size="large" type="primary" onClick={handleSearch}>
+            搜索
+          </Button>
+        </Space.Compact>
 
         {searching ? (
-          <div className="command-state">
-            <span className="material-symbols-outlined command-state-icon is-spinning">sync</span>
-            <p>正在搜索群聊</p>
+          <div className="ant-app-modal-state">
+            <Spin />
+            <span>正在搜索群聊</span>
           </div>
         ) : results.length > 0 ? (
-          <div className="command-result-list">
-            {results.map((group) => (
-              <div
-                key={group.group_id}
-                className="command-result-card"
-              >
-                <div className="command-result-row">
-                  <UserAvatar
-                    src={group.avatar || "/default-group-avatar.png"}
-                    name={group.name}
-                    size="md"
-                    shape="rounded"
-                    border
-                  />
-                  <div className="command-result-copy">
-                    <p>{group.name}</p>
-                    <small>
-                      {group.member_count} 人 · 群号 {group.group_id}
-                    </small>
-                    {group.description ? (
-                      <small>{group.description}</small>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleJoin(group.group_id)}
+          <List
+            className="ant-app-result-list"
+            dataSource={results}
+            renderItem={(group) => (
+              <List.Item
+                actions={[
+                  <Button
+                    key="join"
                     disabled={Boolean(joiningId)}
-                    className="im-primary-button command-result-action"
+                    loading={joiningId === group.group_id}
+                    type="primary"
+                    onClick={() => handleJoin(group.group_id)}
                   >
-                    {joiningId === group.group_id ? "加入中" : "加入"}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    加入
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={
+                    <UserAvatar
+                      src={group.avatar || "/default-group-avatar.png"}
+                      name={group.name}
+                      size="md"
+                      shape="rounded"
+                      border
+                    />
+                  }
+                  description={
+                    <span className="ant-app-list-description">
+                      <span>{group.member_count} 人 · 群号 {group.group_id}</span>
+                      {group.description ? <small>{group.description}</small> : null}
+                    </span>
+                  }
+                  title={group.name}
+                />
+              </List.Item>
+            )}
+          />
         ) : searched ? (
-          <div className="command-state">
-            <span className="material-symbols-outlined command-state-icon">group_search</span>
-            <p>没有找到匹配群聊</p>
-            <small>请尝试更换关键词或输入完整群号</small>
-          </div>
+          <Empty description="没有找到匹配群聊" />
         ) : (
-          <div className="command-state">
-            <span className="material-symbols-outlined command-state-icon">manage_search</span>
-            <p>输入关键词后按 Enter 搜索</p>
-            <small>找到群聊后即可加入</small>
-          </div>
+          <Empty description="输入关键词后按 Enter 搜索" />
         )}
       </div>
-    </CommandDialog>
+    </Modal>
   );
 }

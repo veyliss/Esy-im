@@ -4431,8 +4431,17 @@ textarea.command-input,
     font-weight: 800;
   }
 
-  .im-mobile-nav-item .material-symbols-outlined {
-    font-size: 21px;
+  .im-mobile-nav-icon {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    line-height: 1;
+  }
+
+  .im-mobile-nav-icon .anticon {
+    color: currentColor;
+    font-size: 20px;
   }
 
   .im-mobile-nav-item.is-active {

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Button, Input, Switch } from "antd";
 import { Im4Button, Im4Shell, Im4Status } from "@/components/im4";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -448,12 +449,12 @@ export default function MePage() {
                 <div className="me-form-grid">
                   <label className="me-field">
                     <span>昵称</span>
-                    <input
-                      className="ui-input"
+                    <Input
                       value={nickname}
                       onChange={(event) => setNickname(event.target.value)}
                       placeholder="请输入昵称"
                       maxLength={30}
+                      size="large"
                     />
                     <small>{nickname.length}/30</small>
                   </label>
@@ -510,23 +511,21 @@ export default function MePage() {
                 <div className="me-form-grid">
                   <label className="me-field">
                     <span>新密码</span>
-                    <input
-                      type="password"
-                      className="ui-input"
+                    <Input.Password
                       placeholder="请输入新密码（最少8位）"
                       value={newPassword}
                       onChange={(event) => setNewPassword(event.target.value)}
+                      size="large"
                     />
                   </label>
 
                   <label className="me-field">
                     <span>确认密码</span>
-                    <input
-                      type="password"
-                      className="ui-input"
+                    <Input.Password
                       placeholder="请再次输入密码"
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
+                      size="large"
                     />
                   </label>
                 </div>
@@ -559,11 +558,10 @@ export default function MePage() {
                       <strong>桌面通知</strong>
                       <small>收到新消息时显示浏览器通知提醒。</small>
                     </span>
-                    <input
-                      type="checkbox"
+                    <Switch
                       checked={desktopNotifications}
-                      onChange={(event) => {
-                        void handleDesktopNotificationsChange(event.target.checked);
+                      onChange={(checked) => {
+                        void handleDesktopNotificationsChange(checked);
                       }}
                     />
                   </label>
@@ -572,10 +570,9 @@ export default function MePage() {
                       <strong>紧凑消息列表</strong>
                       <small>提高会话列表密度，适合小屏或高频切换。</small>
                     </span>
-                    <input
-                      type="checkbox"
+                    <Switch
                       checked={compactMessages}
-                      onChange={(event) => setCompactMessages(event.target.checked)}
+                      onChange={(checked) => setCompactMessages(checked)}
                     />
                   </label>
                 </div>
@@ -594,12 +591,12 @@ export default function MePage() {
                 </span>
               </div>
               <div className="me-save-actions">
-                <button type="button" onClick={handleCancel} disabled={saving || !hasChanges} className="im-secondary-button">
+                <Button onClick={handleCancel} disabled={saving || !hasChanges}>
                   取消
-                </button>
-                <button type="button" onClick={handleSave} disabled={saving || !hasChanges} className="im-primary-button">
+                </Button>
+                <Button type="primary" onClick={handleSave} disabled={saving || !hasChanges} loading={saving}>
                   {saving ? "保存中..." : "保存修改"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

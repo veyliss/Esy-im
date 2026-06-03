@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { Button, Input, Segmented } from "antd";
 import { MomentItem } from "@/components/moments/MomentItem";
 import {
   ActionBar,
@@ -355,26 +356,15 @@ export default function MomentsPage() {
     >
         <div className="im4-feed-page">
           <div className="im4-feed-column">
-            <div className="im3-mobile-tabs" role="tablist" aria-label="朋友圈视图">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "timeline"}
-                className={activeTab === "timeline" ? "is-active" : undefined}
-                onClick={() => setActiveTab("timeline")}
-              >
-                朋友动态
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "my"}
-                className={activeTab === "my" ? "is-active" : undefined}
-                onClick={() => setActiveTab("my")}
-              >
-                我的朋友圈
-              </button>
-            </div>
+            <Segmented
+              className="im3-mobile-tabs ant-moment-tabs"
+              options={[
+                { label: "朋友动态", value: "timeline" },
+                { label: "我的朋友圈", value: "my" },
+              ]}
+              value={activeTab}
+              onChange={(value) => setActiveTab(value as "timeline" | "my")}
+            />
             <ErrorAlert error={error} onClose={() => setError(null)} className="mb-4" />
             <SectionCard className="moment-composer border-slate-200 dark:border-slate-700">
               <div className="flex gap-4">
@@ -386,51 +376,50 @@ export default function MomentsPage() {
                   className="shrink-0"
                 />
                 <div className="flex-1">
-                  <textarea
-                    className="ui-textarea min-h-[104px] w-full resize-none rounded-lg border-transparent bg-slate-50 p-4 text-sm shadow-none dark:bg-slate-800/60"
+                  <Input.TextArea
+                    className="min-h-[104px] w-full resize-none"
                     placeholder="分享这一刻"
                     value={content}
                     onChange={(e) => setContent(e.target.value.slice(0, 500))}
+                    autoSize={{ minRows: 4, maxRows: 8 }}
+                    maxLength={500}
                   />
                   <div className="mt-3 flex items-center gap-2">
                     <span className="material-symbols-outlined text-base text-slate-400">location_on</span>
-                    <input
-                      className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-slate-700 outline-none placeholder:text-slate-400 dark:text-slate-300"
+                    <Input
+                      className="min-w-0 flex-1"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       placeholder="添加位置"
+                      variant="borderless"
                     />
                   </div>
                   <ActionBar className="mt-3 justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      <button
+                      <Button
                         onClick={handleImageSelect}
-                        type="button"
-                        className="im-secondary-button min-h-9 px-3 text-sm"
+                        icon={<span className="material-symbols-outlined text-xl">image</span>}
                       >
-                        <span className="material-symbols-outlined text-xl">image</span>
                         {images.length > 0 ? `${images.length}/9` : "图片"}
-                      </button>
+                      </Button>
                       {content.trim() || location.trim() || images.length > 0 ? (
-                        <button
+                        <Button
                           onClick={clearComposer}
-                          type="button"
-                          className="im-secondary-button min-h-9 px-3 text-sm"
                           disabled={publishing}
                         >
                           清空
-                        </button>
+                        </Button>
                       ) : null}
                     </div>
                     <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">{content.length}/500</span>
-                    <button
-                      type="button"
+                    <Button
                       onClick={handlePublish}
                       disabled={publishing || (!content.trim() && images.length === 0)}
-                      className="im-primary-button"
+                      loading={publishing}
+                      type="primary"
                     >
                       {publishing ? "发布中..." : "发布"}
-                    </button>
+                    </Button>
                   </ActionBar>
 
                   {images.length > 0 ? (
@@ -441,15 +430,17 @@ export default function MomentsPage() {
                           className="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-cover bg-center dark:border-slate-700"
                           style={{ backgroundImage: `url(${img})` }}
                         >
-                          <button
-                            type="button"
+                          <Button
+                            danger
+                            shape="circle"
+                            size="small"
                             className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white"
                             onClick={() => removeImage(index)}
                             aria-label="移除图片"
                             title="移除"
+                            icon={<span className="material-symbols-outlined text-sm">close</span>}
                           >
-                            <span className="material-symbols-outlined text-sm">close</span>
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -477,9 +468,9 @@ export default function MomentsPage() {
                   icon={activeTab === "timeline" ? "dynamic_feed" : "add_photo_alternate"}
                   action={
                     activeTab === "my" ? (
-                      <button type="button" className="im-secondary-button" onClick={() => setContent("今天想分享：")}>
+                      <Button onClick={() => setContent("今天想分享：")}>
                         写一条动态
-                      </button>
+                      </Button>
                     ) : null
                   }
                   className="min-h-[240px] border-0 bg-white dark:bg-slate-900"

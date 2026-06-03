@@ -3,6 +3,7 @@
  */
 
 import Image from "next/image";
+import { Button, Tag } from "antd";
 import type { FriendRequest } from "@/lib/types/api";
 import { formatConversationTime } from "@/lib/utils/time";
 
@@ -57,15 +58,9 @@ export function FriendRequestItem({
           <p className="font-semibold text-slate-900 dark:text-white truncate">
             {user?.nickname || "未知用户"}
           </p>
-          <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${
-            isAccepted 
-              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" 
-              : isRejected 
-              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-              : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
-          }`}>
+          <Tag color={isAccepted ? "success" : isRejected ? "error" : "warning"}>
             {getStatusText()}
-          </span>
+          </Tag>
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400 truncate mt-1.5">
           {request.message || "请求添加你为好友"}
@@ -76,20 +71,20 @@ export function FriendRequestItem({
       </div>
       {type === "received" && isPending && (
         <div className="flex shrink-0 flex-col gap-2">
-          <button
-            type="button"
+          <Button
+            size="small"
+            type="primary"
             onClick={() => onAccept?.(request.id)}
-            className="im-primary-button min-h-9 px-5 text-sm"
           >
             同意
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            danger
+            size="small"
             onClick={() => onReject?.(request.id)}
-            className="im-secondary-button min-h-9 px-5 text-sm"
           >
             拒绝
-          </button>
+          </Button>
         </div>
       )}
     </div>

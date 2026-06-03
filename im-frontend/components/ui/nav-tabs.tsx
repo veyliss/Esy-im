@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CameraOutlined, ContactsOutlined, MessageOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 
@@ -25,42 +26,42 @@ const items: Array<{
   key: NavKey;
   label: string;
   href: string;
-  icon: string;
+  icon: ReactNode;
   description: string;
 }> = [
   {
     key: "chat",
     label: "聊天",
     href: "/chat",
-    icon: "chat",
+    icon: <MessageOutlined />,
     description: "即时消息和对话",
   },
   {
     key: "contacts",
     label: "通讯录",
     href: "/contacts",
-    icon: "contacts",
+    icon: <ContactsOutlined />,
     description: "管理联系人和好友",
   },
   {
     key: "groups",
     label: "群聊",
     href: "/groups",
-    icon: "groups",
+    icon: <TeamOutlined />,
     description: "发现和管理群聊",
   },
   {
     key: "moments",
     label: "朋友圈",
     href: "/moments",
-    icon: "photo_camera",
+    icon: <CameraOutlined />,
     description: "分享生活动态",
   },
   {
     key: "me",
     label: "我的",
     href: "/me",
-    icon: "person",
+    icon: <UserOutlined />,
     description: "个人资料和设置",
   },
 ];
@@ -136,7 +137,7 @@ export function NavTabs({
                   )}
                 >
                   {showIcons ? (
-                    <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                    <span className="im-nav-icon text-[18px]" aria-hidden="true">{item.icon}</span>
                   ) : null}
 
                   <span
@@ -181,7 +182,7 @@ export function MobileBottomNav({ active, badges = {} }: { active: NavKey; badge
             aria-current={isActive ? "page" : undefined}
             className={clsx("im-mobile-nav-item", isActive && "is-active")}
           >
-            <span className="material-symbols-outlined">{item.icon}</span>
+            <span className="im-mobile-nav-icon" aria-hidden="true">{item.icon}</span>
             <span>{item.label}</span>
             {badgeCount > 0 ? (
               <em>{badgeCount > 99 ? "99+" : badgeCount}</em>

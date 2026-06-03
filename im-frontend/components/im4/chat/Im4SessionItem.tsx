@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { Button, Tooltip } from "antd";
 import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface Im4SessionItemProps {
@@ -51,19 +52,40 @@ export function Im4SessionItem({
       </button>
       <div className="im4-session-actions">
         {onPin ? (
-          <button type="button" onClick={onPin} aria-label={pinned ? "取消置顶" : "置顶会话"} title={pinned ? "取消置顶" : "置顶"}>
-            <span className="material-symbols-outlined">{pinned ? "keep_off" : "keep"}</span>
-          </button>
+          <Tooltip title={pinned ? "取消置顶" : "置顶"}>
+            <Button
+              aria-label={pinned ? "取消置顶" : "置顶会话"}
+              icon={<span className="material-symbols-outlined">{pinned ? "keep_off" : "keep"}</span>}
+              shape="circle"
+              size="small"
+              type="text"
+              onClick={onPin}
+            />
+          </Tooltip>
         ) : null}
         {onMute ? (
-          <button type="button" onClick={onMute} aria-label={muted ? "取消免打扰" : "免打扰"} title={muted ? "取消免打扰" : "免打扰"}>
-            <span className="material-symbols-outlined">{muted ? "notifications" : "notifications_off"}</span>
-          </button>
+          <Tooltip title={muted ? "取消免打扰" : "免打扰"}>
+            <Button
+              aria-label={muted ? "取消免打扰" : "免打扰"}
+              icon={<span className="material-symbols-outlined">{muted ? "notifications" : "notifications_off"}</span>}
+              shape="circle"
+              size="small"
+              type="text"
+              onClick={onMute}
+            />
+          </Tooltip>
         ) : null}
         {onHide ? (
-          <button type="button" onClick={onHide} aria-label="隐藏会话" title="隐藏">
-            <span className="material-symbols-outlined">visibility_off</span>
-          </button>
+          <Tooltip title="隐藏">
+            <Button
+              aria-label="隐藏会话"
+              icon={<span className="material-symbols-outlined">visibility_off</span>}
+              shape="circle"
+              size="small"
+              type="text"
+              onClick={onHide}
+            />
+          </Tooltip>
         ) : null}
       </div>
     </div>
@@ -71,4 +93,3 @@ export function Im4SessionItem({
 }
 
 export default Im4SessionItem;
-

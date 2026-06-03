@@ -2,6 +2,7 @@
 import "antd/dist/reset.css";
 import "./globals.css";
 import "../styles/auth-antd.css";
+import "../styles/antd-app.css";
 import { AntdProvider } from "@/components/ui/antd-provider";
 import { AppInteractionProvider } from "@/components/ui/app-interactions";
 

@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 export function AntdProvider({ children }: { children: ReactNode }) {
   return (
     <ConfigProvider
+      wave={{ disabled: true }}
       theme={{
         cssVar: { key: "esy-im" },
         hashed: false,
@@ -23,6 +24,7 @@ export function AntdProvider({ children }: { children: ReactNode }) {
           colorBorder: "#d9e2ef",
           borderRadius: 8,
           borderRadiusLG: 8,
+          motion: false,
           wireframe: false,
           fontFamily:
             'Inter, "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -36,7 +38,7 @@ export function AntdProvider({ children }: { children: ReactNode }) {
             borderRadius: 8,
             controlHeightLG: 46,
             fontWeight: 700,
-            primaryShadow: "0 12px 28px rgba(37, 99, 235, 0.22)",
+            primaryShadow: "0 6px 16px rgba(37, 99, 235, 0.14)",
           },
           Checkbox: {
             colorPrimary: "#2563eb",
