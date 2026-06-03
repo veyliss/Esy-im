@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input } from "antd";
+import { Button, Card, Descriptions, Empty, Input, List, Space, Tag, Typography } from "antd";
+import { CopyOutlined, LogoutOutlined, MessageOutlined, SearchOutlined } from "@ant-design/icons";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { Group } from "@/lib/types/api";
-import { ActionBar, EmptyPanel, SectionTitle } from "@/components/workspace/section";
 import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -91,8 +91,8 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
   };
 
   return (
-    <div className="im-detail-page flex min-h-[520px] flex-col">
-      <div className="im-detail-inner">
+    <div className="im-detail-page ant-linked-page ant-group-detail-page">
+      <div className="im-detail-inner ant-linked-page">
         {onBack ? (
           <MobileDetailHeader
             title={group.name}
@@ -100,129 +100,106 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
             onBack={onBack}
           />
         ) : null}
-        <div className="im-detail-hero">
-          <UserAvatar
-            src={group.avatar || "/default-group-avatar.png"}
-            name={group.name}
-            size="2xl"
-            shape="rounded"
-            border
-          />
-          <div className="min-w-0 flex-1">
-            <h2 className="im-detail-title">{group.name}</h2>
-            <p className="im-detail-subtitle">
-              {group.member_count} 人 · 群号：{group.group_id}
-            </p>
-            <p className="im-detail-subtitle max-w-2xl">{group.description || "暂无群描述"}</p>
+        <Card className="ant-linked-card ant-group-profile-card">
+          <div className="ant-group-profile">
+            <UserAvatar
+              src={group.avatar || "/default-group-avatar.png"}
+              name={group.name}
+              size="2xl"
+              shape="rounded"
+              border
+            />
+            <div className="ant-group-profile-main">
+              <Typography.Title level={2}>{group.name}</Typography.Title>
+              <Typography.Text type="secondary">
+                {group.member_count} 人 · 群号：{group.group_id}
+              </Typography.Text>
+              <Typography.Paragraph type="secondary">
+                {group.description || "暂无群描述"}
+              </Typography.Paragraph>
+              <Space wrap>
+                <Tag color={group.is_public ? "processing" : "default"}>{group.is_public ? "公开群" : "私密群"}</Tag>
+                <Tag color={group.join_approval ? "warning" : "success"}>{group.join_approval ? "入群需审核" : "直接加入"}</Tag>
+              </Space>
+            </div>
           </div>
-        </div>
-
-        <div className="im-detail-stats">
-          <div>
-            <span>成员</span>
-            <strong>{group.member_count}</strong>
-          </div>
-          <div>
-            <span>容量</span>
-            <strong>{group.max_members}</strong>
-          </div>
-          <div>
-            <span>加入方式</span>
-            <strong>{group.join_approval ? "需要审核" : "直接加入"}</strong>
-          </div>
-          <div>
-            <span>可见性</span>
-            <strong>{group.is_public ? "公开" : "私密"}</strong>
-          </div>
-        </div>
-
-        <ActionBar className="mt-8 justify-start">
-          <Button type="primary" onClick={handleSendMessage}>
+          <Space wrap className="ant-linked-actions">
+          <Button type="primary" icon={<MessageOutlined />} onClick={handleSendMessage}>
             发消息
           </Button>
-          <Button onClick={handleCopyGroupId}>
+          <Button icon={<CopyOutlined />} onClick={handleCopyGroupId}>
             复制群号
           </Button>
           <Button
             danger
+            icon={<LogoutOutlined />}
             onClick={handleLeave}
           >
             退出群聊
           </Button>
-        </ActionBar>
-      </div>
+          </Space>
+        </Card>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6">
-        <section className="group-settings-panel">
-          <SectionTitle title="群公告" description="群聊说明会作为当前群公告展示。" />
-          <p>{group.description || "暂无群公告"}</p>
-          <div className="group-settings-grid">
-            <div>
-              <span>入群审核</span>
-              <strong>{group.join_approval ? "已开启" : "未开启"}</strong>
-            </div>
-            <div>
-              <span>公开搜索</span>
-              <strong>{group.is_public ? "允许" : "不允许"}</strong>
-            </div>
-            <div>
-              <span>群容量</span>
-              <strong>
-                {group.member_count}/{group.max_members}
-              </strong>
-            </div>
-          </div>
-        </section>
+        <Card className="ant-linked-card" title="群公告">
+          <Typography.Paragraph type="secondary">
+            {group.description || "暂无群公告"}
+          </Typography.Paragraph>
+          <Descriptions column={3} size="small" className="ant-linked-descriptions ant-group-descriptions">
+            <Descriptions.Item label="入群审核">{group.join_approval ? "已开启" : "未开启"}</Descriptions.Item>
+            <Descriptions.Item label="公开搜索">{group.is_public ? "允许" : "不允许"}</Descriptions.Item>
+            <Descriptions.Item label="群容量">{group.member_count}/{group.max_members}</Descriptions.Item>
+          </Descriptions>
+        </Card>
 
-        <SectionTitle
+        <Card
+          className="ant-linked-card"
           title={`群成员 · ${filteredMembers.length}`}
-          description="成员角色和群内昵称会显示在这里。"
-          className="mb-5 border-b border-slate-200 pb-3 dark:border-slate-800"
-        />
-        <Input
-          allowClear
-          className="group-member-search ant-group-member-search"
-          placeholder="搜索成员昵称或用户 ID"
-          size="large"
-          value={memberKeyword}
-          onChange={(event) => setMemberKeyword(event.target.value)}
-        />
-        {loading ? (
-          <PageLoading message="加载群成员中..." size="sm" />
-        ) : filteredMembers.length === 0 ? (
-          <EmptyPanel
-            title={memberKeyword.trim() ? "未找到相关成员" : "暂无成员信息"}
-            description={memberKeyword.trim() ? "试试其他昵称或用户 ID" : "稍后刷新再试"}
-            className="min-h-[220px] border-0 bg-transparent"
-          />
-        ) : (
-          <div className="im-list-grid">
-            {filteredMembers.map((member) => (
-              <div
-                key={member.user_id}
-                className="im-list-row"
-              >
+          extra={
+            <Input
+              allowClear
+              className="ant-linked-search"
+              placeholder="搜索成员昵称或用户 ID"
+              prefix={<SearchOutlined />}
+              value={memberKeyword}
+              onChange={(event) => setMemberKeyword(event.target.value)}
+            />
+          }
+        >
+          {loading ? (
+            <PageLoading message="加载群成员中..." size="sm" />
+          ) : filteredMembers.length === 0 ? (
+            <Empty description={memberKeyword.trim() ? "未找到相关成员" : "暂无成员信息"} />
+          ) : (
+            <List
+              className="ant-linked-list"
+              dataSource={filteredMembers}
+              renderItem={(member) => (
+                <List.Item key={member.user_id}>
+                  <List.Item.Meta
+                    avatar={
                 <UserAvatar
                   src={member.user?.avatar || "/default-avatar.png"}
                   name={member.nickname || member.user?.nickname || `用户${member.user_id}`}
                   size="md"
                   border
                 />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    {member.nickname || member.user?.nickname || `用户${member.user_id}`}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    <span className={`group-role-badge is-role-${member.role}`}>
-                      {member.role === 3 ? "群主" : member.role === 2 ? "管理员" : "成员"}
-                    </span>
-                    {member.is_muted ? <span className="ml-2 text-amber-500">已禁言</span> : null}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                    }
+                    title={member.nickname || member.user?.nickname || `用户${member.user_id}`}
+                    description={
+                      <Space wrap size={[6, 4]}>
+                        <Tag color={member.role === 3 ? "gold" : member.role === 2 ? "success" : "default"}>
+                          {member.role === 3 ? "群主" : member.role === 2 ? "管理员" : "成员"}
+                        </Tag>
+                        {member.is_muted ? <Tag color="warning">已禁言</Tag> : null}
+                        <Typography.Text type="secondary">{member.user_id}</Typography.Text>
+                      </Space>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+          )}
+        </Card>
       </div>
 
       <ErrorAlert error={error} onClose={() => setError(null)} className="mx-6 mb-4" />

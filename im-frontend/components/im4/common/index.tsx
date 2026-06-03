@@ -61,9 +61,10 @@ export function Im4IconButton({
 
 interface Im4SearchProps extends Omit<InputProps, "prefix" | "size"> {
   onClear?: () => void;
+  size?: InputProps["size"];
 }
 
-export function Im4Search({ value, onClear, className, onChange, ...props }: Im4SearchProps) {
+export function Im4Search({ value, onClear, className, onChange, size = "middle", ...props }: Im4SearchProps) {
   return (
     <Input
       {...props}
@@ -74,7 +75,7 @@ export function Im4Search({ value, onClear, className, onChange, ...props }: Im4
         onChange?.(event);
       }}
       prefix={<SearchOutlined aria-hidden="true" />}
-      size="large"
+      size={size}
       value={value}
     />
   );

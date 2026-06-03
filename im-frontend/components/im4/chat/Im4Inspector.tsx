@@ -1,5 +1,6 @@
 import { UserAvatar } from "@/components/ui/user-avatar";
-import { Im4Button, Im4IconButton } from "../common";
+import { Button, Card, Descriptions, Space, Typography } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 
 interface Im4InspectorProps {
   name: string;
@@ -35,41 +36,33 @@ export function Im4Inspector({
   onHideConversation,
 }: Im4InspectorProps) {
   return (
-    <div className="im4-inspector">
-      <div className="im4-inspector-head">
-        <strong>{type === "group" ? "群聊上下文" : "联系人上下文"}</strong>
-        <Im4IconButton icon="close" label="关闭资料" onClick={onClose} />
+    <div className="im4-inspector ant-im4-inspector">
+      <div className="im4-inspector-head ant-im4-inspector-head">
+        <Typography.Text strong>{type === "group" ? "群聊上下文" : "联系人上下文"}</Typography.Text>
+        <Button aria-label="关闭资料" icon={<CloseOutlined />} shape="circle" title="关闭资料" type="text" onClick={onClose} />
       </div>
-      <div className="im4-inspector-profile">
+      <Card className="ant-im4-inspector-card ant-im4-inspector-profile">
         <UserAvatar src={avatar} name={name} size="2xl" shape={type === "group" ? "rounded" : "circle"} border />
-        <h3>{name}</h3>
-        <p>{type === "group" && groupId ? `群号：${groupId}` : "私聊会话"}</p>
-      </div>
-      <div className="im4-inspector-stats">
-        <div>
-          <span>未读</span>
-          <strong>{unreadCount || "无"}</strong>
-        </div>
-        <div>
-          <span>消息</span>
-          <strong>{messageCount}</strong>
-        </div>
-        {typeof memberCount === "number" ? (
-          <div>
-            <span>成员</span>
-            <strong>{memberCount}</strong>
-          </div>
-        ) : null}
-      </div>
-      <div className="im4-inspector-actions">
-        <Im4Button onClick={onTogglePinned}>{pinned ? "取消置顶" : "置顶会话"}</Im4Button>
-        <Im4Button onClick={onToggleMuted}>{muted ? "取消免打扰" : "免打扰"}</Im4Button>
-        <Im4Button onClick={onOpenDetail}>{type === "group" ? "群聊详情" : "联系人详情"}</Im4Button>
-        <Im4Button tone="danger" onClick={onHideConversation}>隐藏会话</Im4Button>
-      </div>
+        <Typography.Title level={3}>{name}</Typography.Title>
+        <Typography.Text type="secondary">{type === "group" && groupId ? `群号：${groupId}` : "私聊会话"}</Typography.Text>
+      </Card>
+      <Card className="ant-im4-inspector-card">
+        <Descriptions column={1} size="small">
+          <Descriptions.Item label="未读">{unreadCount || "无"}</Descriptions.Item>
+          <Descriptions.Item label="消息">{messageCount}</Descriptions.Item>
+          {typeof memberCount === "number" ? <Descriptions.Item label="成员">{memberCount}</Descriptions.Item> : null}
+        </Descriptions>
+      </Card>
+      <Card className="ant-im4-inspector-card">
+        <Space direction="vertical" className="ant-im4-inspector-actions">
+          <Button onClick={onTogglePinned}>{pinned ? "取消置顶" : "置顶会话"}</Button>
+          <Button onClick={onToggleMuted}>{muted ? "取消免打扰" : "免打扰"}</Button>
+          <Button onClick={onOpenDetail}>{type === "group" ? "群聊详情" : "联系人详情"}</Button>
+          <Button danger onClick={onHideConversation}>隐藏会话</Button>
+        </Space>
+      </Card>
     </div>
   );
 }
 
 export default Im4Inspector;
-

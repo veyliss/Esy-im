@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Input } from "antd";
+import { Button, Card, Descriptions, Empty, Input, Space, Tag, Typography } from "antd";
 import { CopyOutlined, DeleteOutlined, MessageOutlined, SaveOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/lib/store";
 import { useContactStore } from "@/lib/store/contact";
@@ -13,10 +13,6 @@ import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/erro
 import type { User } from "@/lib/types/api";
 import { useRouter } from "next/navigation";
 import { wsClient } from "@/lib/websocket/client";
-import {
-  EmptyPanel,
-  SectionTitle,
-} from "@/components/workspace/section";
 import { Im4Button, Im4Empty, Im4Search, Im4SessionItem, Im4Shell, Im4Status } from "@/components/im4";
 import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -357,22 +353,26 @@ export default function ContactsPage() {
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />
 
             {activeRightTab === "requests" ? (
-              <div className="im-detail-inner space-y-8">
+              <div className="im-detail-inner ant-linked-page">
                 <MobileDetailHeader
                   title="新的朋友"
                   description="好友申请与记录"
                   onBack={backToList}
                 />
-                <div className="border-b border-slate-200 pb-5 dark:border-slate-800">
-                  <h2 className="im-detail-title">新的朋友</h2>
-                  <p className="im-detail-subtitle">处理收到的好友请求，或查看已发出的申请。</p>
-                </div>
+                <Card
+                  className="ant-linked-card"
+                  title="新的朋友"
+                  extra={pendingRequestCount > 0 ? <Tag color="processing">待处理 {pendingRequestCount}</Tag> : null}
+                >
+                  <Typography.Paragraph type="secondary">
+                    处理收到的好友请求，或查看已发出的申请。
+                  </Typography.Paragraph>
+                </Card>
 
-                <section>
-                  <SectionTitle title="收到的请求" className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800" />
-                  <div className="space-y-3">
+                <Card className="ant-linked-card" title="收到的请求">
+                  <div className="ant-linked-stack">
                     {receivedRequests.length === 0 ? (
-                      <EmptyPanel title="暂无收到的请求" icon="inbox" className="min-h-[180px] border-0 bg-transparent" />
+                      <Empty description="暂无收到的请求" />
                     ) : (
                       receivedRequests.map((req) => (
                         <FriendRequestItem
@@ -385,30 +385,29 @@ export default function ContactsPage() {
                       ))
                     )}
                   </div>
-                </section>
+                </Card>
 
-                <section>
-                  <SectionTitle title="我发出的请求" className="mb-4 border-b border-slate-200 pb-3 dark:border-slate-800" />
-                  <div className="space-y-3">
+                <Card className="ant-linked-card" title="我发出的请求">
+                  <div className="ant-linked-stack">
                     {sentRequests.length === 0 ? (
-                      <EmptyPanel title="暂无发出的请求" icon="send" className="min-h-[180px] border-0 bg-transparent" />
+                      <Empty description="暂无发出的请求" />
                     ) : (
                       sentRequests.map((req) => (
                         <FriendRequestItem key={req.id} request={req} type="sent" />
                       ))
                     )}
                   </div>
-                </section>
+                </Card>
               </div>
             ) : selectedFriend && friendUser ? (
-              <div className="im-detail-inner">
+              <div className="im-detail-inner ant-linked-page">
                 <MobileDetailHeader
                   title={selectedFriend.remark || friendUser.nickname || "好友详情"}
                   description={`用户 ID：${friendUser.user_id}`}
                   onBack={backToList}
                 />
-                <section className="border-b border-slate-200 pb-10 text-center dark:border-slate-800 pt-2">
-                  <div className="relative mx-auto inline-block">
+                <Card className="ant-linked-card ant-contact-profile-card">
+                  <div className="ant-contact-profile">
                     <UserAvatar
                       src={friendUser.avatar || "/default-avatar.png"}
                       name={friendUser.nickname}
@@ -417,43 +416,36 @@ export default function ContactsPage() {
                       showStatus
                       border
                     />
-                  </div>
-                  <h2 className="mt-5 im-detail-title">
-                    {selectedFriend.remark || friendUser.nickname}
-                  </h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">昵称：{friendUser.nickname}</p>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">用户 ID：{friendUser.user_id}</p>
-                </section>
-
-                <section className="mt-8">
-                  <SectionTitle title="基础信息" className="mb-4" />
-                  <div className="im-info-grid">
-                    <div className="im-info-row">
-                      <span>用户 ID</span>
-                      <p>{friendUser.user_id}</p>
-                    </div>
-                    <div className="im-info-row">
-                      <span>邮箱</span>
-                      <p>{friendUser.email || "未填写"}</p>
-                    </div>
-                    <div className="im-info-row">
-                      <span>关系</span>
-                      <p>好友</p>
+                    <div className="ant-contact-profile-main">
+                      <Typography.Title level={2}>{selectedFriend.remark || friendUser.nickname}</Typography.Title>
+                      <Typography.Text type="secondary">昵称：{friendUser.nickname || "未设置"}</Typography.Text>
+                      <Space wrap>
+                        <Tag color="success">好友</Tag>
+                        <Tag color="processing">用户 ID：{friendUser.user_id}</Tag>
+                      </Space>
                     </div>
                   </div>
-                </section>
+                </Card>
 
-                <section className="mt-8">
-                  <SectionTitle title="备注信息" className="mb-4" />
+                <Card className="ant-linked-card" title="基础信息">
+                  <Descriptions column={1} size="small" className="ant-linked-descriptions">
+                    <Descriptions.Item label="用户 ID">{friendUser.user_id}</Descriptions.Item>
+                    <Descriptions.Item label="邮箱">{friendUser.email || "未填写"}</Descriptions.Item>
+                    <Descriptions.Item label="关系">好友</Descriptions.Item>
+                  </Descriptions>
+                </Card>
+
+                <Card className="ant-linked-card" title="备注信息">
                   <Input
                     placeholder="添加备注"
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
                     size="large"
                   />
-                </section>
+                </Card>
 
-                <div className="mt-10 flex flex-wrap justify-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
+                <Card className="ant-linked-card ant-linked-action-card">
+                  <Space wrap>
                   <Button
                     icon={<MessageOutlined />}
                     onClick={handleSendMessage}
@@ -480,7 +472,8 @@ export default function ContactsPage() {
                   >
                     删除联系人
                   </Button>
-                </div>
+                  </Space>
+                </Card>
               </div>
             ) : (
               <div className="workspace-empty-wrap">
