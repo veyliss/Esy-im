@@ -1332,6 +1332,8 @@
 
   .im4-message-list {
     padding-bottom: 18px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .im4-composer-shell {
@@ -1339,6 +1341,12 @@
     background: rgba(255, 255, 255, 0.96);
     padding-bottom: max(12px, env(safe-area-inset-bottom));
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .dark .im4-composer-shell {
+    background: rgba(15, 23, 42, 0.96);
+    border-top-color: #1e293b;
   }
 
   .im4-compose-tool.ant-btn {
@@ -1391,10 +1399,14 @@
   .ant-moment-toolbar {
     position: sticky;
     top: 0;
+    z-index: 5;
     display: grid;
     gap: 10px;
     margin: -12px -12px 12px;
     padding: 12px;
+    background: rgba(246, 248, 251, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .ant-moment-title h3.ant-typography {
@@ -1416,6 +1428,7 @@
     background: rgba(255, 255, 255, 0.94);
     padding: 4px;
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .ant-moment-composer.ant-card,

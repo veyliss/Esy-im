@@ -4424,11 +4424,18 @@ textarea.command-input,
     min-width: 0;
     justify-items: center;
     gap: 2px;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 6px 0;
     color: #64748b;
     font-size: 10px;
     font-weight: 800;
+    transition: background 180ms ease, transform 120ms ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .im-mobile-nav-item:active {
+    transform: scale(0.92);
   }
 
   .im-mobile-nav-icon {
@@ -4445,8 +4452,8 @@ textarea.command-input,
   }
 
   .im-mobile-nav-item.is-active {
-    background: #eff6ff;
-    color: #137fec;
+    background: rgba(59, 130, 246, 0.08);
+    color: #3B82F6;
   }
 
   .im-mobile-nav-item em {
@@ -4469,7 +4476,7 @@ textarea.command-input,
   }
 
   .dark .im-mobile-nav-item.is-active {
-    background: rgba(19, 127, 236, 0.16);
+    background: rgba(59, 130, 246, 0.16);
     color: #60a5fa;
   }
 
@@ -4810,5 +4817,1184 @@ textarea.command-input,
   .command-dialog-body {
     max-height: calc(min(86dvh, 720px) - 74px);
     padding: 16px 18px 20px;
+  }
+}
+
+/* ===== Global mobile performance & touch optimizations ===== */
+@media (max-width: 900px) {
+  /* Smooth scrolling on mobile */
+  .im4-session-list,
+  .im4-message-list,
+  .im4-feed-column,
+  .me-page-inner,
+  .workspace-main-panel,
+  .im-detail-inner {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Performance: use content-visibility for offscreen items */
+  .im4-session-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 64px;
+  }
+
+  .moment-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 200px;
+  }
+
+  /* Touch-friendly buttons globally */
+  .ant-btn {
+    min-height: 36px;
+  }
+
+  .ant-btn-sm {
+    min-height: 28px;
+  }
+
+  .ant-btn-lg {
+    min-height: 44px;
+  }
+
+  /* Prevent text selection on interactive elements */
+  .im4-rail-link,
+  .im4-session-item,
+  .im-mobile-nav-item,
+  .mobile-detail-back,
+  .im4-titlebar-back,
+  .im4-icon-button {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 900px) {
+  .im4-session-list::-webkit-scrollbar,
+  .im4-message-list::-webkit-scrollbar,
+  .im4-feed-column::-webkit-scrollbar {
+    width: 0;
+    display: none;
+  }
+
+  .im4-session-list,
+  .im4-message-list,
+  .im4-feed-column {
+    scrollbar-width: none;
+  }
+}
+
+/* ======================================================
+   微信朋友圈风格 — Moments Redesign
+   ====================================================== */
+
+/* --- Page container --- */
+.wx-moments-page {
+  width: 100%;
+  min-height: 100%;
+  background: #f5f5f5;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dark .wx-moments-page {
+  background: #111111;
+}
+
+/* --- Cover header --- */
+.wx-moments-cover {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+.wx-moments-cover-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4;
+}
+
+.wx-moments-cover-info {
+  position: absolute;
+  bottom: 20px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wx-moments-cover-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+.wx-moments-cover-avatar {
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  object-fit: cover;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Toolbar (mobile tabs + refresh) --- */
+.wx-moments-toolbar {
+  display: none; /* shown only on mobile via media query */
+}
+
+/* --- Feed --- */
+.wx-moments-feed {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px 100px;
+}
+
+/* --- Moment item (WeChat style) --- */
+.wx-moment-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dark .wx-moment-item {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.wx-moment-item:last-child {
+  border-bottom: none;
+}
+
+/* Avatar */
+.wx-moment-avatar {
+  flex-shrink: 0;
+}
+
+.wx-moment-avatar img {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* Body */
+.wx-moment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.wx-moment-author {
+  margin-bottom: 4px;
+}
+
+.wx-moment-name {
+  color: #576b95;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dark .wx-moment-name {
+  color: #6d8cc7;
+}
+
+.wx-moment-text {
+  color: #1a1a1a;
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+  margin-bottom: 6px;
+}
+
+.dark .wx-moment-text {
+  color: #e0e0e0;
+}
+
+.wx-moment-location {
+  color: #576b95;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.dark .wx-moment-location {
+  color: #6d8cc7;
+}
+
+/* Meta row: time + action trigger */
+.wx-moment-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.wx-moment-time {
+  color: #b0b0b0;
+  font-size: 12px;
+}
+
+.dark .wx-moment-time {
+  color: #666;
+}
+
+/* Action button (the "..." trigger) */
+.wx-moment-action-wrap {
+  position: relative;
+}
+
+.wx-moment-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: #f7f7f7;
+  color: #576b95;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wx-moment-action-btn:hover,
+.wx-moment-action-btn.is-open {
+  background: #e8e8e8;
+}
+
+.dark .wx-moment-action-btn {
+  background: #2a2a2a;
+  color: #6d8cc7;
+}
+
+.dark .wx-moment-action-btn:hover,
+.dark .wx-moment-action-btn.is-open {
+  background: #333;
+}
+
+/* Action popup (like / comment / delete) */
+.wx-moment-action-popup {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #4c4c4c;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  animation: wxPopupIn 0.15s ease-out;
+}
+
+@keyframes wxPopupIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.wx-action-popup-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wx-action-popup-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wx-action-popup-item:active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.wx-action-popup-item + .wx-action-popup-item {
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.wx-action-popup-item.is-danger {
+  color: #ff6b6b;
+}
+
+.wx-action-popup-item .is-liked {
+  color: #fa5151;
+}
+
+/* Interactions section (likes + comments) */
+.wx-moment-interactions {
+  background: #f7f7f7;
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.dark .wx-moment-interactions {
+  background: #1e1e1e;
+}
+
+/* Likes */
+.wx-moment-likes {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wx-like-icon {
+  color: #576b95;
+  font-size: 12px;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.dark .wx-like-icon {
+  color: #6d8cc7;
+}
+
+.wx-like-names {
+  color: #576b95;
+  word-break: break-word;
+}
+
+.dark .wx-like-names {
+  color: #6d8cc7;
+}
+
+.wx-like-name {
+  font-weight: 500;
+}
+
+/* Comments */
+.wx-moment-comments {
+  padding: 0 12px 8px;
+}
+
+.wx-moment-likes + .wx-moment-comments {
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  padding-top: 6px;
+}
+
+.dark .wx-moment-likes + .wx-moment-comments {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.wx-comment-line {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 2px 0;
+  cursor: pointer;
+  word-break: break-word;
+}
+
+.wx-comment-line:active {
+  opacity: 0.7;
+}
+
+.wx-comment-author {
+  color: #576b95;
+  font-weight: 500;
+}
+
+.dark .wx-comment-author {
+  color: #6d8cc7;
+}
+
+.wx-comment-reply-label {
+  color: #888;
+  margin: 0 2px;
+  font-size: 13px;
+}
+
+.wx-comment-reply-to {
+  color: #576b95;
+  font-weight: 500;
+}
+
+.dark .wx-comment-reply-to {
+  color: #6d8cc7;
+}
+
+.wx-comment-colon {
+  color: #333;
+}
+
+.dark .wx-comment-colon {
+  color: #ccc;
+}
+
+.wx-comment-text {
+  color: #333;
+}
+
+.dark .wx-comment-text {
+  color: #ccc;
+}
+
+/* Comment input */
+.wx-moment-comment-input {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+}
+
+.dark .wx-moment-comment-input {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+.wx-reply-hint {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wx-reply-hint span {
+  color: #576b95;
+  font-weight: 500;
+}
+
+.wx-reply-hint button {
+  border: none;
+  background: none;
+  color: #576b95;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.wx-comment-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.wx-comment-input-row .ant-input {
+  flex: 1;
+  font-size: 14px;
+}
+
+.wx-comment-send {
+  flex-shrink: 0;
+  border: none;
+  background: #576b95;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.wx-comment-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dark .wx-comment-send {
+  background: #6d8cc7;
+}
+
+/* --- Image grid (WeChat style) --- */
+.wx-image-grid {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  max-width: 300px;
+}
+
+.wx-image-grid--single {
+  grid-template-columns: 1fr;
+  max-width: 240px;
+}
+
+.wx-image-grid--pair {
+  grid-template-columns: 1fr 1fr;
+  max-width: 240px;
+}
+
+.wx-image-grid--four {
+  grid-template-columns: 1fr 1fr;
+  max-width: 240px;
+}
+
+.wx-image-grid--grid {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 300px;
+}
+
+.wx-image-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #e8e8e8;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wx-image-grid--single .wx-image-cell {
+  aspect-ratio: auto;
+}
+
+.wx-image-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 200ms ease;
+}
+
+.wx-image-cell:active img {
+  transform: scale(0.96);
+}
+
+/* Image preview modal */
+.wx-image-preview-modal .ant-modal-content {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.wx-image-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wx-image-preview-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.wx-image-preview-img {
+  max-width: min(920px, calc(100vw - 32px));
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.wx-image-preview-counter {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+.wx-image-preview-nav {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 40px;
+}
+
+.wx-image-preview-nav button {
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.wx-image-preview-nav button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* --- Session panel (sidebar) --- */
+.wx-session-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.wx-session-user img {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.wx-session-user strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.dark .wx-session-user strong {
+  color: #e0e0e0;
+}
+
+.wx-session-user small {
+  color: #888;
+  font-size: 12px;
+}
+
+.wx-session-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 12px;
+}
+
+.wx-session-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease;
+  text-align: left;
+}
+
+.wx-session-tab:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.wx-session-tab.is-active {
+  background: rgba(59, 130, 246, 0.08);
+  color: #3B82F6;
+  font-weight: 600;
+}
+
+.dark .wx-session-tab {
+  color: #ccc;
+}
+
+.dark .wx-session-tab:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark .wx-session-tab.is-active {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+}
+
+.wx-session-tab em {
+  font-style: normal;
+  font-size: 12px;
+  color: #888;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.dark .wx-session-tab em {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.wx-session-compose-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 18px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.wx-session-compose-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+.wx-session-compose-btn:active {
+  transform: scale(0.97);
+}
+
+/* --- Composer modal --- */
+.wx-composer-modal .ant-modal-content {
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.wx-composer {
+  display: flex;
+  flex-direction: column;
+}
+
+.wx-composer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dark .wx-composer-head {
+  border-bottom-color: #333;
+}
+
+.wx-composer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.dark .wx-composer-title {
+  color: #e0e0e0;
+}
+
+.wx-composer-close {
+  border: none;
+  background: none;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.wx-composer-body {
+  padding: 16px 20px;
+}
+
+.wx-composer-textarea {
+  width: 100%;
+  min-height: 120px;
+  border: none;
+  resize: none;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  outline: none;
+  font-family: inherit;
+  background: transparent;
+}
+
+.dark .wx-composer-textarea {
+  color: #e0e0e0;
+}
+
+.wx-composer-textarea::placeholder {
+  color: #b0b0b0;
+}
+
+.wx-composer-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.wx-composer-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.wx-composer-image button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wx-composer-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 0;
+  border-top: 1px solid #f0f0f0;
+  color: #888;
+  font-size: 14px;
+}
+
+.dark .wx-composer-location {
+  border-top-color: #333;
+}
+
+.wx-composer-location input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #333;
+  background: transparent;
+}
+
+.dark .wx-composer-location input {
+  color: #e0e0e0;
+}
+
+.wx-composer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.dark .wx-composer-foot {
+  border-top-color: #333;
+}
+
+.wx-composer-tools {
+  display: flex;
+  gap: 8px;
+}
+
+.wx-composer-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.wx-composer-tool:hover {
+  background: #f5f5f5;
+}
+
+.dark .wx-composer-tool {
+  border-color: #444;
+  color: #aaa;
+}
+
+.dark .wx-composer-tool:hover {
+  background: #2a2a2a;
+}
+
+.wx-composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wx-composer-count {
+  font-size: 12px;
+  color: #b0b0b0;
+}
+
+.wx-composer-send {
+  border: none;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+.wx-composer-send:hover {
+  transform: translateY(-1px);
+}
+
+.wx-composer-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- FAB (floating action button for mobile) --- */
+.wx-fab-compose {
+  display: none; /* shown only on mobile */
+}
+
+.wx-mobile-compose-btn {
+  display: none;
+}
+
+/* ======================================================
+   Moments Responsive — Mobile
+   ====================================================== */
+@media (max-width: 900px) {
+  /* Cover header smaller */
+  .wx-moments-cover {
+    height: 200px;
+  }
+
+  .wx-moments-cover-info {
+    bottom: 14px;
+    right: 16px;
+    gap: 10px;
+  }
+
+  .wx-moments-cover-name {
+    font-size: 16px;
+  }
+
+  .wx-moments-cover-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* Show mobile toolbar */
+  .wx-moments-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(245, 245, 245, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .dark .wx-moments-toolbar {
+    background: rgba(17, 17, 17, 0.96);
+  }
+
+  .wx-moments-tabs {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wx-moments-refresh {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .dark .wx-moments-refresh {
+    background: rgba(255, 255, 255, 0.08);
+    color: #aaa;
+  }
+
+  /* Feed adjustments */
+  .wx-moments-feed {
+    padding: 0 14px 120px;
+  }
+
+  /* Moment item touch-friendly */
+  .wx-moment-item {
+    padding: 14px 0;
+  }
+
+  .wx-moment-avatar img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .wx-moment-text {
+    font-size: 14px;
+  }
+
+  /* Image grid smaller */
+  .wx-image-grid {
+    max-width: 260px;
+  }
+
+  .wx-image-grid--single {
+    max-width: 200px;
+  }
+
+  /* FAB compose button */
+  .wx-fab-compose {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: #ffffff;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+    z-index: 40;
+    transition: transform 200ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .wx-fab-compose:active {
+    transform: scale(0.9);
+  }
+
+  /* Show mobile compose button in titlebar */
+  .wx-mobile-compose-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+    font-size: 16px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .wx-mobile-compose-btn:active {
+    background: rgba(59, 130, 246, 0.2);
+  }
+
+  /* Composer modal mobile */
+  .wx-composer-modal .ant-modal {
+    max-width: calc(100vw - 16px);
+  }
+
+  .wx-composer-textarea {
+    font-size: 16px; /* prevent iOS zoom */
+  }
+
+  .wx-composer-location input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .wx-moments-cover {
+    height: 160px;
+  }
+
+  .wx-moments-cover-info {
+    bottom: 10px;
+    right: 12px;
+  }
+
+  .wx-moments-cover-name {
+    font-size: 14px;
+  }
+
+  .wx-moments-cover-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .wx-moment-item {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .wx-moment-avatar img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .wx-image-grid {
+    max-width: 220px;
+    gap: 3px;
+  }
+
+  .wx-image-grid--single {
+    max-width: 180px;
+  }
+
+  .wx-fab-compose {
+    width: 48px;
+    height: 48px;
+    right: 16px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    font-size: 20px;
   }
 }

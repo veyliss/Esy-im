@@ -146,6 +146,7 @@ export default function GroupsPage() {
         sessionPanel={sessionPanel}
         avatarSrc={currentUser?.avatar}
         avatarName={currentUser?.nickname || "我"}
+        onMobileBack={currentGroup ? () => setCurrentGroup(null) : undefined}
       >
           <div className="workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />

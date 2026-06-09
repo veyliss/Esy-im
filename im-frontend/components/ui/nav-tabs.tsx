@@ -193,5 +193,4 @@ export function MobileBottomNav({ active, badges = {} }: { active: NavKey; badge
     </nav>
   );
 }
-
 export default NavTabs;

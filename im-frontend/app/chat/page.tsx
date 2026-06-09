@@ -1038,6 +1038,10 @@ export default function ChatPage() {
       avatarSrc={currentUser?.avatar}
       avatarName={currentUser?.nickname || "我"}
       avatarStatus={wsConnected ? "online" : "away"}
+      onMobileBack={currentChat ? () => {
+        setCurrentChat(null);
+        setInspectorOpen(false);
+      } : undefined}
     >
       {currentChat ? (
         <>

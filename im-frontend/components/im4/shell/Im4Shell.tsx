@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CameraOutlined, ContactsOutlined, MessageOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, CameraOutlined, ContactsOutlined, MessageOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import clsx from "clsx";
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -21,6 +21,8 @@ interface Im4ShellProps {
   avatarName?: string;
   avatarStatus?: "online" | "offline" | "away" | "busy" | "invisible";
   className?: string;
+  /** 移动端标题栏返回按钮回调 */
+  onMobileBack?: () => void;
 }
 
 const navItems: Array<{ key: NavKey; label: string; href: string; icon: ReactNode }> = [
@@ -46,6 +48,7 @@ export function Im4Shell({
   avatarName = "我",
   avatarStatus,
   className,
+  onMobileBack,
 }: Im4ShellProps) {
   const router = useRouter();
   const [optimisticActive, setOptimisticActive] = useState<NavKey>(active);
@@ -113,11 +116,24 @@ export function Im4Shell({
 
       <main className={clsx("im4-conversation", detailActive && "is-active")}>
         <header className="im4-mobile-titlebar">
-          <div>
-            <h1>{title}</h1>
-            {subtitle ? <p>{subtitle}</p> : null}
+          <div className="flex items-center gap-2 min-w-0">
+            {onMobileBack ? (
+              <button
+                type="button"
+                className="im4-titlebar-back"
+                onClick={onMobileBack}
+                aria-label="返回"
+                title="返回"
+              >
+                <ArrowLeftOutlined />
+              </button>
+            ) : null}
+            <div className="min-w-0">
+              <h1>{title}</h1>
+              {subtitle ? <p>{subtitle}</p> : null}
+            </div>
           </div>
-          <div>{rightSlot}</div>
+          <div className="shrink-0">{rightSlot}</div>
         </header>
         {children}
       </main>

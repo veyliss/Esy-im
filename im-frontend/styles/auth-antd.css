@@ -491,6 +491,8 @@
   .ant-auth-page {
     min-height: 100svh;
     padding: 22px 14px;
+    padding-top: calc(22px + env(safe-area-inset-top));
+    padding-bottom: calc(22px + env(safe-area-inset-bottom));
   }
 
   .ant-auth-brand {
@@ -511,7 +513,7 @@
   }
 
   .ant-auth-product-copy h1 {
-    font-size: 34px;
+    font-size: 28px;
   }
 
   .ant-auth-product-copy span {
@@ -521,21 +523,12 @@
   }
 
   .ant-auth-preview {
-    grid-template-columns: 1fr;
-    min-height: 0;
-  }
-
-  .ant-auth-preview-sidebar {
-    border-right: 0;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
-  }
-
-  .ant-auth-preview-chat {
     display: none;
   }
 
   .ant-auth-panel {
     padding: 20px;
+    border-radius: 12px;
   }
 
   .ant-auth-panel-head {
@@ -543,7 +536,7 @@
   }
 
   .ant-auth-panel-head h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .ant-auth-code-button {
@@ -554,5 +547,46 @@
 
   .ant-auth-form-row {
     align-items: flex-start;
+  }
+
+  /* Touch-friendly form inputs */
+  .ant-auth-form .ant-input,
+  .ant-auth-form .ant-input-affix-wrapper {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  .ant-auth-form .ant-btn-lg {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .ant-auth-main-tabs,
+  .ant-auth-login-tabs {
+    font-size: 14px;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .ant-auth-page {
+    padding: 16px 10px;
+    gap: 20px;
+  }
+
+  .ant-auth-product-copy h1 {
+    font-size: 24px;
+  }
+
+  .ant-auth-product-copy span {
+    font-size: 13px;
+  }
+
+  .ant-auth-panel {
+    padding: 16px;
+  }
+
+  .ant-auth-panel-head h2 {
+    font-size: 20px;
   }
 }

@@ -1,9 +1,19 @@
-/* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
-import { Avatar, Button, Card, Input, List, Modal, Space, Tag, Typography } from "antd";
-import { DeleteOutlined, EnvironmentOutlined, LikeFilled, LikeOutlined, MessageOutlined } from "@ant-design/icons";
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { Input, type InputRef } from "antd";
+import {
+  DeleteOutlined,
+  EnvironmentOutlined,
+  HeartOutlined,
+  HeartFilled,
+  MessageOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
+import clsx from "clsx";
 import type { Moment, User, MomentLike, MomentComment } from "@/lib/types/api";
-import { formatTime } from "@/lib/utils/time";
+import { formatMomentTime } from "@/lib/utils/time";
+import { MomentImageGrid } from "./MomentImageGrid";
 
 interface MomentItemProps {
   moment: Moment;
@@ -14,6 +24,16 @@ interface MomentItemProps {
   onDelete: (momentId: number) => void;
 }
 
+function parseImages(raw?: string): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export function MomentItem({
   moment,
   currentUser,
@@ -22,218 +42,218 @@ export function MomentItem({
   onComment,
   onDelete,
 }: MomentItemProps) {
-  const [showCommentInput, setShowCommentInput] = useState(false);
-  const [commentContent, setCommentContent] = useState("");
+  const [actionOpen, setActionOpen] = useState(false);
+  const [commentOpen, setCommentOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState<MomentComment | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
+  const commentInputRef = useRef<InputRef>(null);
 
-  const images = (() => {
-    if (!moment.images) return [];
-    try {
-      const parsed = JSON.parse(moment.images);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  })();
-  const isLiked = moment.likes?.some(
-    (like: MomentLike) => like.user_id === currentUser?.user_id
-  );
+  const images = parseImages(moment.images);
+  const isLiked = moment.likes?.some((l: MomentLike) => l.user_id === currentUser?.user_id);
   const authorName = moment.user?.nickname || "用户";
-  const imageLayout = images.length === 1 ? "is-single" : images.length === 2 ? "is-pair" : "is-grid";
+  const isOwner = currentUser?.user_id === moment.user_id;
 
-  const handleLikeClick = () => {
-    if (isLiked) {
-      onUnlike(moment.id);
-    } else {
-      onLike(moment.id);
+  // Close action popup when clicking outside
+  useEffect(() => {
+    if (!actionOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (actionRef.current && !actionRef.current.contains(e.target as Node)) {
+        setActionOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [actionOpen]);
+
+  // Focus comment input when opened
+  useEffect(() => {
+    if (commentOpen) {
+      const t = setTimeout(() => commentInputRef.current?.input?.focus(), 80);
+      return () => clearTimeout(t);
     }
+  }, [commentOpen]);
+
+  const handleLike = () => {
+    if (isLiked) onUnlike(moment.id);
+    else onLike(moment.id);
+    setActionOpen(false);
   };
 
-  const handleCommentSubmit = () => {
-    if (!commentContent.trim()) return;
+  const handleToggleComment = () => {
+    setCommentOpen((v) => !v);
+    setActionOpen(false);
+  };
 
-    onComment(moment.id, commentContent.trim(), replyTo?.id || null);
-    setCommentContent("");
+  const handleSubmitComment = () => {
+    const text = commentText.trim();
+    if (!text) return;
+    onComment(moment.id, text, replyTo?.id || null);
+    setCommentText("");
     setReplyTo(null);
-    setShowCommentInput(false);
+    setCommentOpen(false);
   };
 
   const handleReply = (comment: MomentComment) => {
     setReplyTo(comment);
-    setShowCommentInput(true);
-    setCommentContent(`@${comment.user?.nickname || "用户"} `);
+    setCommentOpen(true);
+    setCommentText("");
   };
 
   return (
-    <Card className="moment-item ant-moment-card" styles={{ body: { padding: 0 } }}>
-      <div className="ant-moment-main">
-        <div className="ant-moment-header">
-          <Space align="center" size={12}>
-            <Avatar src={moment.user?.avatar || undefined} size={42}>{authorName.slice(0, 1).toUpperCase()}</Avatar>
-            <div className="ant-moment-author">
-              <Typography.Text strong>{authorName}</Typography.Text>
-              <Typography.Text type="secondary">{formatTime(moment.created_at)}</Typography.Text>
-            </div>
-          </Space>
-          {currentUser?.user_id === moment.user_id && (
-            <Button
-              aria-label="删除动态"
-              danger
-              icon={<DeleteOutlined />}
-              shape="circle"
-              title="删除动态"
-              type="text"
-              onClick={() => onDelete(moment.id)}
-            />
-          )}
-        </div>
-
-        {moment.content ? (
-          <Typography.Paragraph className="ant-moment-content">
-            {moment.content}
-          </Typography.Paragraph>
-        ) : null}
-
-        {moment.location && (
-          <Tag className="ant-moment-location" icon={<EnvironmentOutlined />}>
-            {moment.location}
-          </Tag>
-        )}
+    <div className="wx-moment-item">
+      {/* Avatar */}
+      <div className="wx-moment-avatar">
+        <img
+          src={moment.user?.avatar || "/default-avatar.png"}
+          alt={authorName}
+          loading="lazy"
+        />
       </div>
 
-      {images.length > 0 && (
-        <div className={`ant-moment-image-strip ${imageLayout}`}>
-          {images.map((img: string, index: number) => (
-            <Button
-              type="text"
-              key={index}
-              className="moment-image-button"
-              style={{ backgroundImage: `url(${img})` }}
-              onClick={() => setPreviewImage(img)}
-              aria-label="预览图片"
-            />
-          ))}
+      {/* Content area */}
+      <div className="wx-moment-body">
+        {/* Author name */}
+        <div className="wx-moment-author">
+          <span className="wx-moment-name">{authorName}</span>
         </div>
-      )}
 
-      <div className="ant-moment-footer">
-        <Space className="ant-moment-action-row" size={4}>
-          <Button
-            onClick={handleLikeClick}
-            icon={isLiked ? <LikeFilled /> : <LikeOutlined />}
-            className={`moment-action-button ${
-              isLiked
-                ? "is-active"
-                : ""
-            }`}
-            type="text"
-          >
-            <span>{moment.like_count || 0}</span>
-          </Button>
-          <Button
-            onClick={() => setShowCommentInput(!showCommentInput)}
-            className="moment-action-button"
-            icon={<MessageOutlined />}
-            type="text"
-          >
-            <span>{moment.comment_count || 0}</span>
-          </Button>
-        </Space>
+        {/* Text content */}
+        {moment.content ? (
+          <div className="wx-moment-text">{moment.content}</div>
+        ) : null}
 
-        {moment.likes && moment.likes.length > 0 && (
-          <div className="ant-moment-meta">
-            <LikeFilled />
-            <Typography.Text type="secondary">
-              {moment.likes
-                .map((like: MomentLike) => like.user?.nickname)
-                .join("、")}
-            </Typography.Text>
+        {/* Location */}
+        {moment.location ? (
+          <div className="wx-moment-location">
+            <EnvironmentOutlined /> {moment.location}
           </div>
-        )}
+        ) : null}
 
-        {moment.comments && moment.comments.length > 0 && (
-          <List
-            className="ant-moment-comments"
-            dataSource={moment.comments}
-            renderItem={(comment: MomentComment) => (
-              <List.Item className="ant-moment-comment">
-                <List.Item.Meta
-                  avatar={<Avatar src={comment.user?.avatar || undefined} size={24}>{comment.user?.nickname?.slice(0, 1) || "用"}</Avatar>}
-                  title={
-                    <span>
-                      <Typography.Text strong>{comment.user?.nickname}</Typography.Text>
-                      {comment.reply_to?.user ? (
-                        <>
-                          <Typography.Text type="secondary"> 回复 </Typography.Text>
-                          <Typography.Text strong>{comment.reply_to.user.nickname}</Typography.Text>
-                        </>
-                      ) : null}
+        {/* Image grid */}
+        {images.length > 0 ? <MomentImageGrid images={images} /> : null}
+
+        {/* Time + action bar */}
+        <div className="wx-moment-meta">
+          <span className="wx-moment-time">{formatMomentTime(moment.created_at)}</span>
+
+          {/* Action trigger button */}
+          <div className="wx-moment-action-wrap" ref={actionRef}>
+            <button
+              type="button"
+              className={clsx("wx-moment-action-btn", actionOpen && "is-open")}
+              onClick={() => setActionOpen((v) => !v)}
+              aria-label="操作"
+            >
+              <MoreOutlined />
+            </button>
+
+            {/* Action popup (like / comment / delete) */}
+            {actionOpen ? (
+              <div className="wx-moment-action-popup">
+                <button type="button" className="wx-action-popup-item" onClick={handleLike}>
+                  {isLiked ? <HeartFilled className="is-liked" /> : <HeartOutlined />}
+                  <span>{isLiked ? "取消" : "赞"}</span>
+                </button>
+                <button type="button" className="wx-action-popup-item" onClick={handleToggleComment}>
+                  <MessageOutlined />
+                  <span>评论</span>
+                </button>
+                {isOwner ? (
+                  <button
+                    type="button"
+                    className="wx-action-popup-item is-danger"
+                    onClick={() => {
+                      setActionOpen(false);
+                      onDelete(moment.id);
+                    }}
+                  >
+                    <DeleteOutlined />
+                    <span>删除</span>
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Likes + Comments combined section */}
+        {(moment.likes?.length || moment.comments?.length) ? (
+          <div className="wx-moment-interactions">
+            {/* Likes */}
+            {moment.likes && moment.likes.length > 0 ? (
+              <div className="wx-moment-likes">
+                <HeartFilled className="wx-like-icon" />
+                <span className="wx-like-names">
+                  {moment.likes.map((l: MomentLike, i: number) => (
+                    <span key={l.id}>
+                      {i > 0 ? "，" : ""}
+                      <span className="wx-like-name">{l.user?.nickname || l.user_id}</span>
                     </span>
-                  }
-                  description={<Typography.Text type="secondary">{comment.content}</Typography.Text>}
-                />
-                <Button
-                  className="ant-moment-reply"
-                  size="small"
-                  type="link"
-                  onClick={() => handleReply(comment)}
-                >
-                  回复
-                </Button>
-              </List.Item>
-            )}
-          />
-        )}
+                  ))}
+                </span>
+              </div>
+            ) : null}
 
-        {showCommentInput && (
-          <div className="ant-moment-comment-form">
-            {replyTo && (
-              <div className="ant-moment-replying">
-                <Typography.Text type="secondary">回复 @{replyTo.user?.nickname}</Typography.Text>
-                <Button
-                  size="small"
-                  type="link"
+            {/* Comments */}
+            {moment.comments && moment.comments.length > 0 ? (
+              <div className="wx-moment-comments">
+                {moment.comments.map((c: MomentComment) => (
+                  <div key={c.id} className="wx-comment-line" onClick={() => handleReply(c)}>
+                    <span className="wx-comment-author">{c.user?.nickname || "用户"}</span>
+                    {c.reply_to?.user ? (
+                      <>
+                        <span className="wx-comment-reply-label">回复</span>
+                        <span className="wx-comment-reply-to">{c.reply_to.user.nickname}</span>
+                      </>
+                    ) : null}
+                    <span className="wx-comment-colon">：</span>
+                    <span className="wx-comment-text">{c.content}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {/* Inline comment input */}
+        {commentOpen ? (
+          <div className="wx-moment-comment-input">
+            {replyTo ? (
+              <div className="wx-reply-hint">
+                回复 <span>{replyTo.user?.nickname}</span>
+                <button
+                  type="button"
                   onClick={() => {
                     setReplyTo(null);
-                    setCommentContent("");
+                    setCommentText("");
                   }}
                 >
                   取消
-                </Button>
+                </button>
               </div>
-            )}
-            <Space.Compact className="ant-moment-comment-input">
+            ) : null}
+            <div className="wx-comment-input-row">
               <Input
-                placeholder="写评论..."
-                value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCommentSubmit();
-                  }
-                }}
+                ref={commentInputRef}
+                placeholder={replyTo ? `回复 ${replyTo.user?.nickname}...` : "写评论..."}
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onPressEnter={handleSubmitComment}
+                size="small"
               />
-              <Button
-                type="primary"
-                onClick={handleCommentSubmit}
+              <button
+                type="button"
+                className="wx-comment-send"
+                disabled={!commentText.trim()}
+                onClick={handleSubmitComment}
               >
                 发送
-              </Button>
-            </Space.Compact>
+              </button>
+            </div>
           </div>
-        )}
+        ) : null}
       </div>
-
-      <Modal
-        className="ant-app-image-modal"
-        footer={null}
-        open={Boolean(previewImage)}
-        width="min(920px, calc(100vw - 32px))"
-        onCancel={() => setPreviewImage(null)}
-      >
-        {previewImage ? <img src={previewImage} alt="动态图片预览" /> : null}
-      </Modal>
-    </Card>
+    </div>
   );
 }

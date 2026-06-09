@@ -110,3 +110,38 @@ export function formatConversationTime(dateString: string | null): string {
   const daysDiff = Math.floor(diff / (24 * 3600000));
   return `${daysDiff}天前`;
 }
+
+/**
+ * 朋友圈相对时间格式（微信风格）
+ * 刚刚、x分钟前、x小时前、昨天 HH:MM、MM-DD HH:MM、YYYY-MM-DD
+ */
+export function formatMomentTime(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const hhmm = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+  if (diff < 60_000) return '刚刚';
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}分钟前`;
+  if (diff < 86_400_000 && date.toDateString() === now.toDateString()) {
+    const hours = Math.floor(diff / 3_600_000);
+    return hours < 1 ? '刚刚' : `${hours}小时前`;
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) {
+    return `昨天 ${hhmm}`;
+  }
+
+  if (diff < 7 * 86_400_000) {
+    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return `${days[date.getDay()]} ${hhmm}`;
+  }
+
+  const mmdd = `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  if (date.getFullYear() === now.getFullYear()) return `${mmdd} ${hhmm}`;
+  return `${date.getFullYear()}-${mmdd}`;
+}

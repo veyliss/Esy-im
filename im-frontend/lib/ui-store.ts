@@ -112,22 +112,67 @@ export const useUIStore = create<UIState>((set, get) => ({
 /**
  * 响应式断点hooks
  */
-export const useBreakpoint = () => {
-  if (typeof window === 'undefined') return 'lg';
-  
-  const width = window.innerWidth;
-  
+import { useEffect, useState } from 'react';
+
+type BreakpointKey = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+function getBreakpoint(width: number): BreakpointKey {
   if (width < 640) return 'sm';
   if (width < 768) return 'md';
   if (width < 1024) return 'lg';
   if (width < 1280) return 'xl';
   return '2xl';
+}
+
+export const useBreakpoint = (): BreakpointKey => {
+  const [bp, setBp] = useState<BreakpointKey>(() =>
+    typeof window !== 'undefined' ? getBreakpoint(window.innerWidth) : 'lg',
+  );
+
+  useEffect(() => {
+    let rafId = 0;
+    const onResize = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setBp(getBreakpoint(window.innerWidth)));
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return bp;
 };
 
 /**
- * 移动端检测hooks
+ * 移动端检测hooks (< 768px)
  */
-export const useIsMobile = () => {
-  const breakpoint = useBreakpoint();
-  return breakpoint === 'sm' || breakpoint === 'md';
+export const useIsMobile = (): boolean => {
+  const bp = useBreakpoint();
+  return bp === 'sm' || bp === 'md';
+};
+
+/**
+ * 检测 IM4 Shell 移动端断点 (< 900px)
+ */
+export const useIsIm4Mobile = (): boolean => {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+  );
+
+  useEffect(() => {
+    let rafId = 0;
+    const onResize = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setIsMobile(window.innerWidth < 900));
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return isMobile;
 };

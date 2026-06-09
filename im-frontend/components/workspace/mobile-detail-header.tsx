@@ -27,7 +27,6 @@ export function MobileDetailHeader({
         aria-label="返回列表"
         title="返回"
         icon={<ArrowLeftOutlined />}
-        shape="circle"
       />
       <div className="min-w-0 flex-1">
         <h2>{title}</h2>

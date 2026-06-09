@@ -348,6 +348,7 @@ export default function ContactsPage() {
         avatarSrc={currentUser?.avatar}
         avatarName={currentUser?.nickname || "我"}
         rightSlot={pendingRequestCount > 0 ? <Im4Status tone="primary">申请 {pendingRequestCount > 99 ? "99+" : pendingRequestCount}</Im4Status> : null}
+        onMobileBack={(activeRightTab === "requests" || selectedFriend) ? backToList : undefined}
       >
           <div className="workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />

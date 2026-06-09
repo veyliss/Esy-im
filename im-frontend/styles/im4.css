@@ -2013,30 +2013,54 @@
   background: linear-gradient(90deg, var(--im4-blue), var(--im4-mint));
 }
 
+/* ===== Mobile: slide-in transition for session ↔ detail ===== */
+@keyframes im4SlideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes im4SlideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 900px) {
   .im4-shell {
     grid-template-columns: 1fr;
     height: 100svh;
-    padding-bottom: 64px;
+    padding-bottom: 0;
+    /* bottom nav height handled per-component via safe-area */
   }
 
+  /* ---- Bottom navigation (rail) ---- */
   .im4-rail {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 50;
-    height: 64px;
+    height: auto;
+    min-height: 58px;
     flex-direction: row;
     border-right: 0;
     border-top: 1px solid var(--im4-border);
-    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.92);
+    padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 -1px 12px rgba(15, 23, 42, 0.06);
+  }
+
+  .dark .im4-rail {
+    background: rgba(15, 23, 42, 0.92);
+    border-top-color: #1e293b;
+    box-shadow: 0 -1px 12px rgba(0, 0, 0, 0.25);
   }
 
   .im4-rail nav {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 4px;
+    gap: 2px;
+    width: 100%;
   }
 
   .im4-rail > .relative {
@@ -2044,8 +2068,18 @@
   }
 
   .im4-rail-link {
+    position: relative;
     height: 50px;
+    min-height: 44px;
     gap: 2px;
+    border-radius: 10px;
+    transition: background 180ms ease, transform 120ms ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .im4-rail-link:active {
+    transform: scale(0.92);
   }
 
   .im4-rail-link em {
@@ -2053,14 +2087,34 @@
     font-size: 10px;
     font-style: normal;
     font-weight: 700;
+    transition: color 180ms ease;
   }
 
+  .im4-rail-link.is-active {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  .im4-rail-link.is-active em {
+    color: var(--im4-blue);
+  }
+
+  .im4-rail-link.is-active .im4-rail-icon {
+    color: var(--im4-blue);
+  }
+
+  .dark .im4-rail-link.is-active {
+    background: rgba(59, 130, 246, 0.16);
+  }
+
+  /* ---- Sessions panel ---- */
   .im4-sessions {
     display: block;
-    height: calc(100svh - 64px);
+    height: 100svh;
     border-right: 0;
+    padding-bottom: calc(62px + env(safe-area-inset-bottom));
   }
 
+  /* ---- Conversation / detail panel ---- */
   .im4-conversation,
   .im4-inspector-pane {
     display: none;
@@ -2068,22 +2122,72 @@
 
   .im4-conversation.is-active {
     display: flex;
-    height: calc(100svh - 64px);
+    height: 100svh;
+    animation: im4SlideInRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .im4-shell:has(.im4-conversation.is-active) .im4-sessions {
     display: none;
   }
 
+  .im4-inspector-pane {
+    position: fixed;
+    inset: auto 10px calc(68px + env(safe-area-inset-bottom)) 10px;
+    top: auto;
+    z-index: 40;
+    width: auto;
+    max-height: min(72dvh, 560px);
+    overflow-y: auto;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+    animation: im4SlideInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ---- Mobile titlebar ---- */
   .im4-mobile-titlebar {
     display: flex;
-    min-height: 56px;
+    min-height: 52px;
     flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--im4-border);
-    background: var(--im4-surface);
-    padding: 0 16px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 0 14px;
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .dark .im4-mobile-titlebar {
+    background: rgba(15, 23, 42, 0.92);
+  }
+
+  .im4-titlebar-back {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--im4-blue);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 180ms ease, transform 120ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .im4-titlebar-back:active {
+    transform: scale(0.9);
+    background: rgba(59, 130, 246, 0.16);
+  }
+
+  .dark .im4-titlebar-back {
+    background: rgba(59, 130, 246, 0.16);
   }
 
   .im4-mobile-titlebar h1 {
@@ -2098,12 +2202,14 @@
     font-size: 11px;
   }
 
+  /* ---- Session panel adjustments ---- */
   .im4-session-head {
     padding: 20px 16px 16px;
   }
 
   .im4-session-list {
     padding: 10px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .im4-me-footer {
@@ -2114,12 +2220,14 @@
   .me-page,
   .im4-feed-page {
     padding: 16px;
+    padding-bottom: calc(16px + 68px + env(safe-area-inset-bottom));
   }
 
   .im4-conversation .im-detail-inner {
     padding: 8px 0 26px;
   }
 
+  /* ---- Mobile detail header ---- */
   .mobile-detail-header {
     display: flex;
     align-items: center;
@@ -2131,14 +2239,25 @@
 
   .mobile-detail-back {
     display: inline-flex;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    background: #edf2f7;
-    color: var(--im4-text);
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.08);
+    color: var(--im4-blue);
+    transition: background 180ms ease, transform 120ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-detail-back:active {
+    transform: scale(0.9);
+    background: rgba(59, 130, 246, 0.16);
+  }
+
+  .dark .mobile-detail-back {
+    background: rgba(59, 130, 246, 0.16);
   }
 
   .mobile-detail-header h2 {
@@ -2158,6 +2277,7 @@
     white-space: nowrap;
   }
 
+  /* ---- Detail / info panels ---- */
   .im-detail-hero {
     align-items: flex-start;
     padding-bottom: 20px;
@@ -2183,6 +2303,7 @@
     box-shadow: none;
   }
 
+  /* ---- Feed / Moments ---- */
   .im4-feed-column > * + * {
     margin-top: 18px;
   }
@@ -2195,6 +2316,7 @@
     gap: 12px;
   }
 
+  /* ---- Me page ---- */
   .me-hero {
     grid-template-columns: 1fr;
     justify-items: start;
@@ -2218,17 +2340,26 @@
     flex: 1;
   }
 
+  /* ---- Chat area ---- */
   .im4-chat-head {
-    min-height: 60px;
+    min-height: 56px;
     padding: 0 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .im4-chat-head-back {
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .im4-message-list {
     padding: 18px 14px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .im4-message-stack {
-    max-width: calc(100vw - 92px);
+    max-width: calc(100vw - 80px);
   }
 
   .im4-thread-search {
@@ -2237,10 +2368,114 @@
   }
 
   .im4-composer-shell {
-    padding: 10px 12px 12px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
   }
 
   .im4-compose-tool {
     display: none;
+  }
+
+  /* ---- Session items: better touch targets ---- */
+  .im4-session-item {
+    min-height: 64px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 150ms ease;
+  }
+
+  .im4-session-item:active {
+    background: rgba(59, 130, 246, 0.04);
+  }
+
+  /* ---- Contact actions ---- */
+  .im4-contact-actions {
+    gap: 8px;
+  }
+
+  .im4-contact-actions .im4-button {
+    flex: 1;
+    min-height: 40px;
+  }
+
+  /* ---- Search bar ---- */
+  .im4-search {
+    margin: 0;
+  }
+
+  .im4-search input {
+    min-height: 40px;
+  }
+}
+
+/* ===== Extra small screens (phones < 640px) ===== */
+@media (max-width: 640px) {
+  .im4-rail-link em {
+    font-size: 9px;
+  }
+
+  .im4-rail-link .im4-rail-icon {
+    font-size: 20px;
+  }
+
+  .im4-session-head {
+    padding: 16px 12px 12px;
+  }
+
+  .im4-session-head h1 {
+    font-size: 20px;
+  }
+
+  .im4-session-head p {
+    font-size: 12px;
+  }
+
+  .im4-session-list {
+    padding: 8px;
+  }
+
+  .im4-session-item {
+    min-height: 60px;
+    padding: 6px;
+  }
+
+  .im4-mobile-titlebar {
+    min-height: 48px;
+    padding: 0 12px;
+  }
+
+  .im4-mobile-titlebar h1 {
+    font-size: 16px;
+  }
+
+  .im4-message-list {
+    padding: 14px 10px;
+  }
+
+  .im4-message-stack {
+    max-width: calc(100vw - 60px);
+  }
+
+  .im4-composer-shell {
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .im4-conversation .workspace-main-panel,
+  .me-page,
+  .im4-feed-page {
+    padding: 12px;
+    padding-bottom: calc(12px + 68px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-detail-header {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
+  .im4-contact-actions {
+    flex-direction: column;
+  }
+
+  .im4-contact-actions .im4-button {
+    width: 100%;
+    text-align: center;
   }
 }
