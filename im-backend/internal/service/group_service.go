@@ -418,6 +418,170 @@ func (s *GroupService) GetUserUnreadGroupMessages(groupID, userID string) (int64
 	return s.groupRepo.GetUserUnreadGroupMessages(groupID, userID)
 }
 
+// ==================== 群邀请 ====================
+
+// InviteToGroup 邀请用户入群
+func (s *GroupService) InviteToGroup(groupID, inviterID, inviteeID string) (*model.GroupInvitation, error) {
+	// 检查邀请者权限（Admin+）
+	role, err := s.groupRepo.GetMemberRole(groupID, inviterID)
+	if err != nil {
+		return nil, errors.New("您不是该群组的成员")
+	}
+	if role < model.GroupRoleAdmin {
+		return nil, errors.New("只有管理员和群主可以邀请成员")
+	}
+
+	// 检查被邀请者是否已是成员
+	isMember, _ := s.groupRepo.IsGroupMember(groupID, inviteeID)
+	if isMember {
+		return nil, errors.New("该用户已是群成员")
+	}
+
+	// 检查是否好友关系
+	isFriend, _ := s.friendRepo.IsFriend(inviterID, inviteeID)
+	if !isFriend {
+		return nil, errors.New("只能邀请好友入群")
+	}
+
+	// 检查是否已有待处理邀请
+	existing, _ := s.groupRepo.FindPendingInvitation(groupID, inviterID, inviteeID)
+	if existing != nil {
+		return nil, errors.New("已发送过邀请，请等待对方处理")
+	}
+
+	inv := &model.GroupInvitation{
+		GroupID:       groupID,
+		InviterUserID: inviterID,
+		InviteeUserID: inviteeID,
+		Status:        0,
+		CreatedAt:     time.Now(),
+	}
+	if err := s.groupRepo.CreateGroupInvitation(inv); err != nil {
+		return nil, err
+	}
+
+	return s.groupRepo.GetGroupInvitationByID(inv.ID)
+}
+
+// AcceptGroupInvitation 接受群邀请
+func (s *GroupService) AcceptGroupInvitation(invitationID uint, userID string) error {
+	inv, err := s.groupRepo.GetGroupInvitationByID(invitationID)
+	if err != nil {
+		return errors.New("邀请不存在")
+	}
+	if inv.InviteeUserID != userID {
+		return errors.New("无权处理该邀请")
+	}
+	if inv.Status != 0 {
+		return errors.New("该邀请已被处理")
+	}
+
+	// 更新状态
+	if err := s.groupRepo.UpdateGroupInvitationStatus(invitationID, 1); err != nil {
+		return err
+	}
+
+	// 加入群组
+	member := &model.GroupMember{
+		GroupID:   inv.GroupID,
+		UserID:    userID,
+		Role:      model.GroupRoleMember,
+		JoinedAt:  time.Now(),
+		CreatedAt: time.Now(),
+	}
+	if err := s.groupRepo.AddGroupMember(member); err != nil {
+		return err
+	}
+	return s.groupRepo.UpdateMemberCount(inv.GroupID, 1)
+}
+
+// RejectGroupInvitation 拒绝群邀请
+func (s *GroupService) RejectGroupInvitation(invitationID uint, userID string) error {
+	inv, err := s.groupRepo.GetGroupInvitationByID(invitationID)
+	if err != nil {
+		return errors.New("邀请不存在")
+	}
+	if inv.InviteeUserID != userID {
+		return errors.New("无权处理该邀请")
+	}
+	if inv.Status != 0 {
+		return errors.New("该邀请已被处理")
+	}
+	return s.groupRepo.UpdateGroupInvitationStatus(invitationID, 2)
+}
+
+// GetReceivedInvitations 获取收到的群邀请
+func (s *GroupService) GetReceivedInvitations(userID string, status int) ([]model.GroupInvitation, error) {
+	return s.groupRepo.GetReceivedInvitations(userID, status)
+}
+
+// ==================== 群公告 ====================
+
+// CreateAnnouncement 创建群公告
+func (s *GroupService) CreateAnnouncement(groupID, publisherID, content string, isPinned bool) (*model.GroupAnnouncement, error) {
+	role, err := s.groupRepo.GetMemberRole(groupID, publisherID)
+	if err != nil {
+		return nil, errors.New("您不是该群组的成员")
+	}
+	if role < model.GroupRoleAdmin {
+		return nil, errors.New("只有管理员和群主可以发布公告")
+	}
+
+	ann := &model.GroupAnnouncement{
+		GroupID:     groupID,
+		PublisherID: publisherID,
+		Content:     content,
+		IsPinned:    isPinned,
+		CreatedAt:   time.Now(),
+	}
+	if err := s.groupRepo.CreateAnnouncement(ann); err != nil {
+		return nil, err
+	}
+	return s.groupRepo.GetAnnouncementByID(ann.ID)
+}
+
+// GetGroupAnnouncements 获取群公告列表
+func (s *GroupService) GetGroupAnnouncements(groupID, userID string, page, pageSize int) ([]model.GroupAnnouncement, error) {
+	isMember, err := s.groupRepo.IsGroupMember(groupID, userID)
+	if err != nil || !isMember {
+		return nil, errors.New("您不是该群组的成员")
+	}
+	return s.groupRepo.GetGroupAnnouncements(groupID, page, pageSize)
+}
+
+// UpdateAnnouncement 更新群公告
+func (s *GroupService) UpdateAnnouncement(announcementID uint, userID string, updates map[string]interface{}) error {
+	ann, err := s.groupRepo.GetAnnouncementByID(announcementID)
+	if err != nil {
+		return errors.New("公告不存在")
+	}
+	role, err := s.groupRepo.GetMemberRole(ann.GroupID, userID)
+	if err != nil || role < model.GroupRoleAdmin {
+		return errors.New("无权操作公告")
+	}
+	return s.groupRepo.UpdateAnnouncement(announcementID, updates)
+}
+
+// DeleteAnnouncement 删除群公告
+func (s *GroupService) DeleteAnnouncement(announcementID uint, userID string) error {
+	ann, err := s.groupRepo.GetAnnouncementByID(announcementID)
+	if err != nil {
+		return errors.New("公告不存在")
+	}
+	role, err := s.groupRepo.GetMemberRole(ann.GroupID, userID)
+	if err != nil || role < model.GroupRoleAdmin {
+		return errors.New("无权操作公告")
+	}
+	return s.groupRepo.DeleteAnnouncement(announcementID)
+}
+
+// ==================== 群 Typing ====================
+
+// GetGroupOnlineMembers 获取群在线成员列表（用于 typing 推送）
+func (s *GroupService) GetGroupOnlineMembers(groupID string) ([]model.GroupMember, error) {
+	return s.groupRepo.GetGroupMembers(groupID, 1, 1000)
+}
+
 // ==================== 辅助方法 ====================
 
 // generateGroupID 生成群组ID

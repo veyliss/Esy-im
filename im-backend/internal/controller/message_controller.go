@@ -2,6 +2,7 @@ package controller
 
 import (
 	"im-backend/internal/service"
+	"time"
 )
 
 type MessageController struct {
@@ -37,8 +38,8 @@ func (c *MessageController) MarkMessageAsRead(messageID uint, userID string) err
 	return c.messageService.MarkMessageAsRead(messageID, userID)
 }
 
-// MarkConversationAsRead 标记会话所有消息为已读
-func (c *MessageController) MarkConversationAsRead(conversationID uint, userID string) error {
+// MarkConversationAsRead 标记会话所有消息为已读，返回对方UserID
+func (c *MessageController) MarkConversationAsRead(conversationID uint, userID string) (string, error) {
 	return c.messageService.MarkConversationAsRead(conversationID, userID)
 }
 
@@ -65,4 +66,55 @@ func (c *MessageController) GetConversationUnreadCount(conversationID uint, user
 // GetOrCreateConversation 获取或创建会话
 func (c *MessageController) GetOrCreateConversation(user1ID, user2ID string) (interface{}, error) {
 	return c.messageService.GetOrCreateConversation(user1ID, user2ID)
+}
+
+// ==================== 新功能方法 ====================
+
+// GetConversationPartner 获取会话对方用户ID
+func (c *MessageController) GetConversationPartner(conversationID uint, userID string) (string, error) {
+	return c.messageService.GetConversationPartner(conversationID, userID)
+}
+
+// GetConversationMessagesByCursor 游标分页获取消息
+func (c *MessageController) GetConversationMessagesByCursor(conversationID uint, userID string, cursor uint, limit int) (interface{}, error) {
+	return c.messageService.GetConversationMessagesByCursor(conversationID, userID, cursor, limit)
+}
+
+// SearchMessages 搜索消息
+func (c *MessageController) SearchMessages(userID, keyword string, conversationID *uint, page, pageSize int) (interface{}, error) {
+	return c.messageService.SearchMessages(userID, keyword, conversationID, page, pageSize)
+}
+
+// GetUnreadCountWithOffline 获取未读消息数（含离线）
+func (c *MessageController) GetUnreadCountWithOffline(userID string, lastLoginAt *time.Time) (interface{}, error) {
+	return c.messageService.GetUnreadCountWithOffline(userID, lastLoginAt)
+}
+
+// ForwardMessage 转发消息
+func (c *MessageController) ForwardMessage(messageID uint, fromUserID string, targets []service.ForwardTarget) (interface{}, error) {
+	return c.messageService.ForwardMessage(messageID, fromUserID, targets)
+}
+
+// PinConversation 置顶会话
+func (c *MessageController) PinConversation(userID string, conversationID uint, isPinned bool) error {
+	return c.messageService.PinConversation(userID, conversationID, isPinned)
+}
+
+// MuteConversation 免打扰会话
+func (c *MessageController) MuteConversation(userID string, conversationID uint, isMuted bool) error {
+	return c.messageService.MuteConversation(userID, conversationID, isMuted)
+}
+
+// ConversationInfo 会话信息（用于typing handler）
+type ConversationInfo struct {
+	OtherUserID string
+}
+
+// GetConversationByID 获取会话信息（返回简化结构）
+func (c *MessageController) GetConversationByID(conversationID uint, userID string) (*ConversationInfo, error) {
+	otherUserID, err := c.messageService.GetConversationPartner(conversationID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &ConversationInfo{OtherUserID: otherUserID}, nil
 }

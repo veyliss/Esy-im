@@ -50,9 +50,10 @@ type Message struct {
 
 // MessageType 消息类型常量
 const (
-	MessageTypeText  = 1 // 文本消息
-	MessageTypeImage = 2 // 图片消息
-	MessageTypeAudio = 3 // 语音消息
-	MessageTypeVideo = 4 // 视频消息
-	MessageTypeFile  = 5 // 文件消息
+	MessageTypeText    = 1 // 文本消息
+	MessageTypeImage   = 2 // 图片消息
+	MessageTypeAudio   = 3 // 语音消息
+	MessageTypeVideo   = 4 // 视频消息
+	MessageTypeFile    = 5 // 文件消息
+	MessageTypeForward = 7 // 转发消息
 )

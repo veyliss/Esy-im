@@ -303,3 +303,117 @@ func (r *MessageRepository) GetConversationUnreadCount(conversationID uint, user
 		Count(&count).Error
 	return count, err
 }
+
+// ==================== 新功能方法 ====================
+
+// GetConversationMessagesByCursor 游标分页获取会话消息
+func (r *MessageRepository) GetConversationMessagesByCursor(conversationID uint, cursor uint, limit int) ([]model.Message, bool, error) {
+	var messages []model.Message
+	query := r.db.Where("conversation_id = ?", conversationID)
+	if cursor > 0 {
+		query = query.Where("id < ?", cursor)
+	}
+
+	err := query.Preload("FromUser").
+		Preload("ToUser").
+		Order("id DESC").
+		Limit(limit + 1).
+		Find(&messages).Error
+
+	hasMore := len(messages) > limit
+	if hasMore {
+		messages = messages[:limit]
+	}
+
+	// 反转为时间正序
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
+	}
+
+	return messages, hasMore, err
+}
+
+// SearchMessages 搜索消息
+func (r *MessageRepository) SearchMessages(userID string, keyword string, conversationID *uint, page, pageSize int) ([]model.Message, int64, error) {
+	var messages []model.Message
+	var total int64
+
+	baseQuery := r.db.Where("(from_user_id = ? OR to_user_id = ?) AND is_recalled = ? AND content ILIKE ?",
+		userID, userID, false, "%"+keyword+"%")
+
+	if conversationID != nil {
+		baseQuery = baseQuery.Where("conversation_id = ?", *conversationID)
+	}
+
+	// 统计总数
+	if err := baseQuery.Model(&model.Message{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * pageSize
+	err := baseQuery.Preload("FromUser").
+		Preload("ToUser").
+		Order("created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&messages).Error
+
+	return messages, total, err
+}
+
+// GetOfflineMessageCount 获取离线消息数（用户上次登录后收到的未读消息）
+func (r *MessageRepository) GetOfflineMessageCount(userID string, since time.Time) (int64, error) {
+	var count int64
+	err := r.db.Model(&model.Message{}).
+		Where("to_user_id = ? AND is_read = ? AND is_recalled = ? AND created_at > ?",
+			userID, false, false, since).
+		Count(&count).Error
+	return count, err
+}
+
+// SetConversationSetting 设置会话配置（置顶/免打扰）
+func (r *MessageRepository) SetConversationSetting(userID string, conversationID uint, field string, value bool) error {
+	var setting model.ConversationSetting
+	err := r.db.Where("user_id = ? AND conversation_id = ?", userID, conversationID).First(&setting).Error
+
+	if err == gorm.ErrRecordNotFound {
+		// 创建新设置
+		setting = model.ConversationSetting{
+			UserID:         userID,
+			ConversationID: conversationID,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+		}
+		if field == "is_pinned" {
+			setting.IsPinned = value
+		} else if field == "is_muted" {
+			setting.IsMuted = value
+		}
+		return r.db.Create(&setting).Error
+	}
+	if err != nil {
+		return err
+	}
+
+	// 更新已有设置
+	updates := map[string]interface{}{
+		field:      value,
+		"updated_at": time.Now(),
+	}
+	return r.db.Model(&setting).Updates(updates).Error
+}
+
+// GetConversationSettings 获取用户的所有会话设置
+func (r *MessageRepository) GetConversationSettings(userID string) (map[uint]*model.ConversationSetting, error) {
+	var settings []model.ConversationSetting
+	err := r.db.Where("user_id = ?", userID).Find(&settings).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[uint]*model.ConversationSetting, len(settings))
+	for i := range settings {
+		result[settings[i].ConversationID] = &settings[i]
+	}
+	return result, nil
+}

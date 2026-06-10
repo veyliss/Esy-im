@@ -83,6 +83,9 @@ func (s *UserService) Login(ctx context.Context, email, code string) (*model.Use
 	// 登录成功后清除验证码
 	_ = s.RDB.Del(ctx, CodePrefix+email).Err()
 
+	// 更新最后登录时间
+	_ = s.Repo.UpdateLastLoginAt(user.UserID)
+
 	return user, nil
 }
 
@@ -144,6 +147,9 @@ func (s *UserService) LoginWithPassword(ctx context.Context, account, password s
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, errors.New("密码错误")
 	}
+
+	// 更新最后登录时间
+	_ = s.Repo.UpdateLastLoginAt(user.UserID)
 
 	return user, nil
 }

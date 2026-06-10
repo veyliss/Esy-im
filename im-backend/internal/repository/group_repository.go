@@ -333,3 +333,105 @@ func (r *GroupRepository) BatchMarkGroupMessagesAsRead(groupID, userID string, b
 
 	return r.db.CreateInBatches(reads, 100).Error
 }
+
+// ==================== GroupInvitation 相关方法 ====================
+
+// CreateGroupInvitation 创建群邀请
+func (r *GroupRepository) CreateGroupInvitation(inv *model.GroupInvitation) error {
+	return r.db.Create(inv).Error
+}
+
+// GetGroupInvitationByID 根据ID获取群邀请
+func (r *GroupRepository) GetGroupInvitationByID(id uint) (*model.GroupInvitation, error) {
+	var inv model.GroupInvitation
+	err := r.db.Where("id = ?", id).
+		Preload("Group").
+		Preload("Inviter").
+		Preload("Invitee").
+		First(&inv).Error
+	if err != nil {
+		return nil, err
+	}
+	return &inv, nil
+}
+
+// UpdateGroupInvitationStatus 更新群邀请状态
+func (r *GroupRepository) UpdateGroupInvitationStatus(id uint, status int) error {
+	return r.db.Model(&model.GroupInvitation{}).
+		Where("id = ?", id).
+		Update("status", status).Error
+}
+
+// GetReceivedInvitations 获取收到的群邀请
+func (r *GroupRepository) GetReceivedInvitations(userID string, status int) ([]model.GroupInvitation, error) {
+	var invitations []model.GroupInvitation
+	query := r.db.Where("invitee_user_id = ?", userID).
+		Preload("Group").
+		Preload("Inviter").
+		Order("created_at DESC")
+
+	if status >= 0 {
+		query = query.Where("status = ?", status)
+	}
+
+	err := query.Find(&invitations).Error
+	return invitations, err
+}
+
+// FindPendingInvitation 查找待处理的群邀请
+func (r *GroupRepository) FindPendingInvitation(groupID, inviterID, inviteeID string) (*model.GroupInvitation, error) {
+	var inv model.GroupInvitation
+	err := r.db.Where("group_id = ? AND inviter_user_id = ? AND invitee_user_id = ? AND status = ?",
+		groupID, inviterID, inviteeID, 0).First(&inv).Error
+	if err != nil {
+		return nil, err
+	}
+	return &inv, nil
+}
+
+// ==================== GroupAnnouncement 相关方法 ====================
+
+// CreateAnnouncement 创建群公告
+func (r *GroupRepository) CreateAnnouncement(ann *model.GroupAnnouncement) error {
+	return r.db.Create(ann).Error
+}
+
+// GetAnnouncementByID 根据ID获取群公告
+func (r *GroupRepository) GetAnnouncementByID(id uint) (*model.GroupAnnouncement, error) {
+	var ann model.GroupAnnouncement
+	err := r.db.Where("id = ?", id).
+		Preload("Group").
+		Preload("Publisher").
+		First(&ann).Error
+	if err != nil {
+		return nil, err
+	}
+	return &ann, nil
+}
+
+// GetGroupAnnouncements 获取群公告列表
+func (r *GroupRepository) GetGroupAnnouncements(groupID string, page, pageSize int) ([]model.GroupAnnouncement, error) {
+	var announcements []model.GroupAnnouncement
+	offset := (page - 1) * pageSize
+
+	err := r.db.Where("group_id = ?", groupID).
+		Preload("Publisher").
+		Order("is_pinned DESC, created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&announcements).Error
+
+	return announcements, err
+}
+
+// UpdateAnnouncement 更新群公告
+func (r *GroupRepository) UpdateAnnouncement(id uint, updates map[string]interface{}) error {
+	return r.db.Model(&model.GroupAnnouncement{}).
+		Where("id = ?", id).
+		Updates(updates).Error
+}
+
+// DeleteAnnouncement 删除群公告
+func (r *GroupRepository) DeleteAnnouncement(id uint) error {
+	return r.db.Delete(&model.GroupAnnouncement{}, id).Error
+}

@@ -56,3 +56,13 @@ func (c *FriendController) GetSentRequests(userID string, status int) (interface
 func (c *FriendController) SearchFriend(currentUserID, keyword string) (interface{}, error) {
 	return c.friendService.SearchFriend(currentUserID, keyword)
 }
+
+// GetOnlineFriends 获取在线好友列表
+func (c *FriendController) GetOnlineFriends(userID string) (interface{}, error) {
+	return c.friendService.GetOnlineFriends(userID)
+}
+
+// GetFriendsOnlineStatus 批量查询好友在线状态
+func (c *FriendController) GetFriendsOnlineStatus(userID string, friendIDs []string) (interface{}, error) {
+	return c.friendService.GetFriendsOnlineStatus(userID, friendIDs)
+}

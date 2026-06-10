@@ -184,6 +184,70 @@ func (h *Hub) SendFriendAccepted(userID string, friend interface{}) error {
 	return nil
 }
 
+// SendReadReceipt 发送已读回执通知
+func (h *Hub) SendReadReceipt(userID string, receipt interface{}) error {
+	wsMsg := WSMessage{
+		Type:      "read_receipt",
+		Data:      receipt,
+		Timestamp: time.Now().Unix(),
+	}
+
+	data, err := json.Marshal(wsMsg)
+	if err != nil {
+		return err
+	}
+
+	h.Broadcast <- &BroadcastMessage{
+		UserID:  userID,
+		Message: data,
+	}
+
+	log.Printf("📖 发送已读回执通知给用户 %s", userID)
+	return nil
+}
+
+// SendTypingStatus 发送输入状态通知
+func (h *Hub) SendTypingStatus(userID string, typingData interface{}) error {
+	wsMsg := WSMessage{
+		Type:      "typing",
+		Data:      typingData,
+		Timestamp: time.Now().Unix(),
+	}
+
+	data, err := json.Marshal(wsMsg)
+	if err != nil {
+		return err
+	}
+
+	h.Broadcast <- &BroadcastMessage{
+		UserID:  userID,
+		Message: data,
+	}
+
+	return nil
+}
+
+// SendGroupNotification 发送群组通知（邀请、公告等）
+func (h *Hub) SendGroupNotification(userID string, notificationType string, data interface{}) error {
+	wsMsg := WSMessage{
+		Type:      notificationType,
+		Data:      data,
+		Timestamp: time.Now().Unix(),
+	}
+
+	msgData, err := json.Marshal(wsMsg)
+	if err != nil {
+		return err
+	}
+
+	h.Broadcast <- &BroadcastMessage{
+		UserID:  userID,
+		Message: msgData,
+	}
+
+	return nil
+}
+
 // IsUserOnline 检查用户是否在线
 func (h *Hub) IsUserOnline(userID string) bool {
 	h.mu.RLock()

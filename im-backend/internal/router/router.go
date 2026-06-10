@@ -25,35 +25,36 @@ func InitRouter() *mux.Router {
 
 	// 好友系统
 	friendRepo := repository.NewFriendRepository(pkg.DB)
-	friendService := service.NewFriendService(friendRepo, userRepo)
+	blockRepo := repository.NewBlockRepository(pkg.DB)
+	friendService := service.NewFriendService(friendRepo, userRepo, blockRepo)
 
 	// 朋友圈
 	momentRepo := repository.NewMomentRepository(pkg.DB)
-	momentService := service.NewMomentService(momentRepo, friendRepo)
+	momentService := service.NewMomentService(momentRepo, friendRepo, blockRepo)
 
 	// 消息系统
 	messageRepo := repository.NewMessageRepository(pkg.DB)
-	messageService := service.NewMessageService(messageRepo, friendRepo)
 
 	// 群聊系统
 	groupRepo := repository.NewGroupRepository(pkg.DB)
 	groupService := service.NewGroupService(groupRepo, friendRepo, userRepo)
+
+	messageService := service.NewMessageService(messageRepo, friendRepo, groupRepo, blockRepo)
+	blockService := service.NewBlockService(blockRepo, userRepo)
 
 	userController := controller.NewUserController(userService, codeService)
 	friendController := controller.NewFriendController(friendService)
 	momentController := controller.NewMomentController(momentService)
 	messageController := controller.NewMessageController(messageService)
 	groupController := controller.NewGroupController(groupService)
-	//friendController := controller.NewFriendController()
-	//messageController := controller.NewMessageController()
-	//momentController := controller.NewMomentController()
+	blockController := controller.NewBlockController(blockService)
 
 	userHandler := handler.NewUserHandler(userController)
 	friendHandler := handler.NewFriendHandler(friendController, userRepo)
 	momentHandler := handler.NewMomentHandler(momentController)
-	// 替换这里：为MessageHandler注入userRepo
 	messageHandler := handler.NewMessageHandler(messageController, userRepo)
 	groupHandler := handler.NewGroupHandler(groupController, userRepo)
+	blockHandler := handler.NewBlockHandler(blockController, userRepo)
 	uploadHandler := handler.NewUploadHandler()
 
 	// 健康检查
@@ -86,11 +87,8 @@ func InitRouter() *mux.Router {
 	api.HandleFunc("/friends/received-requests", pkg.AuthMiddleware(pkg.RDB, friendHandler.GetReceivedRequests)).Methods("GET")
 	api.HandleFunc("/friends/sent-requests", pkg.AuthMiddleware(pkg.RDB, friendHandler.GetSentRequests)).Methods("GET")
 	api.HandleFunc("/friends/search", pkg.AuthMiddleware(pkg.RDB, friendHandler.SearchFriend)).Methods("GET")
-
-	// messages 消息管理
-	//api.HandleFunc("/messages/send", messageHandler.Send).Methods("POST")
-	//api.HandleFunc("/messages/history", messageHandler.History).Methods("GET")
-	//api.HandleFunc("/messages/ws", messageHandler.WebSocket).Methods("GET")
+	api.HandleFunc("/friends/online-status", pkg.AuthMiddleware(pkg.RDB, friendHandler.GetOnlineFriends)).Methods("GET")
+	api.HandleFunc("/friends/online-status/batch", pkg.AuthMiddleware(pkg.RDB, friendHandler.GetFriendsOnlineStatus)).Methods("GET")
 
 	// moments 朋友圈
 	api.HandleFunc("/moments/create", pkg.AuthMiddleware(pkg.RDB, momentHandler.CreateMoment)).Methods("POST")
@@ -116,6 +114,16 @@ func InitRouter() *mux.Router {
 	api.HandleFunc("/messages/{message_id}/recall", pkg.AuthMiddleware(pkg.RDB, messageHandler.RecallMessage)).Methods("PUT")
 	api.HandleFunc("/messages/{message_id}", pkg.AuthMiddleware(pkg.RDB, messageHandler.DeleteMessage)).Methods("DELETE")
 	api.HandleFunc("/messages/unread-count", pkg.AuthMiddleware(pkg.RDB, messageHandler.GetUnreadMessageCount)).Methods("GET")
+	api.HandleFunc("/messages/typing", pkg.AuthMiddleware(pkg.RDB, messageHandler.SendTypingStatus)).Methods("POST")
+	api.HandleFunc("/messages/search", pkg.AuthMiddleware(pkg.RDB, messageHandler.SearchMessages)).Methods("GET")
+	api.HandleFunc("/messages/forward", pkg.AuthMiddleware(pkg.RDB, messageHandler.ForwardMessage)).Methods("POST")
+	api.HandleFunc("/messages/conversations/{conversation_id}/pin", pkg.AuthMiddleware(pkg.RDB, messageHandler.PinConversation)).Methods("PUT")
+	api.HandleFunc("/messages/conversations/{conversation_id}/mute", pkg.AuthMiddleware(pkg.RDB, messageHandler.MuteConversation)).Methods("PUT")
+
+	// users 黑名单
+	api.HandleFunc("/users/block", pkg.AuthMiddleware(pkg.RDB, blockHandler.BlockUser)).Methods("POST")
+	api.HandleFunc("/users/block/{blocked_id}", pkg.AuthMiddleware(pkg.RDB, blockHandler.UnblockUser)).Methods("DELETE")
+	api.HandleFunc("/users/blocked-list", pkg.AuthMiddleware(pkg.RDB, blockHandler.GetBlockedList)).Methods("GET")
 
 	// groups 群聊系统
 	api.HandleFunc("/groups/create", pkg.AuthMiddleware(pkg.RDB, groupHandler.CreateGroup)).Methods("POST")
@@ -138,6 +146,21 @@ func InitRouter() *mux.Router {
 	api.HandleFunc("/groups/messages/{message_id}/recall", pkg.AuthMiddleware(pkg.RDB, groupHandler.RecallGroupMessage)).Methods("PUT")
 	api.HandleFunc("/groups/{group_id}/messages/read", pkg.AuthMiddleware(pkg.RDB, groupHandler.MarkGroupMessagesAsRead)).Methods("PUT")
 	api.HandleFunc("/groups/{group_id}/unread-count", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetUserUnreadGroupMessages)).Methods("GET")
+
+	// 群邀请
+	api.HandleFunc("/groups/{group_id}/invite", pkg.AuthMiddleware(pkg.RDB, groupHandler.InviteToGroup)).Methods("POST")
+	api.HandleFunc("/groups/invitations/{id}/accept", pkg.AuthMiddleware(pkg.RDB, groupHandler.AcceptGroupInvitation)).Methods("POST")
+	api.HandleFunc("/groups/invitations/{id}/reject", pkg.AuthMiddleware(pkg.RDB, groupHandler.RejectGroupInvitation)).Methods("POST")
+	api.HandleFunc("/groups/invitations/received", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetReceivedInvitations)).Methods("GET")
+
+	// 群公告
+	api.HandleFunc("/groups/{group_id}/announcements", pkg.AuthMiddleware(pkg.RDB, groupHandler.CreateAnnouncement)).Methods("POST")
+	api.HandleFunc("/groups/{group_id}/announcements", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetGroupAnnouncements)).Methods("GET")
+	api.HandleFunc("/groups/announcements/{id}", pkg.AuthMiddleware(pkg.RDB, groupHandler.UpdateAnnouncement)).Methods("PUT")
+	api.HandleFunc("/groups/announcements/{id}", pkg.AuthMiddleware(pkg.RDB, groupHandler.DeleteAnnouncement)).Methods("DELETE")
+
+	// 群 Typing
+	api.HandleFunc("/groups/{group_id}/typing", pkg.AuthMiddleware(pkg.RDB, groupHandler.SendGroupTyping)).Methods("POST")
 
 	return r
 }

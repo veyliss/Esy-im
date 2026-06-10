@@ -2,6 +2,7 @@ package repository
 
 import (
 	"im-backend/internal/model"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -58,4 +59,12 @@ func (r *UserRepository) UpdateField(userID string, field string, value interfac
 	return r.db.Model(&model.User{}).
 		Where("user_id = ?", userID).
 		Update(field, value).Error
+}
+
+// UpdateLastLoginAt 更新最后登录时间
+func (r *UserRepository) UpdateLastLoginAt(userID string) error {
+	now := time.Now()
+	return r.db.Model(&model.User{}).
+		Where("user_id = ?", userID).
+		Update("last_login_at", now).Error
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"im-backend/internal/controller"
+	"im-backend/internal/model"
 	"im-backend/internal/pkg"
 	"im-backend/internal/repository"
 	"net/http"
@@ -548,4 +549,294 @@ func (h *GroupHandler) GetUserUnreadGroupMessages(w http.ResponseWriter, r *http
 	pkg.Success(w, map[string]interface{}{
 		"count": count,
 	})
+}
+
+// ==================== 群邀请 ====================
+
+// InviteToGroup 邀请用户入群
+func (h *GroupHandler) InviteToGroup(w http.ResponseWriter, r *http.Request) {
+	inviterID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	groupID := vars["group_id"]
+	if groupID == "" {
+		pkg.Error(w, 4001, "群组ID不能为空")
+		return
+	}
+
+	var req struct {
+		InviteeUserID string `json:"invitee_user_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 4001, "请求参数格式错误")
+		return
+	}
+	if req.InviteeUserID == "" {
+		pkg.Error(w, 4001, "被邀请用户ID不能为空")
+		return
+	}
+
+	inv, err := h.groupController.InviteToGroup(groupID, inviterID, req.InviteeUserID)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+
+	// WS通知被邀请者
+	if pkg.GlobalHub != nil {
+		inviteeUser, _ := h.userRepo.FindByUserID(req.InviteeUserID)
+		if inviteeUser != nil && pkg.GlobalHub.IsUserOnline(inviteeUser.Email) {
+			pkg.GlobalHub.SendGroupNotification(inviteeUser.Email, "group_invitation", map[string]interface{}{
+				"invitation": inv,
+			})
+		}
+	}
+
+	pkg.Success(w, inv)
+}
+
+// AcceptGroupInvitation 接受群邀请
+func (h *GroupHandler) AcceptGroupInvitation(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		pkg.Error(w, 4001, "邀请ID格式错误")
+		return
+	}
+
+	if err := h.groupController.AcceptGroupInvitation(uint(id), userID); err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+	pkg.Success(w, "已接受群邀请")
+}
+
+// RejectGroupInvitation 拒绝群邀请
+func (h *GroupHandler) RejectGroupInvitation(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		pkg.Error(w, 4001, "邀请ID格式错误")
+		return
+	}
+
+	if err := h.groupController.RejectGroupInvitation(uint(id), userID); err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+	pkg.Success(w, "已拒绝群邀请")
+}
+
+// GetReceivedInvitations 获取收到的群邀请
+func (h *GroupHandler) GetReceivedInvitations(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	status := -1
+	if statusStr := r.URL.Query().Get("status"); statusStr != "" {
+		if s, err := strconv.Atoi(statusStr); err == nil {
+			status = s
+		}
+	}
+
+	invitations, err := h.groupController.GetReceivedInvitations(userID, status)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+	pkg.Success(w, invitations)
+}
+
+// ==================== 群公告 ====================
+
+// CreateAnnouncement 创建群公告
+func (h *GroupHandler) CreateAnnouncement(w http.ResponseWriter, r *http.Request) {
+	publisherID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	groupID := vars["group_id"]
+	if groupID == "" {
+		pkg.Error(w, 4001, "群组ID不能为空")
+		return
+	}
+
+	var req struct {
+		Content  string `json:"content"`
+		IsPinned bool   `json:"is_pinned"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 4001, "请求参数格式错误")
+		return
+	}
+	if req.Content == "" {
+		pkg.Error(w, 4001, "公告内容不能为空")
+		return
+	}
+
+	ann, err := h.groupController.CreateAnnouncement(groupID, publisherID, req.Content, req.IsPinned)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+
+	// WS通知群成员
+	if pkg.GlobalHub != nil {
+		members, _ := h.groupController.GetGroupOnlineMembers(groupID)
+		if memberList, ok := members.([]model.GroupMember); ok {
+			for _, member := range memberList {
+				if member.UserID != publisherID {
+					memberUser, _ := h.userRepo.FindByUserID(member.UserID)
+					if memberUser != nil && pkg.GlobalHub.IsUserOnline(memberUser.Email) {
+						pkg.GlobalHub.SendGroupNotification(memberUser.Email, "group_announcement", map[string]interface{}{
+							"announcement": ann,
+						})
+					}
+				}
+			}
+		}
+	}
+
+	pkg.Success(w, ann)
+}
+
+// GetGroupAnnouncements 获取群公告列表
+func (h *GroupHandler) GetGroupAnnouncements(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	groupID := vars["group_id"]
+	if groupID == "" {
+		pkg.Error(w, 4001, "群组ID不能为空")
+		return
+	}
+
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page <= 0 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+
+	announcements, err := h.groupController.GetGroupAnnouncements(groupID, userID, page, pageSize)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+	pkg.Success(w, announcements)
+}
+
+// UpdateAnnouncement 更新群公告
+func (h *GroupHandler) UpdateAnnouncement(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		pkg.Error(w, 4001, "公告ID格式错误")
+		return
+	}
+
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 4001, "请求参数格式错误")
+		return
+	}
+
+	if err := h.groupController.UpdateAnnouncement(uint(id), userID, req); err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+	pkg.Success(w, "公告已更新")
+}
+
+// DeleteAnnouncement 删除群公告
+func (h *GroupHandler) DeleteAnnouncement(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		pkg.Error(w, 4001, "公告ID格式错误")
+		return
+	}
+
+	if err := h.groupController.DeleteAnnouncement(uint(id), userID); err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+	pkg.Success(w, "公告已删除")
+}
+
+// ==================== 群 Typing ====================
+
+// SendGroupTyping 发送群输入状态
+func (h *GroupHandler) SendGroupTyping(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+	vars := mux.Vars(r)
+	groupID := vars["group_id"]
+	if groupID == "" {
+		pkg.Error(w, 4001, "群组ID不能为空")
+		return
+	}
+
+	// 获取群在线成员并推送 typing 状态
+	if pkg.GlobalHub != nil {
+		currentUser, _ := h.userRepo.FindByUserID(userID)
+		members, _ := h.groupController.GetGroupOnlineMembers(groupID)
+		if memberList, ok := members.([]model.GroupMember); ok {
+			typingData := map[string]interface{}{
+				"group_id": groupID,
+				"user_id":  userID,
+				"nickname": func() string { if currentUser != nil { return currentUser.Nickname }; return "" }(),
+			}
+			for _, member := range memberList {
+				if member.UserID != userID {
+					memberUser, _ := h.userRepo.FindByUserID(member.UserID)
+					if memberUser != nil && pkg.GlobalHub.IsUserOnline(memberUser.Email) {
+						pkg.GlobalHub.SendTypingStatus(memberUser.Email, typingData)
+					}
+				}
+			}
+		}
+	}
+
+	pkg.Success(w, "typing状态已发送")
 }

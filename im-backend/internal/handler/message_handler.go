@@ -8,9 +8,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"errors"
 	"im-backend/internal/repository"
+	"im-backend/internal/service"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -182,7 +184,7 @@ func (h *MessageHandler) GetConversationList(w http.ResponseWriter, r *http.Requ
 	pkg.Success(w, conversations)
 }
 
-// GetConversationMessages 获取会话消息历史
+// GetConversationMessages 获取会话消息历史（支持游标分页和页码分页）
 func (h *MessageHandler) GetConversationMessages(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	conversationIDStr := vars["conversation_id"]
@@ -194,6 +196,23 @@ func (h *MessageHandler) GetConversationMessages(w http.ResponseWriter, r *http.
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
 		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	// 检查是否使用游标分页
+	cursorStr := r.URL.Query().Get("cursor")
+	if cursorStr != "" {
+		cursor, _ := strconv.ParseUint(cursorStr, 10, 32)
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if limit <= 0 {
+			limit = 50
+		}
+		messages, err := h.controller.GetConversationMessagesByCursor(uint(conversationID), userID, uint(cursor), limit)
+		if err != nil {
+			pkg.ServiceError(w, err, pkg.CodeInternalError)
+			return
+		}
+		pkg.Success(w, messages)
 		return
 	}
 
@@ -214,7 +233,7 @@ func (h *MessageHandler) GetConversationMessages(w http.ResponseWriter, r *http.
 	pkg.Success(w, messages)
 }
 
-// MarkConversationAsRead 标记会话为已读
+// MarkConversationAsRead 标记会话为已读，并发送已读回执WS推送
 func (h *MessageHandler) MarkConversationAsRead(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	conversationIDStr := vars["conversation_id"]
@@ -229,10 +248,25 @@ func (h *MessageHandler) MarkConversationAsRead(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := h.controller.MarkConversationAsRead(uint(conversationID), userID); err != nil {
+	otherUserID, err := h.controller.MarkConversationAsRead(uint(conversationID), userID)
+	if err != nil {
 		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
+
+	// 已读回执WS推送：通知对方已读
+	if otherUserID != "" && pkg.GlobalHub != nil {
+		otherUser, _ := h.userRepo.FindByUserID(otherUserID)
+		if otherUser != nil && pkg.GlobalHub.IsUserOnline(otherUser.Email) {
+			receiptData := map[string]interface{}{
+				"conversation_id": conversationID,
+				"reader_user_id":  userID,
+				"read_at":         time.Now(),
+			}
+			_ = pkg.GlobalHub.SendReadReceipt(otherUser.Email, receiptData)
+		}
+	}
+
 	pkg.Success(w, "已标记为已读")
 }
 
@@ -280,19 +314,27 @@ func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 	pkg.Success(w, "消息已删除")
 }
 
-// GetUnreadMessageCount 获取未读消息总数
+// GetUnreadMessageCount 获取未读消息总数（含离线消息数）
 func (h *MessageHandler) GetUnreadMessageCount(w http.ResponseWriter, r *http.Request) {
 	userID, err := h.getCurrentUserID(r)
 	if err != nil {
 		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
 		return
 	}
-	count, err := h.controller.GetUnreadMessageCount(userID)
+
+	// 获取用户的lastLoginAt
+	user, _ := h.userRepo.FindByUserID(userID)
+	var lastLoginAt *time.Time
+	if user != nil && user.LastLoginAt != nil {
+		lastLoginAt = user.LastLoginAt
+	}
+
+	result, err := h.controller.GetUnreadCountWithOffline(userID, lastLoginAt)
 	if err != nil {
 		pkg.ServiceError(w, err, pkg.CodeInternalError)
 		return
 	}
-	pkg.Success(w, map[string]interface{}{"count": count})
+	pkg.Success(w, result)
 }
 
 // GetOrCreateConversation 获取或创建会话
@@ -317,4 +359,191 @@ func (h *MessageHandler) GetOrCreateConversation(w http.ResponseWriter, r *http.
 		return
 	}
 	pkg.Success(w, conversation)
+}
+
+// SendTypingStatus 发送输入状态通知
+func (h *MessageHandler) SendTypingStatus(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		ConversationID uint `json:"conversation_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 400, "请求参数错误")
+		return
+	}
+
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	// 查询会话获取对方用户
+	conversation, err := h.controller.GetConversationByID(req.ConversationID, userID)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeNotFound)
+		return
+	}
+
+	// 获取对方用户信息
+	otherUserID := conversation.OtherUserID
+	if otherUserID != "" && pkg.GlobalHub != nil {
+		otherUser, _ := h.userRepo.FindByUserID(otherUserID)
+		if otherUser != nil && pkg.GlobalHub.IsUserOnline(otherUser.Email) {
+			currentUser, _ := h.userRepo.FindByUserID(userID)
+			typingData := map[string]interface{}{
+				"conversation_id": req.ConversationID,
+				"user_id":         userID,
+				"nickname":        func() string { if currentUser != nil { return currentUser.Nickname }; return "" }(),
+			}
+			_ = pkg.GlobalHub.SendTypingStatus(otherUser.Email, typingData)
+		}
+	}
+
+	pkg.Success(w, "typing状态已发送")
+}
+
+// SearchMessages 搜索消息
+func (h *MessageHandler) SearchMessages(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	keyword := r.URL.Query().Get("keyword")
+	if keyword == "" {
+		pkg.Error(w, 4311, "搜索关键词不能为空")
+		return
+	}
+
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page <= 0 {
+		page = 1
+	}
+	pageSize, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 50 {
+		pageSize = 50
+	}
+
+	var conversationID *uint
+	if cidStr := r.URL.Query().Get("conversation_id"); cidStr != "" {
+		if cid, err := strconv.ParseUint(cidStr, 10, 32); err == nil {
+			cidUint := uint(cid)
+			conversationID = &cidUint
+		}
+	}
+
+	results, err := h.controller.SearchMessages(userID, keyword, conversationID, page, pageSize)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
+		return
+	}
+	pkg.Success(w, results)
+}
+
+// ForwardMessage 转发消息
+func (h *MessageHandler) ForwardMessage(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		MessageID uint `json:"message_id"`
+		Targets   []struct {
+			ConversationID *uint   `json:"conversation_id"`
+			GroupID        *string `json:"group_id"`
+		} `json:"targets"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 400, "请求参数错误")
+		return
+	}
+
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	if len(req.Targets) == 0 {
+		pkg.Error(w, 400, "转发目标不能为空")
+		return
+	}
+
+	// 转换为service层类型
+	targets := make([]service.ForwardTarget, len(req.Targets))
+	for i, t := range req.Targets {
+		targets[i] = service.ForwardTarget{
+			ConversationID: t.ConversationID,
+			GroupID:        t.GroupID,
+		}
+	}
+
+	results, err := h.controller.ForwardMessage(req.MessageID, userID, targets)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
+		return
+	}
+	pkg.Success(w, results)
+}
+
+// PinConversation 置顶/取消置顶会话
+func (h *MessageHandler) PinConversation(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	conversationIDStr := vars["conversation_id"]
+	conversationID, err := strconv.ParseUint(conversationIDStr, 10, 32)
+	if err != nil {
+		pkg.Error(w, 400, "会话ID格式错误")
+		return
+	}
+
+	var req struct {
+		IsPinned bool `json:"is_pinned"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 400, "请求参数错误")
+		return
+	}
+
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	if err := h.controller.PinConversation(userID, uint(conversationID), req.IsPinned); err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
+		return
+	}
+	pkg.Success(w, "操作成功")
+}
+
+// MuteConversation 免打扰/取消免打扰会话
+func (h *MessageHandler) MuteConversation(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	conversationIDStr := vars["conversation_id"]
+	conversationID, err := strconv.ParseUint(conversationIDStr, 10, 32)
+	if err != nil {
+		pkg.Error(w, 400, "会话ID格式错误")
+		return
+	}
+
+	var req struct {
+		IsMuted bool `json:"is_muted"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		pkg.Error(w, 400, "请求参数错误")
+		return
+	}
+
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	if err := h.controller.MuteConversation(userID, uint(conversationID), req.IsMuted); err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
+		return
+	}
+	pkg.Success(w, "操作成功")
 }

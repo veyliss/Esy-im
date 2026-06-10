@@ -97,3 +97,54 @@ func (c *GroupController) MarkGroupMessagesAsRead(groupID, userID string) error 
 func (c *GroupController) GetUserUnreadGroupMessages(groupID, userID string) (interface{}, error) {
 	return c.groupService.GetUserUnreadGroupMessages(groupID, userID)
 }
+
+// ==================== 群邀请 ====================
+
+// InviteToGroup 邀请用户入群
+func (c *GroupController) InviteToGroup(groupID, inviterID, inviteeID string) (interface{}, error) {
+	return c.groupService.InviteToGroup(groupID, inviterID, inviteeID)
+}
+
+// AcceptGroupInvitation 接受群邀请
+func (c *GroupController) AcceptGroupInvitation(invitationID uint, userID string) error {
+	return c.groupService.AcceptGroupInvitation(invitationID, userID)
+}
+
+// RejectGroupInvitation 拒绝群邀请
+func (c *GroupController) RejectGroupInvitation(invitationID uint, userID string) error {
+	return c.groupService.RejectGroupInvitation(invitationID, userID)
+}
+
+// GetReceivedInvitations 获取收到的群邀请
+func (c *GroupController) GetReceivedInvitations(userID string, status int) (interface{}, error) {
+	return c.groupService.GetReceivedInvitations(userID, status)
+}
+
+// ==================== 群公告 ====================
+
+// CreateAnnouncement 创建群公告
+func (c *GroupController) CreateAnnouncement(groupID, publisherID, content string, isPinned bool) (interface{}, error) {
+	return c.groupService.CreateAnnouncement(groupID, publisherID, content, isPinned)
+}
+
+// GetGroupAnnouncements 获取群公告列表
+func (c *GroupController) GetGroupAnnouncements(groupID, userID string, page, pageSize int) (interface{}, error) {
+	return c.groupService.GetGroupAnnouncements(groupID, userID, page, pageSize)
+}
+
+// UpdateAnnouncement 更新群公告
+func (c *GroupController) UpdateAnnouncement(announcementID uint, userID string, updates map[string]interface{}) error {
+	return c.groupService.UpdateAnnouncement(announcementID, userID, updates)
+}
+
+// DeleteAnnouncement 删除群公告
+func (c *GroupController) DeleteAnnouncement(announcementID uint, userID string) error {
+	return c.groupService.DeleteAnnouncement(announcementID, userID)
+}
+
+// ==================== 群 Typing ====================
+
+// GetGroupOnlineMembers 获取群在线成员
+func (c *GroupController) GetGroupOnlineMembers(groupID string) (interface{}, error) {
+	return c.groupService.GetGroupOnlineMembers(groupID)
+}

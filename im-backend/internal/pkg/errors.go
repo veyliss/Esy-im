@@ -32,8 +32,19 @@ const (
 	CodeFriendExists     ErrorCode = 4202 // 已经是好友
 	CodeRequestExists    ErrorCode = 4203 // 好友请求已存在
 	CodeMessageNotFound  ErrorCode = 4301 // 消息不存在
+	CodeSearchEmpty      ErrorCode = 4311 // 搜索关键词为空
 	CodeMomentNotFound   ErrorCode = 4401 // 朋友圈不存在
 	CodePermissionDenied ErrorCode = 4403 // 权限不足
+	CodeBlockExists      ErrorCode = 4501 // 已屏蔽该用户
+	CodeBlockNotFound    ErrorCode = 4502 // 屏蔽关系不存在
+	CodeBlockedByUser    ErrorCode = 4503 // 被对方屏蔽
+	CodeGroupInviteExists    ErrorCode = 4511 // 群邀请已存在
+	CodeGroupInviteNotFound  ErrorCode = 4512 // 群邀请不存在
+	CodeGroupInviteProcessed ErrorCode = 4513 // 群邀请已被处理
+	CodeAnnouncementNotFound    ErrorCode = 4521 // 群公告不存在
+	CodeAnnouncementPermission  ErrorCode = 4522 // 无权操作群公告
+	CodeForwardFailed    ErrorCode = 4531 // 消息转发失败
+	CodeConversationNotFound ErrorCode = 4541 // 会话不存在
 
 	// 服务端错误 (5xxx)
 	CodeInternalError ErrorCode = 5000 // 内部服务器错误
@@ -66,8 +77,19 @@ var errorMessages = map[ErrorCode]string{
 	CodeFriendExists:     "已经是好友关系",
 	CodeRequestExists:    "好友请求已存在",
 	CodeMessageNotFound:  "消息不存在",
+	CodeSearchEmpty:      "搜索关键词不能为空",
 	CodeMomentNotFound:   "朋友圈不存在",
 	CodePermissionDenied: "权限不足",
+	CodeBlockExists:      "已屏蔽该用户",
+	CodeBlockNotFound:    "屏蔽关系不存在",
+	CodeBlockedByUser:    "被对方屏蔽",
+	CodeGroupInviteExists:    "群邀请已存在",
+	CodeGroupInviteNotFound:  "群邀请不存在",
+	CodeGroupInviteProcessed: "群邀请已被处理",
+	CodeAnnouncementNotFound:    "群公告不存在",
+	CodeAnnouncementPermission:  "无权操作群公告",
+	CodeForwardFailed:    "消息转发失败",
+	CodeConversationNotFound: "会话不存在",
 
 	// 服务端错误
 	CodeInternalError: "内部服务器错误",

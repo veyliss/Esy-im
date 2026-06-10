@@ -11,6 +11,7 @@ import (
 type FriendService struct {
 	friendRepo *repository.FriendRepository
 	userRepo   *repository.UserRepository
+	blockRepo  *repository.BlockRepository
 }
 
 // FriendSearchResult 好友搜索结果，附带当前用户与目标用户的关系状态
@@ -22,10 +23,11 @@ type FriendSearchResult struct {
 	RelationshipStatus string `json:"relationship_status"` // self, friend, pending_sent, pending_received, none
 }
 
-func NewFriendService(friendRepo *repository.FriendRepository, userRepo *repository.UserRepository) *FriendService {
+func NewFriendService(friendRepo *repository.FriendRepository, userRepo *repository.UserRepository, blockRepo *repository.BlockRepository) *FriendService {
 	return &FriendService{
 		friendRepo: friendRepo,
 		userRepo:   userRepo,
+		blockRepo:  blockRepo,
 	}
 }
 
@@ -40,6 +42,14 @@ func (s *FriendService) SendFriendRequest(fromUserID, toUserID, message string) 
 	toUser, err := s.userRepo.FindByUserID(toUserID)
 	if err != nil || toUser == nil {
 		return errors.New("目标用户不存在")
+	}
+
+	// 黑名单检查
+	if s.blockRepo != nil {
+		blocked, _ := s.blockRepo.IsBlockedByEither(fromUserID, toUserID)
+		if blocked {
+			return errors.New("对方已被屏蔽或您已被对方屏蔽，无法发送好友请求")
+		}
 	}
 
 	// 检查是否已经是好友
@@ -336,4 +346,48 @@ func (s *FriendService) SearchFriend(currentUserID, keyword string) (*FriendSear
 		Avatar:             user.Avatar,
 		RelationshipStatus: status,
 	}, nil
+}
+
+// GetOnlineFriends 获取在线好友列表
+func (s *FriendService) GetOnlineFriends(userID string) ([]model.Friend, error) {
+	friends, err := s.friendRepo.GetFriendList(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取所有在线用户（email列表）
+	onlineUsers := pkg.GlobalHub.GetOnlineUsers()
+	onlineSet := make(map[string]bool, len(onlineUsers))
+	for _, email := range onlineUsers {
+		onlineSet[email] = true
+	}
+
+	// 过滤出在线好友
+	var onlineFriends []model.Friend
+	for _, friend := range friends {
+		if friend.FriendUser != nil && onlineSet[friend.FriendUser.Email] {
+			onlineFriends = append(onlineFriends, friend)
+		}
+	}
+	return onlineFriends, nil
+}
+
+// GetFriendsOnlineStatus 批量查询好友在线状态
+func (s *FriendService) GetFriendsOnlineStatus(userID string, friendIDs []string) (map[string]bool, error) {
+	onlineUsers := pkg.GlobalHub.GetOnlineUsers()
+	onlineSet := make(map[string]bool, len(onlineUsers))
+	for _, email := range onlineUsers {
+		onlineSet[email] = true
+	}
+
+	result := make(map[string]bool, len(friendIDs))
+	for _, fid := range friendIDs {
+		user, err := s.userRepo.FindByUserID(fid)
+		if err != nil || user == nil {
+			result[fid] = false
+			continue
+		}
+		result[fid] = onlineSet[user.Email]
+	}
+	return result, nil
 }

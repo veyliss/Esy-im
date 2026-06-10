@@ -88,10 +88,42 @@ const (
 
 // 消息类型常量（扩展原有的消息类型）
 const (
-	GroupMessageTypeText   = 1 // 文本消息
-	GroupMessageTypeImage  = 2 // 图片消息
-	GroupMessageTypeAudio  = 3 // 语音消息
-	GroupMessageTypeVideo  = 4 // 视频消息
-	GroupMessageTypeFile   = 5 // 文件消息
-	GroupMessageTypeSystem = 6 // 系统消息（加入、退出、踢出等）
+	GroupMessageTypeText    = 1 // 文本消息
+	GroupMessageTypeImage   = 2 // 图片消息
+	GroupMessageTypeAudio   = 3 // 语音消息
+	GroupMessageTypeVideo   = 4 // 视频消息
+	GroupMessageTypeFile    = 5 // 文件消息
+	GroupMessageTypeSystem  = 6 // 系统消息（加入、退出、踢出等）
+	GroupMessageTypeForward = 7 // 转发消息
 )
+
+// GroupInvitation 群邀请表
+type GroupInvitation struct {
+	ID            uint           `gorm:"primaryKey" json:"id"`
+	GroupID       string         `gorm:"not null;index:idx_group_inv_group" json:"group_id"`
+	InviterUserID string         `gorm:"not null;index:idx_group_inv_inviter" json:"inviter_user_id"`
+	InviteeUserID string         `gorm:"not null;index:idx_group_inv_invitee" json:"invitee_user_id"`
+	Status        int            `gorm:"default:0;index:idx_group_inv_status" json:"status"` // 0-待处理, 1-已接受, 2-已拒绝
+	CreatedAt     time.Time      `gorm:"index:idx_group_inv_created_at" json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index:idx_group_inv_deleted_at" json:"-"`
+
+	Group   *Group `gorm:"foreignKey:GroupID;references:GroupID" json:"group,omitempty"`
+	Inviter *User  `gorm:"foreignKey:InviterUserID;references:UserID" json:"inviter,omitempty"`
+	Invitee *User  `gorm:"foreignKey:InviteeUserID;references:UserID" json:"invitee,omitempty"`
+}
+
+// GroupAnnouncement 群公告表
+type GroupAnnouncement struct {
+	ID          uint           `gorm:"primaryKey" json:"id"`
+	GroupID     string         `gorm:"not null;index:idx_group_ann_group" json:"group_id"`
+	PublisherID string         `gorm:"not null;index:idx_group_ann_publisher" json:"publisher_id"`
+	Content     string         `gorm:"type:text;not null" json:"content"`
+	IsPinned    bool           `gorm:"default:false" json:"is_pinned"`
+	CreatedAt   time.Time      `gorm:"index:idx_group_ann_created_at" json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index:idx_group_ann_deleted_at" json:"-"`
+
+	Group     *Group `gorm:"foreignKey:GroupID;references:GroupID" json:"group,omitempty"`
+	Publisher *User  `gorm:"foreignKey:PublisherID;references:UserID" json:"publisher,omitempty"`
+}

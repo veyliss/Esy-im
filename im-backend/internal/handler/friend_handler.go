@@ -7,6 +7,7 @@ import (
 	"im-backend/internal/repository"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -248,4 +249,45 @@ func (h *FriendHandler) SearchFriend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pkg.Success(w, user)
+}
+
+// GetOnlineFriends 获取在线好友列表
+func (h *FriendHandler) GetOnlineFriends(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getUserID(r)
+	if err != nil {
+		pkg.Error(w, 401, "用户不存在")
+		return
+	}
+
+	friends, err := h.controller.GetOnlineFriends(userID)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
+		return
+	}
+
+	pkg.Success(w, friends)
+}
+
+// GetFriendsOnlineStatus 批量查询好友在线状态
+func (h *FriendHandler) GetFriendsOnlineStatus(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getUserID(r)
+	if err != nil {
+		pkg.Error(w, 401, "用户不存在")
+		return
+	}
+
+	userIDsParam := r.URL.Query().Get("user_ids")
+	if userIDsParam == "" {
+		pkg.Error(w, 400, "user_ids参数不能为空")
+		return
+	}
+	friendIDs := strings.Split(userIDsParam, ",")
+
+	result, err := h.controller.GetFriendsOnlineStatus(userID, friendIDs)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeInternalError)
+		return
+	}
+
+	pkg.Success(w, result)
 }

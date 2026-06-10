@@ -71,5 +71,27 @@ func InitPostgres() {
 		log.Fatalf("❌ 群聊表迁移失败: %v", err)
 	}
 
+	// 创建黑名单相关表
+	if err := DB.AutoMigrate(
+		&model.Block{},
+	); err != nil {
+		log.Fatalf("❌ 黑名单表迁移失败: %v", err)
+	}
+
+	// 创建会话设置表
+	if err := DB.AutoMigrate(
+		&model.ConversationSetting{},
+	); err != nil {
+		log.Fatalf("❌ 会话设置表迁移失败: %v", err)
+	}
+
+	// 创建群邀请和群公告表
+	if err := DB.AutoMigrate(
+		&model.GroupInvitation{},
+		&model.GroupAnnouncement{},
+	); err != nil {
+		log.Fatalf("❌ 群邀请/公告表迁移失败: %v", err)
+	}
+
 	log.Println("✅ Postgres 连接成功并完成迁移")
 }

@@ -1,7 +1,9 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"im-backend/internal/model"
 	"im-backend/internal/repository"
 	"strings"
@@ -11,6 +13,8 @@ import (
 type MessageService struct {
 	messageRepo *repository.MessageRepository
 	friendRepo  *repository.FriendRepository
+	groupRepo   *repository.GroupRepository
+	blockRepo   *repository.BlockRepository
 }
 
 type MessagePage struct {
@@ -20,10 +24,36 @@ type MessagePage struct {
 	HasMore  bool            `json:"has_more"`
 }
 
-func NewMessageService(messageRepo *repository.MessageRepository, friendRepo *repository.FriendRepository) *MessageService {
+type CursorPage struct {
+	List       []model.Message `json:"list"`
+	HasMore    bool            `json:"has_more"`
+	NextCursor string          `json:"next_cursor"`
+}
+
+type MessageSearchResult struct {
+	List     []model.Message `json:"list"`
+	Total    int64           `json:"total"`
+	Page     int             `json:"page"`
+	PageSize int             `json:"page_size"`
+	HasMore  bool            `json:"has_more"`
+}
+
+type UnreadCountResult struct {
+	Total   int64 `json:"total"`
+	Offline int64 `json:"offline"`
+}
+
+type ForwardTarget struct {
+	ConversationID *uint   `json:"conversation_id"`
+	GroupID        *string `json:"group_id"`
+}
+
+func NewMessageService(messageRepo *repository.MessageRepository, friendRepo *repository.FriendRepository, groupRepo *repository.GroupRepository, blockRepo *repository.BlockRepository) *MessageService {
 	return &MessageService{
 		messageRepo: messageRepo,
 		friendRepo:  friendRepo,
+		groupRepo:   groupRepo,
+		blockRepo:   blockRepo,
 	}
 }
 
@@ -40,6 +70,14 @@ func (s *MessageService) SendMessage(fromUserID, toUserID string, messageType in
 	}
 	if messageType != model.MessageTypeText && content == "" && mediaURL == "" {
 		return nil, errors.New("消息内容或媒体地址不能为空")
+	}
+
+	// 黑名单检查
+	if s.blockRepo != nil {
+		blocked, _ := s.blockRepo.IsBlockedByEither(fromUserID, toUserID)
+		if blocked {
+			return nil, errors.New("对方已被屏蔽或您已被对方屏蔽，无法发送消息")
+		}
 	}
 
 	// 检查是否为好友关系
@@ -130,25 +168,34 @@ func (s *MessageService) MarkMessageAsRead(messageID uint, userID string) error 
 	return s.messageRepo.MarkMessageAsRead(messageID)
 }
 
-// MarkConversationAsRead 标记会话中所有消息为已读
-func (s *MessageService) MarkConversationAsRead(conversationID uint, userID string) error {
+// MarkConversationAsRead 标记会话中所有消息为已读，返回对方UserID用于WS推送
+func (s *MessageService) MarkConversationAsRead(conversationID uint, userID string) (string, error) {
 	// 验证用户是否属于该会话
 	conversation, err := s.messageRepo.GetConversationByID(conversationID)
 	if err != nil {
-		return errors.New("会话不存在")
+		return "", errors.New("会话不存在")
 	}
 
 	if conversation.User1ID != userID && conversation.User2ID != userID {
-		return errors.New("无权访问该会话")
+		return "", errors.New("无权访问该会话")
 	}
 
 	// 标记所有未读消息为已读
 	if err := s.messageRepo.MarkConversationMessagesAsRead(conversationID, userID); err != nil {
-		return err
+		return "", err
 	}
 
 	// 清空会话的未读计数
-	return s.messageRepo.ClearUnreadCount(conversationID, userID)
+	if err := s.messageRepo.ClearUnreadCount(conversationID, userID); err != nil {
+		return "", err
+	}
+
+	// 返回对方UserID
+	otherUserID := conversation.User1ID
+	if conversation.User1ID == userID {
+		otherUserID = conversation.User2ID
+	}
+	return otherUserID, nil
 }
 
 // RecallMessage 撤回消息
@@ -225,4 +272,185 @@ func (s *MessageService) GetOrCreateConversation(user1ID, user2ID string) (*mode
 	}
 
 	return s.messageRepo.FindOrCreateConversation(user1ID, user2ID)
+}
+
+// ==================== 新功能方法 ====================
+
+// GetConversationPartner 获取会话对方用户ID
+func (s *MessageService) GetConversationPartner(conversationID uint, userID string) (string, error) {
+	conversation, err := s.messageRepo.GetConversationByID(conversationID)
+	if err != nil {
+		return "", errors.New("会话不存在")
+	}
+	if conversation.User1ID != userID && conversation.User2ID != userID {
+		return "", errors.New("无权访问该会话")
+	}
+	if conversation.User1ID == userID {
+		return conversation.User2ID, nil
+	}
+	return conversation.User1ID, nil
+}
+
+// GetConversationMessagesByCursor 游标分页获取消息
+func (s *MessageService) GetConversationMessagesByCursor(conversationID uint, userID string, cursor uint, limit int) (*CursorPage, error) {
+	conversation, err := s.messageRepo.GetConversationByID(conversationID)
+	if err != nil {
+		return nil, errors.New("会话不存在")
+	}
+	if conversation.User1ID != userID && conversation.User2ID != userID {
+		return nil, errors.New("无权访问该会话")
+	}
+	if limit <= 0 {
+		limit = 50
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	messages, hasMore, err := s.messageRepo.GetConversationMessagesByCursor(conversationID, cursor, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	nextCursor := ""
+	if hasMore && len(messages) > 0 {
+		nextCursor = fmt.Sprintf("%d", messages[0].ID)
+	}
+
+	return &CursorPage{
+		List:       messages,
+		HasMore:    hasMore,
+		NextCursor: nextCursor,
+	}, nil
+}
+
+// SearchMessages 搜索消息
+func (s *MessageService) SearchMessages(userID, keyword string, conversationID *uint, page, pageSize int) (*MessageSearchResult, error) {
+	if strings.TrimSpace(keyword) == "" {
+		return nil, errors.New("搜索关键词不能为空")
+	}
+
+	messages, total, err := s.messageRepo.SearchMessages(userID, keyword, conversationID, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	hasMore := int64(page*pageSize) < total
+	return &MessageSearchResult{
+		List:     messages,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		HasMore:  hasMore,
+	}, nil
+}
+
+// GetUnreadCountWithOffline 获取未读消息数（含离线消息数）
+func (s *MessageService) GetUnreadCountWithOffline(userID string, lastLoginAt *time.Time) (*UnreadCountResult, error) {
+	total, err := s.messageRepo.GetUnreadMessageCount(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var offline int64
+	if lastLoginAt != nil {
+		offline, err = s.messageRepo.GetOfflineMessageCount(userID, *lastLoginAt)
+		if err != nil {
+			offline = 0
+		}
+	}
+
+	return &UnreadCountResult{
+		Total:   total,
+		Offline: offline,
+	}, nil
+}
+
+// ForwardMessage 转发消息
+func (s *MessageService) ForwardMessage(messageID uint, fromUserID string, targets []ForwardTarget) ([]interface{}, error) {
+	// 获取原始消息
+	originalMsg, err := s.messageRepo.GetMessageByID(messageID)
+	if err != nil {
+		return nil, errors.New("消息不存在")
+	}
+
+	// 验证用户有权查看该消息
+	if originalMsg.FromUserID != fromUserID && originalMsg.ToUserID != fromUserID {
+		return nil, errors.New("无权转发该消息")
+	}
+
+	// 构造转发内容
+	forwardContent := map[string]interface{}{
+		"forwarded":        true,
+		"original_from":    originalMsg.FromUserID,
+		"original_content": originalMsg.Content,
+		"original_type":    originalMsg.MessageType,
+		"original_time":    originalMsg.CreatedAt,
+	}
+	contentJSON, _ := json.Marshal(forwardContent)
+
+	var results []interface{}
+	for _, target := range targets {
+		if target.ConversationID != nil {
+			// 单聊转发
+			conv, err := s.messageRepo.GetConversationByID(*target.ConversationID)
+			if err != nil {
+				continue
+			}
+			toUserID := conv.User1ID
+			if conv.User1ID == fromUserID {
+				toUserID = conv.User2ID
+			}
+			msg, err := s.messageRepo.CreatePrivateMessageInTx(fromUserID, toUserID, model.MessageTypeForward, string(contentJSON), "")
+			if err == nil {
+				results = append(results, msg)
+			}
+		} else if target.GroupID != nil {
+			// 群聊转发
+			if s.groupRepo != nil {
+				groupMsg := &model.GroupMessage{
+					GroupID:     *target.GroupID,
+					FromUserID:  fromUserID,
+					MessageType: model.GroupMessageTypeForward,
+					Content:     string(contentJSON),
+					CreatedAt:   time.Now(),
+				}
+				if err := s.groupRepo.CreateGroupMessage(groupMsg); err == nil {
+					loaded, _ := s.groupRepo.GetGroupMessageByID(groupMsg.ID)
+					if loaded != nil {
+						results = append(results, loaded)
+					}
+				}
+			}
+		}
+	}
+
+	return results, nil
+}
+
+// PinConversation 置顶/取消置顶会话
+func (s *MessageService) PinConversation(userID string, conversationID uint, isPinned bool) error {
+	// 验证会话存在且用户有权访问
+	conversation, err := s.messageRepo.GetConversationByID(conversationID)
+	if err != nil {
+		return errors.New("会话不存在")
+	}
+	if conversation.User1ID != userID && conversation.User2ID != userID {
+		return errors.New("无权访问该会话")
+	}
+
+	return s.messageRepo.SetConversationSetting(userID, conversationID, "is_pinned", isPinned)
+}
+
+// MuteConversation 免打扰/取消免打扰会话
+func (s *MessageService) MuteConversation(userID string, conversationID uint, isMuted bool) error {
+	conversation, err := s.messageRepo.GetConversationByID(conversationID)
+	if err != nil {
+		return errors.New("会话不存在")
+	}
+	if conversation.User1ID != userID && conversation.User2ID != userID {
+		return errors.New("无权访问该会话")
+	}
+
+	return s.messageRepo.SetConversationSetting(userID, conversationID, "is_muted", isMuted)
 }

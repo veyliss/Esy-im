@@ -11,12 +11,14 @@ import (
 type MomentService struct {
 	momentRepo *repository.MomentRepository
 	friendRepo *repository.FriendRepository
+	blockRepo  *repository.BlockRepository
 }
 
-func NewMomentService(momentRepo *repository.MomentRepository, friendRepo *repository.FriendRepository) *MomentService {
+func NewMomentService(momentRepo *repository.MomentRepository, friendRepo *repository.FriendRepository, blockRepo *repository.BlockRepository) *MomentService {
 	return &MomentService{
 		momentRepo: momentRepo,
 		friendRepo: friendRepo,
+		blockRepo:  blockRepo,
 	}
 }
 
@@ -84,6 +86,24 @@ func (s *MomentService) GetFriendMoments(userID string, page, pageSize int) ([]m
 	friendIDs := []string{userID}
 	for _, friend := range friends {
 		friendIDs = append(friendIDs, friend.FriendID)
+	}
+
+	// 过滤黑名单用户
+	if s.blockRepo != nil {
+		blockedUsers, _ := s.blockRepo.GetBlockedList(userID)
+		if len(blockedUsers) > 0 {
+			blockedSet := make(map[string]bool, len(blockedUsers))
+			for _, b := range blockedUsers {
+				blockedSet[b.BlockedUserID] = true
+			}
+			filtered := friendIDs[:0]
+			for _, id := range friendIDs {
+				if !blockedSet[id] {
+					filtered = append(filtered, id)
+				}
+			}
+			friendIDs = filtered
+		}
 	}
 
 	offset := (page - 1) * pageSize
