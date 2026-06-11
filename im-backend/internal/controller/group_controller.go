@@ -98,6 +98,16 @@ func (c *GroupController) GetUserUnreadGroupMessages(groupID, userID string) (in
 	return c.groupService.GetUserUnreadGroupMessages(groupID, userID)
 }
 
+// GetGroupMessagesByCursor 游标分页获取群消息
+func (c *GroupController) GetGroupMessagesByCursor(groupID, userID string, cursor uint, limit int) (interface{}, bool, error) {
+	return c.groupService.GetGroupMessagesByCursor(groupID, userID, cursor, limit)
+}
+
+// BatchGetUnreadCounts 批量获取多个群的未读消息数
+func (c *GroupController) BatchGetUnreadCounts(userID string, groupIDs []string) (map[string]int64, error) {
+	return c.groupService.BatchGetUnreadCounts(userID, groupIDs)
+}
+
 // ==================== 群邀请 ====================
 
 // InviteToGroup 邀请用户入群

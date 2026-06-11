@@ -1,6 +1,6 @@
 import type { KeyboardEvent, Ref } from "react";
 import { Button, Input } from "antd";
-import { CloseOutlined, PlusOutlined, SendOutlined, SyncOutlined } from "@ant-design/icons";
+import { CloseOutlined, PlusOutlined, SendOutlined, SyncOutlined, AudioOutlined, FileOutlined } from "@ant-design/icons";
 import type { TextAreaRef } from "antd/es/input/TextArea";
 
 interface Im4ComposerProps {
@@ -14,6 +14,8 @@ interface Im4ComposerProps {
   onChange: (value: string) => void;
   onSend: () => void;
   onAttach: () => void;
+  onAttachFile?: () => void;
+  onVoiceRecord?: () => void;
   onCancelReply?: () => void;
   onQuickReply?: (value: string) => void;
 }
@@ -29,6 +31,8 @@ export function Im4Composer({
   onChange,
   onSend,
   onAttach,
+  onAttachFile,
+  onVoiceRecord,
   onCancelReply,
   onQuickReply,
 }: Im4ComposerProps) {
@@ -79,6 +83,28 @@ export function Im4Composer({
           type="text"
           onClick={onAttach}
         />
+        {onVoiceRecord ? (
+          <Button
+            aria-label="语音消息"
+            className="im4-compose-tool"
+            icon={<AudioOutlined />}
+            shape="circle"
+            title="语音消息"
+            type="text"
+            onClick={onVoiceRecord}
+          />
+        ) : null}
+        {onAttachFile ? (
+          <Button
+            aria-label="发送文件"
+            className="im4-compose-tool"
+            icon={<FileOutlined />}
+            shape="circle"
+            title="发送文件"
+            type="text"
+            onClick={onAttachFile}
+          />
+        ) : null}
         <div className="im4-compose-input">
           <Input.TextArea
             ref={inputRef}

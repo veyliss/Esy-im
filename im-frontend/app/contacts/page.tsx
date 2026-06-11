@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Descriptions, Empty, Input, Space, Tag, Typography } from "antd";
-import { CopyOutlined, DeleteOutlined, MessageOutlined, SaveOutlined } from "@ant-design/icons";
+import { Button, Card, Descriptions, Empty, Input, Popconfirm, Space, Tag, Typography } from "antd";
+import { CopyOutlined, DeleteOutlined, MessageOutlined, SaveOutlined, StopOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/lib/store";
 import { useContactStore } from "@/lib/store/contact";
 import { useChatStore } from "@/lib/store/chat";
 import { FriendAPI } from "@/lib/api/friend";
+import { BlockAPI } from "@/lib/api/block";
 import { MessageAPI } from "@/lib/api/message";
 import { UserAPI } from "@/lib/api/user";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
@@ -20,6 +21,7 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 import { FriendRequestItem } from "@/components/contacts/FriendRequestItem";
 import { AddFriendModal } from "@/components/contacts/AddFriendModal";
+import { BlockedList } from "@/components/contacts/BlockedList";
 
 export default function ContactsPage() {
   const { confirm, toast } = useAppInteractions();
@@ -37,12 +39,18 @@ export default function ContactsPage() {
     setSelectedFriend,
     pendingRequestCount,
     setPendingRequestCount,
+    onlineStatusMap,
+    batchSetOnlineStatus,
+    blockedList,
+    setBlockedList,
+    addBlocked,
+    removeBlocked,
   } = useContactStore();
 
   const { setCurrentConversation } = useChatStore();
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [activeRightTab, setActiveRightTab] = useState<"detail" | "requests">("detail");
+  const [activeRightTab, setActiveRightTab] = useState<"detail" | "requests" | "blocked">("detail");
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [remark, setRemark] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -86,11 +94,34 @@ export default function ContactsPage() {
     }
   };
 
+  const loadOnlineStatus = async () => {
+    try {
+      const userIds = friends.map((f) => f.friend_id);
+      if (userIds.length === 0) return;
+      const res = await FriendAPI.getOnlineStatusBatch(userIds);
+      if (res.data.code === 0) {
+        batchSetOnlineStatus(res.data.data);
+      }
+    } catch (e) {
+      console.error("加载在线状态失败:", e);
+    }
+  };
+
+  const loadBlockedList = async () => {
+    try {
+      const res = await BlockAPI.getBlockedUsers();
+      if (res.data.code === 0) setBlockedList(res.data.data);
+    } catch (e) {
+      console.error("加载黑名单失败:", e);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       loadFriends();
       loadReceivedRequests();
       loadSentRequests();
+      loadBlockedList();
 
       wsClient.connect(token);
 
@@ -112,9 +143,17 @@ export default function ContactsPage() {
         wsClient.offFriendAccepted(handleFriendAccepted);
       };
     }
-    // Contacts bootstrap and realtime subscriptions are tied to auth token changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  // 定时轮询在线状态 (60s)
+  useEffect(() => {
+    if (!token || friends.length === 0) return;
+    loadOnlineStatus();
+    const timer = setInterval(loadOnlineStatus, 60000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, friends.length]);
 
   useEffect(() => {
     if (selectedFriend) setRemark(selectedFriend.remark || "");
@@ -193,6 +232,33 @@ export default function ContactsPage() {
     }
   };
 
+  const handleBlockFriend = async () => {
+    if (!selectedFriend) return;
+    try {
+      const res = await BlockAPI.blockUser(selectedFriend.friend_id);
+      if (res.data.code === 0) {
+        addBlocked(res.data.data);
+        toast("已将对方加入黑名单", { tone: "success" });
+      }
+    } catch (e) {
+      const apiError = handleApiError(e);
+      setError(createUserFriendlyErrorMessage(apiError));
+    }
+  };
+
+  const handleUnblockUser = async (blockId: number) => {
+    try {
+      const res = await BlockAPI.unblockUser(blockId);
+      if (res.data.code === 0) {
+        removeBlocked(blockId);
+        toast("已解除拉黑", { tone: "success" });
+      }
+    } catch (e) {
+      const apiError = handleApiError(e);
+      toast(createUserFriendlyErrorMessage(apiError), { tone: "error" });
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!selectedFriend) return;
     try {
@@ -263,6 +329,11 @@ export default function ContactsPage() {
     setActiveRightTab("requests");
   };
 
+  const openBlocked = () => {
+    setSelectedFriend(null);
+    setActiveRightTab("blocked");
+  };
+
   const backToList = () => {
     setSelectedFriend(null);
     setActiveRightTab("detail");
@@ -304,6 +375,16 @@ export default function ContactsPage() {
           {pendingRequestCount > 0 ? <em>{pendingRequestCount > 99 ? "99+" : pendingRequestCount}</em> : null}
         </Button>
 
+        <Button
+          type="text"
+          className={`im4-contact-request ${activeRightTab === "blocked" ? "is-active" : ""}`}
+          onClick={openBlocked}
+        >
+          <span>黑名单</span>
+          <small>已拉黑的用户</small>
+          {blockedList.length > 0 ? <em>{blockedList.length}</em> : null}
+        </Button>
+
         <h2 className="im4-session-section-label">我的好友 · {filteredFriends.length}</h2>
         {filteredFriends.length === 0 ? (
           <Im4Empty
@@ -318,6 +399,7 @@ export default function ContactsPage() {
               {group.items.map((friend) => {
                 const fu = friend.friend_user;
                 const displayName = friend.remark || fu?.nickname || `用户${fu?.user_id}`;
+                const isOnline = onlineStatusMap[friend.friend_id];
                 return (
                   <Im4SessionItem
                     key={friend.id}
@@ -325,7 +407,7 @@ export default function ContactsPage() {
                     type="private"
                     name={displayName}
                     avatar={fu?.avatar || "/default-avatar.png"}
-                    lastMessage={`用户 ID：${fu?.user_id || "-"}`}
+                    lastMessage={isOnline ? "🟢 在线" : `用户 ID：${fu?.user_id || "-"}`}
                     onClick={() => selectFriend(friend)}
                   />
                 );
@@ -343,12 +425,12 @@ export default function ContactsPage() {
         active="contacts"
         title="通讯录"
         subtitle="好友、申请和一对一会话"
-        detailActive={activeRightTab === "requests" || Boolean(selectedFriend)}
+        detailActive={activeRightTab === "requests" || activeRightTab === "blocked" || Boolean(selectedFriend)}
         sessionPanel={sessionPanel}
         avatarSrc={currentUser?.avatar}
         avatarName={currentUser?.nickname || "我"}
         rightSlot={pendingRequestCount > 0 ? <Im4Status tone="primary">申请 {pendingRequestCount > 99 ? "99+" : pendingRequestCount}</Im4Status> : null}
-        onMobileBack={(activeRightTab === "requests" || selectedFriend) ? backToList : undefined}
+        onMobileBack={(activeRightTab !== "detail" || selectedFriend) ? backToList : undefined}
       >
           <div className="workspace-main-panel">
             <ErrorAlert error={error} onClose={() => setError(null)} className="mx-8 mt-6" />
@@ -400,6 +482,18 @@ export default function ContactsPage() {
                   </div>
                 </Card>
               </div>
+            ) : activeRightTab === "blocked" ? (
+              <div className="im-detail-inner ant-linked-page">
+                <MobileDetailHeader
+                  title="黑名单管理"
+                  description={`已拉黑 ${blockedList.length} 人`}
+                  onBack={backToList}
+                />
+                <BlockedList
+                  blockedList={blockedList}
+                  onUnblock={handleUnblockUser}
+                />
+              </div>
             ) : selectedFriend && friendUser ? (
               <div className="im-detail-inner ant-linked-page">
                 <MobileDetailHeader
@@ -413,7 +507,7 @@ export default function ContactsPage() {
                       src={friendUser.avatar || "/default-avatar.png"}
                       name={friendUser.nickname}
                       size="3xl"
-                      status="online"
+                      status={onlineStatusMap[friendUser.user_id] ? "online" : "offline"}
                       showStatus
                       border
                     />
@@ -422,6 +516,11 @@ export default function ContactsPage() {
                       <Typography.Text type="secondary">昵称：{friendUser.nickname || "未设置"}</Typography.Text>
                       <Space wrap>
                         <Tag color="success">好友</Tag>
+                        {onlineStatusMap[friendUser.user_id] ? (
+                          <Tag color="processing">在线</Tag>
+                        ) : (
+                          <Tag>离线</Tag>
+                        )}
                         <Tag color="processing">用户 ID：{friendUser.user_id}</Tag>
                       </Space>
                     </div>
@@ -466,6 +565,20 @@ export default function ContactsPage() {
                   >
                     复制 ID
                   </Button>
+                  <Popconfirm
+                    title="确定拉黑该用户？"
+                    description="拉黑后对方将无法向你发送消息和好友请求"
+                    onConfirm={handleBlockFriend}
+                    okText="拉黑"
+                    cancelText="取消"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <Button
+                      icon={<StopOutlined />}
+                    >
+                      拉黑
+                    </Button>
+                  </Popconfirm>
                   <Button
                     danger
                     icon={<DeleteOutlined />}

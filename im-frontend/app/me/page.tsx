@@ -23,6 +23,7 @@ import { useAppInteractions } from "@/components/ui/app-interactions";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
 import { UserAPI } from "@/lib/api/user";
+import { UploadAPI } from "@/lib/api/upload";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { User } from "@/lib/types/api";
 
@@ -136,16 +137,20 @@ export default function MePage() {
 
   const handleAvatarClick = () => fileInputRef.current?.click();
 
-  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { setError("请选择图片文件"); return; }
     if (file.size > 2 * 1024 * 1024) { setError("头像图片不能超过 2MB"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setAvatar(String(reader.result || ""));
-    reader.onerror = () => setError("头像读取失败，请重新选择");
-    reader.readAsDataURL(file);
     event.target.value = "";
+    try {
+      const res = await UploadAPI.uploadImage(file);
+      if (res.data.code === 0) {
+        setAvatar(res.data.data.url);
+      }
+    } catch (err) {
+      setError("头像上传失败，请重试");
+    }
   };
 
   const handleDesktopNotificationsChange = async (enabled: boolean) => {

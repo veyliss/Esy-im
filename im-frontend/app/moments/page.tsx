@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Segmented, Modal } from "antd";
+import { Segmented, Modal, Radio } from "antd";
 import {
   CameraOutlined,
   CloseOutlined,
@@ -46,7 +46,7 @@ export default function MomentsPage() {
   const [location, setLocation] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const visible: 0 | 1 | 2 = 0;
+  const [visible, setVisible] = useState<0 | 1 | 2>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const feedRef = useRef<HTMLDivElement>(null);
 
@@ -438,6 +438,17 @@ export default function MomentsPage() {
               ) : null}
             </div>
             <div className="wx-composer-actions">
+              <Radio.Group
+                size="small"
+                value={visible}
+                onChange={(e) => setVisible(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                <Radio.Button value={0}>所有人</Radio.Button>
+                <Radio.Button value={1}>仅好友</Radio.Button>
+                <Radio.Button value={2}>私密</Radio.Button>
+              </Radio.Group>
               <span className="wx-composer-count">{content.length}/500</span>
               <button
                 type="button"

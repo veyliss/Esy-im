@@ -456,7 +456,36 @@ func (h *GroupHandler) GetGroupMessages(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// 获取分页参数
+	// 检测游标分页参数
+	cursorStr := r.URL.Query().Get("cursor")
+	if cursorStr != "" {
+		cursor, _ := strconv.ParseUint(cursorStr, 10, 32)
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if limit <= 0 {
+			limit = 20
+		}
+
+		messages, hasMore, err := h.groupController.GetGroupMessagesByCursor(groupID, userID, uint(cursor), limit)
+		if err != nil {
+			pkg.ServiceError(w, err, pkg.CodeBadRequest)
+			return
+		}
+
+		var nextCursor string
+		if hasMore && len(messages.([]model.GroupMessage)) > 0 {
+			msgList := messages.([]model.GroupMessage)
+			nextCursor = strconv.FormatUint(uint64(msgList[0].ID), 10)
+		}
+
+		pkg.Success(w, map[string]interface{}{
+			"list":        messages,
+			"has_more":    hasMore,
+			"next_cursor": nextCursor,
+		})
+		return
+	}
+
+	// 回退到传统分页
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	pageSize, _ := strconv.Atoi(r.URL.Query().Get("page_size"))
 
@@ -549,6 +578,31 @@ func (h *GroupHandler) GetUserUnreadGroupMessages(w http.ResponseWriter, r *http
 	pkg.Success(w, map[string]interface{}{
 		"count": count,
 	})
+}
+
+// BatchGetUnreadCounts 批量获取多个群的未读消息数
+func (h *GroupHandler) BatchGetUnreadCounts(w http.ResponseWriter, r *http.Request) {
+	userID, err := h.getCurrentUserID(r)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeUnauthorized)
+		return
+	}
+
+	var req struct {
+		GroupIDs []string `json:"group_ids"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || len(req.GroupIDs) == 0 {
+		pkg.Error(w, 4001, "请提供群组ID列表")
+		return
+	}
+
+	counts, err := h.groupController.BatchGetUnreadCounts(userID, req.GroupIDs)
+	if err != nil {
+		pkg.ServiceError(w, err, pkg.CodeBadRequest)
+		return
+	}
+
+	pkg.Success(w, counts)
 }
 
 // ==================== 群邀请 ====================

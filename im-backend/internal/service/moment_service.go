@@ -107,7 +107,7 @@ func (s *MomentService) GetFriendMoments(userID string, page, pageSize int) ([]m
 	}
 
 	offset := (page - 1) * pageSize
-	return s.momentRepo.GetFriendMomentList(friendIDs, offset, pageSize)
+	return s.momentRepo.GetFriendMomentList(friendIDs, userID, offset, pageSize)
 }
 
 // DeleteMoment 删除动态

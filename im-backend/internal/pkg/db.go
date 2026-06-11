@@ -93,5 +93,13 @@ func InitPostgres() {
 		log.Fatalf("❌ 群邀请/公告表迁移失败: %v", err)
 	}
 
+	// 创建消息收藏和群置顶消息表
+	if err := DB.AutoMigrate(
+		&model.MessageFavorite{},
+		&model.GroupPinnedMessage{},
+	); err != nil {
+		log.Fatalf("❌ 收藏/置顶表迁移失败: %v", err)
+	}
+
 	log.Println("✅ Postgres 连接成功并完成迁移")
 }

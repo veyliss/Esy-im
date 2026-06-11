@@ -3,13 +3,17 @@
  * 用于实时消息通信
  */
 
-import type { WSMessage, WSGroupMessage, Message, GroupMessage, FriendRequest } from "@/lib/types/api";
+import type { WSMessage, WSGroupMessage, Message, GroupMessage, FriendRequest, TypingEvent, ReadReceiptEvent, GroupInvitation, GroupAnnouncement } from "@/lib/types/api";
 import { handleApiError, ErrorCode, isWebSocketError } from "@/lib/utils/errors";
 
 type MessageHandler = (message: Message) => void;
 type GroupMessageHandler = (message: GroupMessage) => void;
 type FriendRequestHandler = (request: FriendRequest) => void;
 type FriendAcceptedHandler = (data: { friend?: { nickname: string } }) => void;
+type TypingHandler = (event: TypingEvent) => void;
+type ReadReceiptHandler = (event: ReadReceiptEvent) => void;
+type GroupInvitationHandler = (invitation: GroupInvitation) => void;
+type GroupAnnouncementHandler = (announcement: GroupAnnouncement) => void;
 type ConnectionHandler = () => void;
 
 class WebSocketClient {
@@ -22,6 +26,10 @@ class WebSocketClient {
   private groupMessageHandlers: Set<GroupMessageHandler> = new Set();
   private friendRequestHandlers: Set<FriendRequestHandler> = new Set();
   private friendAcceptedHandlers: Set<FriendAcceptedHandler> = new Set();
+  private typingHandlers: Set<TypingHandler> = new Set();
+  private readReceiptHandlers: Set<ReadReceiptHandler> = new Set();
+  private groupInvitationHandlers: Set<GroupInvitationHandler> = new Set();
+  private groupAnnouncementHandlers: Set<GroupAnnouncementHandler> = new Set();
   private connectHandlers: Set<ConnectionHandler> = new Set();
   private disconnectHandlers: Set<ConnectionHandler> = new Set();
   private errorHandlers: Set<(error: unknown) => void> = new Set();
@@ -201,8 +209,55 @@ class WebSocketClient {
           break;
           
         case 'typing':
-          // 可以添加正在输入的处理
-          console.log('对方正在输入...');
+          if (data.data) {
+            const typingEvent = data.data as TypingEvent;
+            this.typingHandlers.forEach(handler => {
+              try {
+                handler(typingEvent);
+              } catch (error) {
+                console.error('Typing处理器执行失败:', error);
+              }
+            });
+          }
+          break;
+
+        case 'read_receipt':
+          if (data.data) {
+            const readReceipt = data.data as ReadReceiptEvent;
+            this.readReceiptHandlers.forEach(handler => {
+              try {
+                handler(readReceipt);
+              } catch (error) {
+                console.error('已读回执处理器执行失败:', error);
+              }
+            });
+          }
+          break;
+
+        case 'group_invitation':
+          if (data.data) {
+            const invitation = data.data as GroupInvitation;
+            this.groupInvitationHandlers.forEach(handler => {
+              try {
+                handler(invitation);
+              } catch (error) {
+                console.error('群邀请处理器执行失败:', error);
+              }
+            });
+          }
+          break;
+
+        case 'group_announcement':
+          if (data.data) {
+            const announcement = data.data as GroupAnnouncement;
+            this.groupAnnouncementHandlers.forEach(handler => {
+              try {
+                handler(announcement);
+              } catch (error) {
+                console.error('群公告处理器执行失败:', error);
+              }
+            });
+          }
           break;
           
         case 'error':
@@ -442,6 +497,62 @@ class WebSocketClient {
   }
 
   /**
+   * 注册Typing处理器
+   */
+  onTyping(handler: TypingHandler) {
+    this.typingHandlers.add(handler);
+  }
+
+  /**
+   * 移除Typing处理器
+   */
+  offTyping(handler: TypingHandler) {
+    this.typingHandlers.delete(handler);
+  }
+
+  /**
+   * 注册已读回执处理器
+   */
+  onReadReceipt(handler: ReadReceiptHandler) {
+    this.readReceiptHandlers.add(handler);
+  }
+
+  /**
+   * 移除已读回执处理器
+   */
+  offReadReceipt(handler: ReadReceiptHandler) {
+    this.readReceiptHandlers.delete(handler);
+  }
+
+  /**
+   * 注册群邀请处理器
+   */
+  onGroupInvitation(handler: GroupInvitationHandler) {
+    this.groupInvitationHandlers.add(handler);
+  }
+
+  /**
+   * 移除群邀请处理器
+   */
+  offGroupInvitation(handler: GroupInvitationHandler) {
+    this.groupInvitationHandlers.delete(handler);
+  }
+
+  /**
+   * 注册群公告处理器
+   */
+  onGroupAnnouncement(handler: GroupAnnouncementHandler) {
+    this.groupAnnouncementHandlers.add(handler);
+  }
+
+  /**
+   * 移除群公告处理器
+   */
+  offGroupAnnouncement(handler: GroupAnnouncementHandler) {
+    this.groupAnnouncementHandlers.delete(handler);
+  }
+
+  /**
    * 注册连接处理器
    */
   onConnect(handler: ConnectionHandler) {
@@ -524,4 +635,4 @@ export const wsClient = new WebSocketClient(
 );
 
 // 导出类型
-export type { MessageHandler, GroupMessageHandler, FriendRequestHandler, FriendAcceptedHandler, ConnectionHandler };
+export type { MessageHandler, GroupMessageHandler, FriendRequestHandler, FriendAcceptedHandler, TypingHandler, ReadReceiptHandler, GroupInvitationHandler, GroupAnnouncementHandler, ConnectionHandler };

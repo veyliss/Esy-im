@@ -49,9 +49,11 @@ func (r *MomentRepository) GetMomentList(userID string, offset, limit int) ([]mo
 }
 
 // GetFriendMomentList 获取好友的朋友圈动态列表
-func (r *MomentRepository) GetFriendMomentList(friendIDs []string, offset, limit int) ([]model.Moment, error) {
+// viewerID: 当前查看者，visible=2 的私密动态仅自己可见
+func (r *MomentRepository) GetFriendMomentList(friendIDs []string, viewerID string, offset, limit int) ([]model.Moment, error) {
 	var moments []model.Moment
-	if err := r.db.Where("user_id IN ? AND (visible = 0 OR visible = 1)", friendIDs).
+	// visible=0 所有人可见，visible=1 仅好友可见，visible=2 仅自己可见
+	if err := r.db.Where("user_id IN ? AND (visible = 0 OR visible = 1 OR (visible = 2 AND user_id = ?))", friendIDs, viewerID).
 		Preload("User").
 		Preload("Likes.User").
 		Preload("Comments.User").

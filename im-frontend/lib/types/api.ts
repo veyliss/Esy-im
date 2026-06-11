@@ -122,6 +122,7 @@ export enum MessageType {
   AUDIO = 3,
   VIDEO = 4,
   FILE = 5,
+  FORWARD = 7,
 }
 
 export interface Message {
@@ -162,7 +163,7 @@ export interface Conversation {
 // ============ WebSocket 消息类型 ============
 
 export interface WSMessage<T = unknown> {
-  type: 'message' | 'ping' | 'pong' | 'typing' | 'friend_request' | 'friend_accepted' | 'error';
+  type: 'message' | 'ping' | 'pong' | 'typing' | 'read_receipt' | 'friend_request' | 'friend_accepted' | 'group_invitation' | 'group_announcement' | 'error';
   data?: T;
   timestamp: number;
 }
@@ -246,6 +247,104 @@ export enum GroupMessageType {
   VIDEO = 4,  // 视频消息
   FILE = 5,   // 文件消息
   SYSTEM = 6, // 系统消息
+  FORWARD = 7, // 转发消息
+}
+
+// ============ 游标分页类型 ============
+
+export interface CursorPaginationParams {
+  cursor?: number;
+  limit?: number;
+}
+
+export interface CursorPaginatedResponse<T> {
+  list: T[];
+  has_more: boolean;
+  next_cursor: string;
+}
+
+// ============ Typing 事件类型 ============
+
+export interface TypingEvent {
+  conversation_id?: number;
+  group_id?: string;
+  user_id: string;
+  nickname: string;
+}
+
+// ============ 已读回执事件类型 ============
+
+export interface ReadReceiptEvent {
+  conversation_id: number;
+  reader_user_id: string;
+  read_at: string;
+}
+
+// ============ 消息搜索结果 ============
+
+export interface MessageSearchResult {
+  list: Message[];
+  total: number;
+  page: number;
+  page_size: number;
+  has_more: boolean;
+}
+
+// ============ 未读消息数响应 ============
+
+export interface UnreadCountResponse {
+  total: number;
+  offline: number;
+}
+
+// ============ 黑名单相关类型 ============
+
+export interface BlockedUser {
+  id: number;
+  user_id: string;
+  blocked_user_id: string;
+  created_at: string;
+  blocked_user?: User;
+}
+
+// ============ 群邀请相关类型 ============
+
+export interface GroupInvitation {
+  id: number;
+  group_id: string;
+  inviter_user_id: string;
+  invitee_user_id: string;
+  status: number;
+  created_at: string;
+  group?: Group;
+  inviter?: User;
+}
+
+// ============ 群公告相关类型 ============
+
+export interface GroupAnnouncement {
+  id: number;
+  group_id: string;
+  publisher_id: string;
+  content: string;
+  is_pinned: boolean;
+  created_at: string;
+  user?: User;
+}
+
+// ============ 消息转发目标 ============
+
+export interface ForwardTarget {
+  conversation_id?: number;
+  group_id?: string;
+}
+
+// ============ 会话设置 ============
+
+export interface ConversationSetting {
+  conversation_id: number;
+  is_pinned: boolean;
+  is_muted: boolean;
 }
 
 // ============ WebSocket 群聊消息类型 ============
@@ -259,4 +358,28 @@ export interface WSGroupMessage<T = unknown> {
 export interface WSGroupMessageData extends GroupMessage {
   from_user: User;
   group: Group;
+}
+
+// ============ 消息收藏 ============
+
+export interface MessageFavorite {
+  id: number;
+  user_id: string;
+  message_id: number;
+  message_type: number;
+  content: string;
+  media_url: string;
+  from_user_id: string;
+  created_at: string;
+}
+
+// ============ 群置顶消息 ============
+
+export interface GroupPinnedMessage {
+  id: number;
+  group_id: string;
+  message_id: number;
+  pinned_by: string;
+  content?: string;
+  created_at: string;
 }

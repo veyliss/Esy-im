@@ -5,6 +5,7 @@ import "../styles/auth-antd.css";
 import "../styles/antd-app.css";
 import { AntdProvider } from "@/components/ui/antd-provider";
 import { AppInteractionProvider } from "@/components/ui/app-interactions";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export const metadata = {
   title: "即时通讯系统",
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-display bg-background-light dark:bg-background-dark" suppressHydrationWarning>
         <AntdProvider>
-          <AppInteractionProvider>{children}</AppInteractionProvider>
+          <AppInteractionProvider>
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </AppInteractionProvider>
         </AntdProvider>
       </body>
     </html>

@@ -435,3 +435,72 @@ func (r *GroupRepository) UpdateAnnouncement(id uint, updates map[string]interfa
 func (r *GroupRepository) DeleteAnnouncement(id uint) error {
 	return r.db.Delete(&model.GroupAnnouncement{}, id).Error
 }
+
+// ==================== 游标分页 + 批量未读 ====================
+
+// GetGroupMessagesByCursor 游标分页获取群消息
+func (r *GroupRepository) GetGroupMessagesByCursor(groupID string, cursor uint, limit int) ([]model.GroupMessage, bool, error) {
+	var messages []model.GroupMessage
+	query := r.db.Where("group_id = ?", groupID)
+	if cursor > 0 {
+		query = query.Where("id < ?", cursor)
+	}
+
+	err := query.Preload("FromUser").
+		Order("id DESC").
+		Limit(limit + 1).
+		Find(&messages).Error
+
+	hasMore := len(messages) > limit
+	if hasMore {
+		messages = messages[:limit]
+	}
+
+	// 反转为时间正序
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
+	}
+
+	return messages, hasMore, err
+}
+
+// BatchGetUserUnreadGroupMessages 批量获取用户在多个群组中的未读消息数
+func (r *GroupRepository) BatchGetUserUnreadGroupMessages(userID string, groupIDs []string) (map[string]int64, error) {
+	result := make(map[string]int64, len(groupIDs))
+	for _, gid := range groupIDs {
+		result[gid] = 0
+	}
+
+	// 获取用户在各群的加入时间
+	var members []model.GroupMember
+	if err := r.db.Select("group_id, joined_at").
+		Where("user_id = ? AND group_id IN ?", userID, groupIDs).
+		Find(&members).Error; err != nil {
+		return result, err
+	}
+
+	joinedMap := make(map[string]time.Time, len(members))
+	for _, m := range members {
+		joinedMap[m.GroupID] = m.JoinedAt
+	}
+
+	// 对每个群计算未读数
+	for _, gid := range groupIDs {
+		joinedAt, ok := joinedMap[gid]
+		if !ok {
+			continue
+		}
+		var count int64
+		r.db.Table("group_messages").
+			Where("group_id = ? AND created_at > ? AND from_user_id != ?", gid, joinedAt, userID).
+			Where("id NOT IN (?)",
+				r.db.Table("group_message_reads").
+					Select("message_id").
+					Where("user_id = ?", userID),
+			).
+			Count(&count)
+		result[gid] = count
+	}
+
+	return result, nil
+}

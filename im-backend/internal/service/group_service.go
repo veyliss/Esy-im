@@ -418,6 +418,23 @@ func (s *GroupService) GetUserUnreadGroupMessages(groupID, userID string) (int64
 	return s.groupRepo.GetUserUnreadGroupMessages(groupID, userID)
 }
 
+// GetGroupMessagesByCursor 游标分页获取群消息
+func (s *GroupService) GetGroupMessagesByCursor(groupID, userID string, cursor uint, limit int) ([]model.GroupMessage, bool, error) {
+	isMember, err := s.groupRepo.IsGroupMember(groupID, userID)
+	if err != nil {
+		return nil, false, err
+	}
+	if !isMember {
+		return nil, false, errors.New("您不是该群组的成员")
+	}
+	return s.groupRepo.GetGroupMessagesByCursor(groupID, cursor, limit)
+}
+
+// BatchGetUnreadCounts 批量获取多个群的未读消息数
+func (s *GroupService) BatchGetUnreadCounts(userID string, groupIDs []string) (map[string]int64, error) {
+	return s.groupRepo.BatchGetUserUnreadGroupMessages(userID, groupIDs)
+}
+
 // ==================== 群邀请 ====================
 
 // InviteToGroup 邀请用户入群

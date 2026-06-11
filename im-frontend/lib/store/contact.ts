@@ -3,7 +3,7 @@
  */
 
 import { create } from "zustand";
-import type { Friend, FriendRequest, User } from "@/lib/types/api";
+import type { Friend, FriendRequest, User, BlockedUser } from "@/lib/types/api";
 
 interface ContactState {
   // 好友列表
@@ -30,6 +30,17 @@ interface ContactState {
   pendingRequestCount: number;
   setPendingRequestCount: (count: number) => void;
   
+  // 在线状态: user_id -> online
+  onlineStatusMap: Record<string, boolean>;
+  setOnlineStatus: (userId: string, online: boolean) => void;
+  batchSetOnlineStatus: (statuses: Array<{ user_id: string; online: boolean }>) => void;
+
+  // 黑名单
+  blockedList: BlockedUser[];
+  setBlockedList: (list: BlockedUser[]) => void;
+  addBlocked: (user: BlockedUser) => void;
+  removeBlocked: (blockId: number) => void;
+
   // 加载状态
   loading: boolean;
   setLoading: (loading: boolean) => void;
@@ -57,6 +68,25 @@ export const useContactStore = create<ContactState>((set) => ({
   pendingRequestCount: 0,
   setPendingRequestCount: (count) => set({ pendingRequestCount: count }),
   
+  onlineStatusMap: {},
+  setOnlineStatus: (userId, online) => set((state) => ({
+    onlineStatusMap: { ...state.onlineStatusMap, [userId]: online },
+  })),
+  batchSetOnlineStatus: (statuses) => set((state) => {
+    const map = { ...state.onlineStatusMap };
+    statuses.forEach(({ user_id, online }) => { map[user_id] = online; });
+    return { onlineStatusMap: map };
+  }),
+
+  blockedList: [],
+  setBlockedList: (list) => set({ blockedList: list }),
+  addBlocked: (user) => set((state) => ({
+    blockedList: [user, ...state.blockedList],
+  })),
+  removeBlocked: (blockId) => set((state) => ({
+    blockedList: state.blockedList.filter((b) => b.id !== blockId),
+  })),
+
   loading: false,
   setLoading: (loading) => set({ loading }),
   
@@ -68,6 +98,8 @@ export const useContactStore = create<ContactState>((set) => ({
       selectedFriend: null,
       searchResult: null,
       pendingRequestCount: 0,
+      onlineStatusMap: {},
+      blockedList: [],
       loading: false,
     }),
 }));

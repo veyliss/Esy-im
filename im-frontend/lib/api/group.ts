@@ -5,7 +5,10 @@ import type {
   GroupMember,
   GroupMessage,
   GroupMessageType,
-  PaginationParams 
+  PaginationParams,
+  CursorPaginationParams,
+  CursorPaginatedResponse,
+  GroupPinnedMessage,
 } from "@/lib/types/api";
 
 // ============ 请求参数类型 ============
@@ -167,4 +170,102 @@ export const GroupAPI = {
    */
   getGroupUnreadCount: (groupId: string) =>
     api.get<ApiResponse<{ count: number }>>(`/groups/${groupId}/unread-count`),
+
+  // ==================== Typing ====================
+
+  /**
+   * 发送群聊Typing状态
+   */
+  sendGroupTyping: (groupId: string) =>
+    api.post<ApiResponse<string>>(`/groups/${groupId}/typing`),
+
+  // ==================== 群邀请 ====================
+
+  /**
+   * 邀请用户入群
+   */
+  inviteUser: (groupId: string, inviteeUserId: string) =>
+    api.post<ApiResponse<string>>(`/groups/${groupId}/invite`, { invitee_user_id: inviteeUserId }),
+
+  /**
+   * 接受群邀请
+   */
+  acceptInvitation: (invitationId: number) =>
+    api.post<ApiResponse<string>>(`/groups/invitations/${invitationId}/accept`),
+
+  /**
+   * 拒绝群邀请
+   */
+  rejectInvitation: (invitationId: number) =>
+    api.post<ApiResponse<string>>(`/groups/invitations/${invitationId}/reject`),
+
+  /**
+   * 获取收到的群邀请列表
+   */
+  getReceivedInvitations: () =>
+    api.get<ApiResponse<import("@/lib/types/api").GroupInvitation[]>>("/groups/invitations/received"),
+
+  // ==================== 群公告 ====================
+
+  /**
+   * 创建群公告
+   */
+  createAnnouncement: (groupId: string, data: { content: string; is_pinned?: boolean }) =>
+    api.post<ApiResponse<import("@/lib/types/api").GroupAnnouncement>>(`/groups/${groupId}/announcements`, data),
+
+  /**
+   * 获取群公告列表
+   */
+  getAnnouncements: (groupId: string) =>
+    api.get<ApiResponse<import("@/lib/types/api").GroupAnnouncement[]>>(`/groups/${groupId}/announcements`),
+
+  /**
+   * 更新群公告
+   */
+  updateAnnouncement: (announcementId: number, data: { content?: string; is_pinned?: boolean }) =>
+    api.put<ApiResponse<string>>(`/groups/announcements/${announcementId}`, data),
+
+  /**
+   * 删除群公告
+   */
+  deleteAnnouncement: (announcementId: number) =>
+    api.delete<ApiResponse<string>>(`/groups/announcements/${announcementId}`),
+
+  // ==================== 游标分页 + 批量未读 ====================
+
+  /**
+   * 游标分页获取群消息
+   */
+  getGroupMessagesCursor: (groupId: string, params?: CursorPaginationParams) => {
+    const queryString = params
+      ? `?cursor=${params.cursor ?? 0}&limit=${params.limit ?? 20}`
+      : '?cursor=0&limit=20';
+    return api.get<ApiResponse<CursorPaginatedResponse<GroupMessage>>>(`/groups/${groupId}/messages${queryString}`);
+  },
+
+  /**
+   * 批量获取多个群的未读消息数
+   */
+  batchGetUnreadCounts: (groupIds: string[]) =>
+    api.post<ApiResponse<Record<string, number>>>("/groups/unread-counts-batch", { group_ids: groupIds }),
+
+  // ==================== 群置顶消息 ====================
+
+  /**
+   * 置顶群消息
+   */
+  pinMessage: (groupId: string, messageId: number) =>
+    api.post<ApiResponse<string>>(`/groups/${groupId}/messages/${messageId}/pin`),
+
+  /**
+   * 取消置顶
+   */
+  unpinMessage: (groupId: string, messageId: number) =>
+    api.delete<ApiResponse<string>>(`/groups/${groupId}/messages/${messageId}/unpin`),
+
+  /**
+   * 获取群置顶消息
+   */
+  getPinnedMessages: (groupId: string) =>
+    api.get<ApiResponse<GroupPinnedMessage[]>>(`/groups/${groupId}/pinned-messages`),
 };

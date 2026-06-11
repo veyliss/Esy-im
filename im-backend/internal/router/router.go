@@ -41,6 +41,8 @@ func InitRouter() *mux.Router {
 
 	messageService := service.NewMessageService(messageRepo, friendRepo, groupRepo, blockRepo)
 	blockService := service.NewBlockService(blockRepo, userRepo)
+	favoriteService := service.NewFavoriteService(repository.NewFavoriteRepository(pkg.DB), messageRepo)
+	pinnedService := service.NewPinnedService(repository.NewPinnedRepository(pkg.DB), groupRepo)
 
 	userController := controller.NewUserController(userService, codeService)
 	friendController := controller.NewFriendController(friendService)
@@ -48,6 +50,7 @@ func InitRouter() *mux.Router {
 	messageController := controller.NewMessageController(messageService)
 	groupController := controller.NewGroupController(groupService)
 	blockController := controller.NewBlockController(blockService)
+	favoriteController := controller.NewFavoriteController(favoriteService, pinnedService)
 
 	userHandler := handler.NewUserHandler(userController)
 	friendHandler := handler.NewFriendHandler(friendController, userRepo)
@@ -55,6 +58,7 @@ func InitRouter() *mux.Router {
 	messageHandler := handler.NewMessageHandler(messageController, userRepo)
 	groupHandler := handler.NewGroupHandler(groupController, userRepo)
 	blockHandler := handler.NewBlockHandler(blockController, userRepo)
+	favoriteHandler := handler.NewFavoriteHandler(favoriteController, userRepo)
 	uploadHandler := handler.NewUploadHandler()
 
 	// 健康检查
@@ -76,6 +80,7 @@ func InitRouter() *mux.Router {
 	api.HandleFunc("/users/logout", pkg.AuthMiddleware(pkg.RDB, userHandler.Logout)).Methods("POST")
 	api.HandleFunc("/users/set-password", pkg.AuthMiddleware(pkg.RDB, userHandler.SetPassword)).Methods("POST")
 	api.HandleFunc("/upload/image", pkg.AuthMiddleware(pkg.RDB, uploadHandler.UploadImage)).Methods("POST")
+	api.HandleFunc("/upload/file", pkg.AuthMiddleware(pkg.RDB, uploadHandler.UploadFile)).Methods("POST")
 
 	// friends 好友系统
 	api.HandleFunc("/friends/send-request", pkg.AuthMiddleware(pkg.RDB, friendHandler.SendRequest)).Methods("POST")
@@ -146,6 +151,7 @@ func InitRouter() *mux.Router {
 	api.HandleFunc("/groups/messages/{message_id}/recall", pkg.AuthMiddleware(pkg.RDB, groupHandler.RecallGroupMessage)).Methods("PUT")
 	api.HandleFunc("/groups/{group_id}/messages/read", pkg.AuthMiddleware(pkg.RDB, groupHandler.MarkGroupMessagesAsRead)).Methods("PUT")
 	api.HandleFunc("/groups/{group_id}/unread-count", pkg.AuthMiddleware(pkg.RDB, groupHandler.GetUserUnreadGroupMessages)).Methods("GET")
+	api.HandleFunc("/groups/unread-counts-batch", pkg.AuthMiddleware(pkg.RDB, groupHandler.BatchGetUnreadCounts)).Methods("POST")
 
 	// 群邀请
 	api.HandleFunc("/groups/{group_id}/invite", pkg.AuthMiddleware(pkg.RDB, groupHandler.InviteToGroup)).Methods("POST")
@@ -161,6 +167,14 @@ func InitRouter() *mux.Router {
 
 	// 群 Typing
 	api.HandleFunc("/groups/{group_id}/typing", pkg.AuthMiddleware(pkg.RDB, groupHandler.SendGroupTyping)).Methods("POST")
+
+	// 收藏和群置顶
+	api.HandleFunc("/favorites/add", pkg.AuthMiddleware(pkg.RDB, favoriteHandler.AddFavorite)).Methods("POST")
+	api.HandleFunc("/favorites/remove", pkg.AuthMiddleware(pkg.RDB, favoriteHandler.RemoveFavorite)).Methods("DELETE")
+	api.HandleFunc("/favorites/list", pkg.AuthMiddleware(pkg.RDB, favoriteHandler.GetUserFavorites)).Methods("GET")
+	api.HandleFunc("/groups/{group_id}/messages/{message_id}/pin", pkg.AuthMiddleware(pkg.RDB, favoriteHandler.PinMessage)).Methods("POST")
+	api.HandleFunc("/groups/{group_id}/messages/{message_id}/unpin", pkg.AuthMiddleware(pkg.RDB, favoriteHandler.UnpinMessage)).Methods("DELETE")
+	api.HandleFunc("/groups/{group_id}/pinned-messages", pkg.AuthMiddleware(pkg.RDB, favoriteHandler.GetGroupPinnedMessages)).Methods("GET")
 
 	return r
 }

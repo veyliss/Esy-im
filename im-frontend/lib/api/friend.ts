@@ -83,4 +83,16 @@ export const FriendAPI = {
    */
   searchFriend: (keyword: string) =>
     api.get<ApiResponse<FriendSearchResult>>(`/friends/search?keyword=${encodeURIComponent(keyword)}`),
+
+  /**
+   * 获取在线好友列表
+   */
+  getOnlineStatus: () =>
+    api.get<ApiResponse<Array<{ user_id: string; online: boolean }>>>("/friends/online-status"),
+
+  /**
+   * 批量查询用户在线状态
+   */
+  getOnlineStatusBatch: (userIds: string[]) =>
+    api.get<ApiResponse<Array<{ user_id: string; online: boolean }>>>(`/friends/online-status/batch?user_ids=${userIds.join(',')}`),
 };

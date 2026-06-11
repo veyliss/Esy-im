@@ -57,6 +57,9 @@ Thumbs.db
 *.claude/
 .codebuddy/
 *.codebuddy/
+.qoder/
+.cursor/
+.windsurf/
 
 # 依赖目录
 node_modules/
@@ -101,6 +104,11 @@ settings.local.*
 *.csr
 *.p12
 *.pfx
+
+# 用户上传文件（包含用户隐私数据，绝对不要提交）
+im-backend/uploads/
+uploads/
+storage/
 
 # 数据文件
 *.db

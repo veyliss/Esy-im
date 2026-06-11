@@ -9,6 +9,9 @@ import {
   HeartFilled,
   MessageOutlined,
   MoreOutlined,
+  GlobalOutlined,
+  TeamOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import clsx from "clsx";
 import type { Moment, User, MomentLike, MomentComment } from "@/lib/types/api";
@@ -136,6 +139,8 @@ export function MomentItem({
         {/* Time + action bar */}
         <div className="wx-moment-meta">
           <span className="wx-moment-time">{formatMomentTime(moment.created_at)}</span>
+                    {moment.visible === 1 ? <TeamOutlined style={{ fontSize: 12, color: '#999', marginLeft: 4 }} title="仅好友可见" /> : null}
+                    {moment.visible === 2 ? <LockOutlined style={{ fontSize: 12, color: '#999', marginLeft: 4 }} title="私密" /> : null}
 
           {/* Action trigger button */}
           <div className="wx-moment-action-wrap" ref={actionRef}>
