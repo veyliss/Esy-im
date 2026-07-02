@@ -61,10 +61,10 @@ export function TopIconButton({
       className={clsx(
         "im-top-icon-button relative flex size-9 items-center justify-center rounded-lg text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-[0.92] disabled:cursor-not-allowed disabled:opacity-50",
         tone === "default" &&
-          "text-slate-500 hover:bg-black/5 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-100",
+          "text-slate-500 hover:bg-black/5 hover:text-slate-950",
         tone === "primary" && "bg-primary text-white shadow-sm hover:bg-primary/90",
         tone === "danger" &&
-          "text-red-500 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-950/40",
+          "text-red-500 hover:bg-red-50 hover:text-red-600",
       )}
     >
       <span className="material-symbols-outlined text-xl">{icon}</span>
@@ -87,10 +87,10 @@ export function TopStatusPill({ children, tone = "muted" }: TopStatusPillProps) 
     <span
       className={clsx(
         "top-status-pill inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold",
-        tone === "online" && "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
-        tone === "muted" && "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
-        tone === "primary" && "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light",
-        tone === "warning" && "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
+        tone === "online" && "bg-emerald-50 text-emerald-700",
+        tone === "muted" && "bg-slate-100 text-slate-600",
+        tone === "primary" && "bg-primary/10 text-primary",
+        tone === "warning" && "bg-amber-50 text-amber-700",
       )}
     >
       {children}

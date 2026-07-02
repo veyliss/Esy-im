@@ -9,7 +9,7 @@
   --im4-text: #0F172A;
   --im4-muted: #64748B;
   --im4-subtle: #94A3B8;
-  --im4-blue: #3B82F6;
+  --im4-blue: #2563eb;
   --im4-blue-deep: #2563EB;
   --im4-green: #10B981;
   --im4-red: #EF4444;
@@ -23,6 +23,12 @@
   color: var(--im4-text);
   font-family: var(--font-display);
 }
+
+
+/* Forward / reference bubbles */
+
+
+/* Typing indicator */
 
 .im4-rail {
   display: flex;
@@ -1680,7 +1686,7 @@
   --im4-surface: #ffffff;
   --im4-border: #d8e3ef;
   --im4-border-soft: #e9f0f7;
-  --im4-blue: #3B82F6;
+  --im4-blue: #2563eb;
   --im4-blue-deep: #2563EB;
   --im4-mint: #14b8a6;
   --im4-shadow-soft: 0 14px 38px rgba(15, 23, 42, 0.06);
@@ -1748,7 +1754,7 @@
 .im4-rail-user > div,
 .me-avatar-button > .relative > div,
 .im4-session-head .relative > div {
-  background: linear-gradient(135deg, #3B82F6 0%, #14b8a6 100%) !important;
+  background: linear-gradient(135deg, var(--im4-blue) 0%, #14b8a6 100%) !important;
 }
 
 .im4-sessions {
@@ -1866,7 +1872,7 @@
 
 .im4-button.is-primary:hover,
 .im-primary-button:hover {
-  background: linear-gradient(180deg, #3B82F6 0%, var(--im4-blue-deep) 100%);
+  background: linear-gradient(180deg, var(--im4-blue) 0%, var(--im4-blue-deep) 100%);
   box-shadow: var(--im4-shadow-hover);
 }
 
@@ -2050,11 +2056,6 @@
     box-shadow: 0 -1px 12px rgba(15, 23, 42, 0.06);
   }
 
-  .dark .im4-rail {
-    background: rgba(15, 23, 42, 0.92);
-    border-top-color: #1e293b;
-    box-shadow: 0 -1px 12px rgba(0, 0, 0, 0.25);
-  }
 
   .im4-rail nav {
     display: grid;
@@ -2102,9 +2103,6 @@
     color: var(--im4-blue);
   }
 
-  .dark .im4-rail-link.is-active {
-    background: rgba(59, 130, 246, 0.16);
-  }
 
   /* ---- Sessions panel ---- */
   .im4-sessions {
@@ -2160,9 +2158,6 @@
     z-index: 10;
   }
 
-  .dark .im4-mobile-titlebar {
-    background: rgba(15, 23, 42, 0.92);
-  }
 
   .im4-titlebar-back {
     display: inline-flex;
@@ -2186,9 +2181,6 @@
     background: rgba(59, 130, 246, 0.16);
   }
 
-  .dark .im4-titlebar-back {
-    background: rgba(59, 130, 246, 0.16);
-  }
 
   .im4-mobile-titlebar h1 {
     color: var(--im4-text);
@@ -2256,9 +2248,6 @@
     background: rgba(59, 130, 246, 0.16);
   }
 
-  .dark .mobile-detail-back {
-    background: rgba(59, 130, 246, 0.16);
-  }
 
   .mobile-detail-header h2 {
     overflow: hidden;
@@ -2582,4 +2571,64 @@
 
 .im4-offline-alert {
   margin: 0.5rem 1.5rem;
+}
+
+/* ============ Performance & Containment ============ */
+
+/* Layout containment for list items (reduces layout thrashing) */
+.im4-session-item {
+  contain: layout style;
+}
+
+.im4-message-row {
+  contain: layout style;
+}
+
+/* GPU acceleration for animated elements */
+.im4-rail-link {
+  will-change: background-color, color;
+}
+
+.im4-session-item {
+  will-change: background-color, border-color;
+}
+
+/* Smooth scroll chaining for nested scroll containers */
+.im4-conversation {
+  overflow: hidden;
+}
+
+.im4-message-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Prevent layout shift when scrollbar appears/disappears */
+.im4-session-list,
+.im4-message-list {
+  scrollbar-gutter: stable;
+}
+
+/* Content visibility for offscreen moments (performance) */
+.wx-moment-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 160px;
+}
+
+/* Reduce paint cost for static elements */
+.im4-rail,
+.im4-session-head {
+  contain: layout style paint;
+}
+
+/* Prevent flash of unstyled content on page load */
+.im4-shell {
+  visibility: visible;
+}
+
+/* Smooth font rendering */
+.im4-shell {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }

@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Input, Modal, Switch } from "antd";
+import { Avatar, Badge, Button, Card, Descriptions, Input, List, Modal, Progress, Skeleton, Space, Switch, Typography } from "antd";
 import {
   BellOutlined,
+  BgColorsOutlined,
   CameraOutlined,
   ClockCircleOutlined,
-  CloseOutlined,
   IdcardOutlined,
   KeyOutlined,
   MailOutlined,
@@ -17,8 +17,8 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Im4Button, Im4Shell, Im4Status } from "@/components/im4";
+import { useThemeMode } from "@/components/ui/antd-provider";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { PageLoading } from "@/components/ui/loading-states";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 import { useAuthStore } from "@/lib/store";
 import { AuthAPI } from "@/lib/api/auth";
@@ -26,6 +26,8 @@ import { UserAPI } from "@/lib/api/user";
 import { UploadAPI } from "@/lib/api/upload";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import type { User } from "@/lib/types/api";
+
+const { Text, Title } = Typography;
 
 function formatDate(value?: string) {
   if (!value) return "未记录";
@@ -37,15 +39,15 @@ function formatDate(value?: string) {
 }
 
 function passwordStrength(password: string) {
-  if (!password) return { score: 0, label: "未设置", color: "#d9d9d9" };
+  if (!password) return { score: 0, label: "未设置", color: "#d9d9d9", percent: 0 };
   let score = 0;
   if (password.length >= 8) score += 1;
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
   if (/\d/.test(password)) score += 1;
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
-  if (score <= 1) return { score, label: "偏弱", color: "#ef4444" };
-  if (score <= 3) return { score, label: "可用", color: "#f59e0b" };
-  return { score, label: "较强", color: "#10b981" };
+  if (score <= 1) return { score, label: "偏弱", color: "#ef4444", percent: 33 };
+  if (score <= 3) return { score, label: "可用", color: "#f59e0b", percent: 66 };
+  return { score, label: "较强", color: "#10b981", percent: 100 };
 }
 
 type UserPreferences = {
@@ -62,6 +64,7 @@ const preferencesStorageKey = "esy-im:user-preferences";
 
 export default function MePage() {
   const { confirm, toast } = useAppInteractions();
+  const { isDark, toggle: toggleTheme } = useThemeMode();
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const { clearToken } = useAuthStore();
@@ -148,7 +151,7 @@ export default function MePage() {
       if (res.data.code === 0) {
         setAvatar(res.data.data.url);
       }
-    } catch (err) {
+    } catch {
       setError("头像上传失败，请重试");
     }
   };
@@ -170,7 +173,6 @@ export default function MePage() {
     setDesktopNotifications(enabled);
   };
 
-  // Save profile changes from modal
   const handleSaveProfile = async () => {
     if (saving) return;
     if (!nickname.trim()) { setError("昵称不能为空"); return; }
@@ -194,7 +196,6 @@ export default function MePage() {
     }
   };
 
-  // Save password
   const handleSavePassword = async () => {
     if (saving) return;
     if (!newPassword.trim()) { setError("新密码不能为空"); return; }
@@ -216,7 +217,6 @@ export default function MePage() {
     }
   };
 
-  // Save preferences
   const handleSavePreferences = async () => {
     const nextPreferences = { desktopNotifications, compactMessages };
     window.localStorage.setItem(preferencesStorageKey, JSON.stringify(nextPreferences));
@@ -241,6 +241,8 @@ export default function MePage() {
       router.push("/login");
     }
   };
+
+  const avatarSrc = avatar || currentUser?.avatar || "/default-avatar.png";
 
   // Session panel (left sidebar)
   const settingsPanel = (
@@ -291,8 +293,8 @@ export default function MePage() {
           </div>
         }
       >
-        <div className="wx-me-loading-wrap">
-          <PageLoading message="加载个人资料..." size="md" />
+        <div style={{ padding: 24 }}>
+          <Skeleton active avatar={{ size: 64 }} paragraph={{ rows: 4 }} />
         </div>
       </Im4Shell>
     );
@@ -308,204 +310,154 @@ export default function MePage() {
       avatarSrc={avatar || currentUser?.avatar}
       avatarName={nickname || currentUser?.nickname || "我"}
       rightSlot={
-        <button type="button" className="wx-me-edit-btn" onClick={() => setEditProfileOpen(true)}>
+        <Button type="link" onClick={() => setEditProfileOpen(true)}>
           编辑资料
-        </button>
+        </Button>
       }
     >
-      <div className="wx-me-page">
-        <ErrorAlert error={error} onClose={() => setError(null)} className="wx-me-error" />
+      <div style={{ padding: "24px 28px", maxWidth: 720, display: "flex", flexDirection: "column", gap: 20 }}>
+        <ErrorAlert error={error} onClose={() => setError(null)} />
 
-        {/* Profile header card (WeChat style) */}
-        <div className="wx-me-profile-card">
-          <div className="wx-me-profile-info">
-            <div className="wx-me-profile-text">
-              <span className="wx-me-label">个人资料</span>
-              <h2 className="wx-me-name">{currentUser?.nickname || "未设置昵称"}</h2>
-              <div className="wx-me-id-row">
-                <span className="wx-me-id">微信号：{currentUser?.user_id || "未设置"}</span>
-              </div>
-            </div>
-            <button type="button" className="wx-me-avatar-wrap" onClick={handleAvatarClick}>
-              <img
-                src={avatar || currentUser?.avatar || "/default-avatar.png"}
-                alt={currentUser?.nickname || "头像"}
-                className="wx-me-avatar-img"
+        {/* Profile header card */}
+        <Card>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <Badge count={<span style={{ cursor: "pointer" }} onClick={handleAvatarClick}><CameraOutlined style={{ fontSize: 12, color: "#fff", background: "#2563eb", borderRadius: "50%", padding: 4 }} /></span>}>
+              <Avatar
+                size={72}
+                src={avatarSrc}
+                style={{ cursor: "pointer" }}
+                onClick={handleAvatarClick}
               />
-              <span className="wx-me-avatar-badge">
-                <CameraOutlined />
-              </span>
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+            </Badge>
+            <div style={{ flex: 1 }}>
+              <Title level={4} style={{ margin: 0 }}>{currentUser?.nickname || "未设置昵称"}</Title>
+              <Text type="secondary">微信号：{currentUser?.user_id || "未设置"}</Text>
+            </div>
           </div>
-          {/* Quick meta row */}
-          <div className="wx-me-meta-row">
-            <div className="wx-me-meta-tag"><MailOutlined /> {currentUser?.email || "未绑定邮箱"}</div>
-            <div className="wx-me-meta-tag"><ClockCircleOutlined /> {formatDate(currentUser?.created_at)}</div>
-          </div>
-        </div>
+          <Space style={{ marginTop: 12 }} wrap>
+            <Text type="secondary"><MailOutlined /> {currentUser?.email || "未绑定邮箱"}</Text>
+            <Text type="secondary"><ClockCircleOutlined /> {formatDate(currentUser?.created_at)}</Text>
+          </Space>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+        </Card>
 
         {/* Section: Account info */}
-        <div className="wx-me-section" id="account-section">
-          <div className="wx-me-section-title">
-            <IdcardOutlined /> 账号信息
-          </div>
-          <div className="wx-me-section-body">
-            <div className="wx-me-info-row">
-              <span className="wx-me-info-label">用户 ID</span>
-              <span className="wx-me-info-value">{currentUser?.user_id || "未设置"}</span>
-            </div>
-            <div className="wx-me-info-row">
-              <span className="wx-me-info-label">邮箱</span>
-              <span className="wx-me-info-value">{currentUser?.email || "未绑定"}</span>
-            </div>
-            <div className="wx-me-info-row">
-              <span className="wx-me-info-label">创建时间</span>
-              <span className="wx-me-info-value">{formatDate(currentUser?.created_at)}</span>
-            </div>
-            <div className="wx-me-info-row">
-              <span className="wx-me-info-label">最近更新</span>
-              <span className="wx-me-info-value">{formatDate(currentUser?.updated_at)}</span>
-            </div>
-          </div>
-        </div>
+        <Card title={<><IdcardOutlined /> 账号信息</>} size="small">
+          <Descriptions column={1} size="small">
+            <Descriptions.Item label="用户 ID">{currentUser?.user_id || "未设置"}</Descriptions.Item>
+            <Descriptions.Item label="邮箱">{currentUser?.email || "未绑定"}</Descriptions.Item>
+            <Descriptions.Item label="创建时间">{formatDate(currentUser?.created_at)}</Descriptions.Item>
+            <Descriptions.Item label="最近更新">{formatDate(currentUser?.updated_at)}</Descriptions.Item>
+          </Descriptions>
+        </Card>
 
         {/* Section: Security */}
-        <div className="wx-me-section" id="security-section">
-          <div className="wx-me-section-title">
-            <SafetyCertificateOutlined /> 账号与安全
-          </div>
-          <div className="wx-me-section-body">
-            <button type="button" className="wx-me-action-row" onClick={() => setEditPasswordOpen(true)}>
-              <span className="wx-me-action-label">修改密码</span>
-              <RightOutlined className="wx-me-arrow" />
-            </button>
-            <div className="wx-me-info-row">
-              <span className="wx-me-info-label">登录状态</span>
-              <span className="wx-me-info-value wx-me-status-online">在线</span>
-            </div>
-          </div>
-        </div>
+        <Card title={<><SafetyCertificateOutlined /> 账号与安全</>} size="small">
+          <List split={false} size="small">
+            <List.Item
+              style={{ padding: "8px 0", cursor: "pointer" }}
+              onClick={() => setEditPasswordOpen(true)}
+              extra={<RightOutlined style={{ color: "#94a3b8" }} />}
+            >
+              <span>修改密码</span>
+            </List.Item>
+            <List.Item style={{ padding: "8px 0" }}>
+              <span>登录状态</span>
+              <span style={{ color: "#10b981", fontWeight: 500, marginLeft: "auto" }}>在线</span>
+            </List.Item>
+          </List>
+        </Card>
 
         {/* Section: Preferences */}
-        <div className="wx-me-section" id="preference-section">
-          <div className="wx-me-section-title">
-            <BellOutlined /> 偏好设置
-          </div>
-          <div className="wx-me-section-body">
-            <div className="wx-me-setting-row">
-              <div className="wx-me-setting-text">
-                <strong>桌面通知</strong>
-                <small>收到新消息时显示浏览器通知提醒</small>
-              </div>
-              <Switch
-                checked={desktopNotifications}
-                onChange={(checked) => { void handleDesktopNotificationsChange(checked); }}
-                size="small"
+        <Card title={<><BellOutlined /> 偏好设置</>} size="small">
+          <List split={false} size="small">
+            <List.Item
+              style={{ padding: "10px 0" }}
+              extra={<Switch checked={isDark} onChange={toggleTheme} size="small" />}
+            >
+              <List.Item.Meta
+                title={<span><BgColorsOutlined /> 深色模式</span>}
+                description="切换暗色主题，减少眼睛疲劳"
               />
-            </div>
-            <div className="wx-me-setting-row">
-              <div className="wx-me-setting-text">
-                <strong>紧凑消息列表</strong>
-                <small>提高会话列表密度，适合小屏或高频切换</small>
-              </div>
-              <Switch
-                checked={compactMessages}
-                onChange={setCompactMessages}
-                size="small"
+            </List.Item>
+            <List.Item
+              style={{ padding: "10px 0" }}
+              extra={<Switch checked={desktopNotifications} onChange={(checked) => { void handleDesktopNotificationsChange(checked); }} size="small" />}
+            >
+              <List.Item.Meta
+                title="桌面通知"
+                description="收到新消息时显示浏览器通知提醒"
               />
-            </div>
-            {hasPreferenceChanges ? (
-              <button type="button" className="wx-me-save-pref-btn" onClick={handleSavePreferences}>
-                保存偏好设置
-              </button>
-            ) : null}
-          </div>
-        </div>
+            </List.Item>
+            <List.Item
+              style={{ padding: "10px 0" }}
+              extra={<Switch checked={compactMessages} onChange={setCompactMessages} size="small" />}
+            >
+              <List.Item.Meta
+                title="紧凑消息列表"
+                description="提高会话列表密度，适合小屏或高频切换"
+              />
+            </List.Item>
+          </List>
+          {hasPreferenceChanges ? (
+            <Button type="primary" block style={{ marginTop: 8 }} onClick={handleSavePreferences}>
+              保存偏好设置
+            </Button>
+          ) : null}
+        </Card>
 
-        {/* Logout button (mobile-friendly inline) */}
-        <div className="wx-me-logout-section">
-          <button type="button" className="wx-me-logout-btn" onClick={handleLogout} disabled={logoutLoading}>
-            {logoutLoading ? "退出中..." : "退出登录"}
-          </button>
-        </div>
+        {/* Logout button */}
+        <Button danger block size="large" onClick={handleLogout} loading={logoutLoading}>
+          {logoutLoading ? "退出中..." : "退出登录"}
+        </Button>
       </div>
 
       {/* Edit Profile Modal */}
       <Modal
         open={editProfileOpen}
         onCancel={() => {
-          // Reset to current values
           setNickname(currentUser?.nickname || "");
           setAvatar(currentUser?.avatar || "");
           setEditProfileOpen(false);
         }}
-        footer={null}
-        closable={false}
+        title="编辑资料"
+        footer={
+          <Space>
+            <Button onClick={() => {
+              setNickname(currentUser?.nickname || "");
+              setAvatar(currentUser?.avatar || "");
+              setEditProfileOpen(false);
+            }}>
+              取消
+            </Button>
+            <Button type="primary" disabled={saving || !hasProfileChanges} loading={saving} onClick={handleSaveProfile}>
+              保存
+            </Button>
+          </Space>
+        }
         centered
         width="min(460px, calc(100vw - 24px))"
-        className="wx-me-edit-modal"
       >
-        <div className="wx-me-modal">
-          <div className="wx-me-modal-head">
-            <span className="wx-me-modal-title">编辑资料</span>
-            <button
-              type="button"
-              className="wx-me-modal-close"
-              onClick={() => {
-                setNickname(currentUser?.nickname || "");
-                setAvatar(currentUser?.avatar || "");
-                setEditProfileOpen(false);
-              }}
-            >
-              <CloseOutlined />
-            </button>
-          </div>
-          <div className="wx-me-modal-body">
-            {/* Avatar editor */}
-            <div className="wx-me-edit-avatar">
-              <button type="button" onClick={handleAvatarClick}>
-                <img
-                  src={avatar || currentUser?.avatar || "/default-avatar.png"}
-                  alt="头像"
-                />
-                <span className="wx-me-avatar-overlay"><UploadOutlined /></span>
-              </button>
-              <span className="wx-me-edit-avatar-hint">点击更换头像</span>
-            </div>
-            {/* Nickname input */}
-            <div className="wx-me-edit-field">
-              <label>昵称</label>
-              <Input
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="请输入昵称"
-                maxLength={30}
-                size="large"
-                showCount
-              />
-            </div>
-          </div>
-          <div className="wx-me-modal-foot">
-            <button
-              type="button"
-              className="wx-me-modal-cancel"
-              onClick={() => {
-                setNickname(currentUser?.nickname || "");
-                setAvatar(currentUser?.avatar || "");
-                setEditProfileOpen(false);
-              }}
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              className="wx-me-modal-save"
-              disabled={saving || !hasProfileChanges}
-              onClick={handleSaveProfile}
-            >
-              {saving ? "保存中..." : "保存"}
-            </button>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "16px 0" }}>
+          <Badge count={<span style={{ cursor: "pointer" }} onClick={handleAvatarClick}><CameraOutlined style={{ fontSize: 14, color: "#fff", background: "#2563eb", borderRadius: "50%", padding: 5 }} /></span>}>
+            <Avatar
+              size={80}
+              src={avatarSrc}
+              style={{ cursor: "pointer" }}
+              onClick={handleAvatarClick}
+            />
+          </Badge>
+          <Text type="secondary">点击更换头像</Text>
+          <div style={{ width: "100%" }}>
+            <Text strong style={{ display: "block", marginBottom: 6 }}>昵称</Text>
+            <Input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="请输入昵称"
+              maxLength={30}
+              size="large"
+              showCount
+            />
           </div>
         </div>
       </Modal>
@@ -514,75 +466,62 @@ export default function MePage() {
       <Modal
         open={editPasswordOpen}
         onCancel={() => { setNewPassword(""); setConfirmPassword(""); setEditPasswordOpen(false); }}
-        footer={null}
-        closable={false}
-        centered
-        width="min(460px, calc(100vw - 24px))"
-        className="wx-me-edit-modal"
-      >
-        <div className="wx-me-modal">
-          <div className="wx-me-modal-head">
-            <span className="wx-me-modal-title">修改密码</span>
-            <button
-              type="button"
-              className="wx-me-modal-close"
-              onClick={() => { setNewPassword(""); setConfirmPassword(""); setEditPasswordOpen(false); }}
-            >
-              <CloseOutlined />
-            </button>
-          </div>
-          <div className="wx-me-modal-body">
-            <p className="wx-me-modal-hint">修改密码后会自动退出当前登录，需要重新登录。</p>
-            <div className="wx-me-edit-field">
-              <label>新密码</label>
-              <Input.Password
-                placeholder="请输入新密码（最少8位）"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                size="large"
-              />
-            </div>
-            <div className="wx-me-edit-field">
-              <label>确认密码</label>
-              <Input.Password
-                placeholder="请再次输入密码"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                size="large"
-              />
-            </div>
-            {/* Password strength */}
-            {newPassword ? (
-              <div className="wx-me-strength">
-                <div className="wx-me-strength-header">
-                  <span>密码强度</span>
-                  <strong style={{ color: strength.color }}>{strength.label}</strong>
-                </div>
-                <div className="wx-me-strength-bar">
-                  <div style={{ width: `${strength.score * 25}%`, background: strength.color }} />
-                </div>
-              </div>
-            ) : null}
-          </div>
-          <div className="wx-me-modal-foot">
-            <button
-              type="button"
-              className="wx-me-modal-cancel"
-              onClick={() => { setNewPassword(""); setConfirmPassword(""); setEditPasswordOpen(false); }}
-            >
+        title="修改密码"
+        footer={
+          <Space>
+            <Button onClick={() => { setNewPassword(""); setConfirmPassword(""); setEditPasswordOpen(false); }}>
               取消
-            </button>
-            <button
-              type="button"
-              className="wx-me-modal-save"
+            </Button>
+            <Button
+              type="primary"
               disabled={saving || !hasPasswordInput || newPassword.length < 8 || newPassword !== confirmPassword}
+              loading={saving}
               onClick={handleSavePassword}
             >
-              {saving ? "保存中..." : "确认修改"}
-            </button>
+              确认修改
+            </Button>
+          </Space>
+        }
+        centered
+        width="min(460px, calc(100vw - 24px))"
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "16px 0" }}>
+          <Text type="secondary">修改密码后会自动退出当前登录，需要重新登录。</Text>
+          <div>
+            <Text strong style={{ display: "block", marginBottom: 6 }}>新密码</Text>
+            <Input.Password
+              placeholder="请输入新密码（最少8位）"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              size="large"
+            />
           </div>
+          <div>
+            <Text strong style={{ display: "block", marginBottom: 6 }}>确认密码</Text>
+            <Input.Password
+              placeholder="请再次输入密码"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              size="large"
+            />
+          </div>
+          {newPassword ? (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <Text type="secondary">密码强度</Text>
+                <Text strong style={{ color: strength.color }}>{strength.label}</Text>
+              </div>
+              <Progress
+                percent={strength.percent}
+                strokeColor={strength.color}
+                showInfo={false}
+                size="small"
+              />
+            </div>
+          ) : null}
         </div>
       </Modal>
     </Im4Shell>
   );
 }
+

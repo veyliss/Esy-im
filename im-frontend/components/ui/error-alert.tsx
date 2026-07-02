@@ -88,8 +88,8 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       image={icon || Empty.PRESENTED_IMAGE_SIMPLE}
       description={
         <span>
-          <strong className="block text-slate-900 dark:text-white">{title}</strong>
-          {description ? <small className="mt-1 block text-slate-500 dark:text-slate-400">{description}</small> : null}
+          <strong className="block text-slate-900">{title}</strong>
+          {description ? <small className="mt-1 block text-slate-500">{description}</small> : null}
         </span>
       }
     >

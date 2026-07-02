@@ -134,7 +134,7 @@ export function UserAvatar({
         "relative inline-flex items-center justify-center shrink-0 select-none transition-all duration-200",
         sizeClasses[size],
         shapeClasses[shape],
-        border && "ring-2 ring-white dark:ring-slate-700",
+        border && "ring-2 ring-white",
         clickable && "cursor-pointer",
         hover && clickable && "hover:scale-110 hover:shadow-lg",
         className
@@ -147,7 +147,7 @@ export function UserAvatar({
       <div className={clsx(
         "w-full h-full flex items-center justify-center overflow-hidden",
         shapeClasses[shape],
-        shouldShowImage ? "bg-gray-100 dark:bg-gray-800" : `${backgroundColor} text-white`
+        shouldShowImage ? "bg-gray-100" : `${backgroundColor} text-white`
       )}>
         {shouldShowImage ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -169,7 +169,7 @@ export function UserAvatar({
       {/* 在线状态指示器 */}
       {showStatus && status && (
         <div className={clsx(
-          "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white dark:border-slate-800",
+          "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white",
           statusSizes[size],
           statusColors[status]
         )} />
@@ -240,7 +240,7 @@ export function AvatarGroup({
 
       {remainingCount > 0 && (
         <div className={clsx(
-          "relative flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full border-2 border-white dark:border-slate-700 font-medium",
+          "relative flex items-center justify-center bg-gray-200 text-gray-600 rounded-full border-2 border-white font-medium",
           {
             xs: "w-6 h-6 text-xs",
             sm: "w-8 h-8 text-sm",

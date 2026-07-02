@@ -6,6 +6,7 @@
 "use client";
 
 import clsx from "clsx";
+import { Skeleton as AntdSkeleton, Spin } from "antd";
 
 // 基础加载动画组件
 export function LoadingSpinner({
@@ -135,7 +136,7 @@ export function Skeleton({
 
   return (
     <div className={clsx(
-      "bg-gray-200 dark:bg-gray-700",
+      "bg-gray-200",
       variantClasses[variant],
       animationClasses[animation],
       className
@@ -229,13 +230,15 @@ export function PageLoading({
     lg: "py-24"
   };
 
+  const spinSize = size === "sm" ? "small" : size === "md" ? "default" : "large";
+
   return (
     <div className={clsx(
       "flex flex-col items-center justify-center space-y-4",
       containerClasses[size]
     )}>
-      <LoadingSpinner size={size} />
-      <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+      <Spin size={spinSize} />
+      <p className="text-sm text-gray-500">{message}</p>
     </div>
   );
 }
@@ -316,6 +319,31 @@ export function ContentLoading({
   );
 }
 
+// 内容骨架屏（基于 AntD Skeleton）
+export function ContentSkeleton({
+  type = "list",
+  rows = 3,
+}: {
+  type?: "list" | "card";
+  rows?: number;
+}) {
+  if (type === "card") {
+    return (
+      <div style={{ padding: 24 }}>
+        <AntdSkeleton active avatar={{ size: 64 }} paragraph={{ rows: 2 }} />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <AntdSkeleton key={i} active avatar paragraph={{ rows: 1 }} />
+      ))}
+    </div>
+  );
+}
+
 const loadingStates = {
   LoadingSpinner,
   LoadingPulse,
@@ -326,7 +354,8 @@ const loadingStates = {
   CardSkeleton,
   PageLoading,
   ButtonLoading,
-  ContentLoading
+  ContentLoading,
+  ContentSkeleton
 };
 
 export default loadingStates;

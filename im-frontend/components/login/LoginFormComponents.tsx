@@ -47,7 +47,7 @@ export function MainTabButton({ active, children, onClick }: TabButtonProps) {
         "flex-1 flex items-center justify-center pb-[13px] pt-4 border-b-[3px] cursor-pointer transition-colors duration-150",
         active
           ? "border-b-primary text-primary"
-          : "border-b-transparent text-gray-500 dark:text-gray-400"
+          : "border-b-transparent text-gray-500"
       )}
     >
       <span className="text-sm font-bold leading-normal tracking-[0.015em]">{children}</span>
@@ -62,15 +62,15 @@ export function SegmentedTab({ options, active, onChange }: {
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="auth-segmented flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] dark:bg-slate-800 p-1">
+    <div className="auth-segmented flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7edf3] p-1">
       {options.map((option) => (
         <label
           key={option.key}
           className={clsx(
             "flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal transition-all duration-150",
             active === option.key
-              ? "bg-white dark:bg-slate-950 shadow-[0_0_4px_rgba(0,0,0,0.1)] text-primary"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+              ? "bg-white shadow-[0_0_4px_rgba(0,0,0,0.1)] text-primary"
+              : "text-gray-500 hover:text-gray-700"
           )}
         >
           <span className="truncate">{option.label}</span>
@@ -96,8 +96,8 @@ export function ToggleTabButton({ active, children, onClick }: TabButtonProps) {
       className={clsx(
         "flex h-full grow items-center justify-center overflow-hidden rounded-lg px-2 text-sm font-medium leading-normal cursor-pointer transition-all duration-150",
         active
-          ? "bg-white dark:bg-slate-950 shadow-[0_0_4px_rgba(0,0,0,0.1)] text-primary"
-          : "text-gray-500 dark:text-gray-400"
+          ? "bg-white shadow-[0_0_4px_rgba(0,0,0,0.1)] text-primary"
+          : "text-gray-500"
       )}
     >
       <span className="truncate">{children}</span>
@@ -115,7 +115,7 @@ export function UnderlineTabButton({ active, children, onClick }: TabButtonProps
         "px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-150",
         active
           ? "border-primary text-primary"
-          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600"
+          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
       )}
     >
       {children}
@@ -126,7 +126,7 @@ export function UnderlineTabButton({ active, children, onClick }: TabButtonProps
 export function FormField({ label, children }: FieldProps) {
   return (
     <label className="flex flex-col">
-      <p className="text-gray-800 dark:text-gray-200 text-base font-medium leading-normal pb-2">
+      <p className="text-gray-800 text-base font-medium leading-normal pb-2">
         {label}
       </p>
       {children}
@@ -162,7 +162,7 @@ export function AuthInput({
     <div className="relative">
       <input
         className={clsx(
-          "auth-input form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] dark:border-slate-700 bg-background-light dark:bg-slate-800 focus:border-primary h-14 placeholder:text-gray-400 dark:placeholder-gray-500 p-[15px] text-base font-normal leading-normal",
+          "auth-input form-input w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-800 focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cfdbe7] bg-background-light focus:border-primary h-14 placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal",
           withCodeButton && "pr-32"
         )}
         placeholder={placeholder}

@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Empty, List, Button, Typography } from "antd";
+import { Card, Empty, List, Button, Skeleton, Typography } from "antd";
 import { StarOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/lib/store";
 import { FavoriteAPI } from "@/lib/api/favorite";
 import { Im4Shell } from "@/components/im4";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { PageLoading } from "@/components/ui/loading-states";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 import { handleApiError, createUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -104,7 +103,11 @@ export default function FavoritesPage() {
         <ErrorAlert error={error} onClose={() => setError(null)} />
 
         {loading && favorites.length === 0 ? (
-          <PageLoading message="加载收藏..." size="md" />
+          <>
+            <Skeleton active paragraph={{ rows: 3 }} style={{ marginBottom: 16 }} />
+            <Skeleton active paragraph={{ rows: 3 }} style={{ marginBottom: 16 }} />
+            <Skeleton active paragraph={{ rows: 3 }} />
+          </>
         ) : favorites.length === 0 ? (
           <Empty description="暂无收藏消息">
             <Typography.Text type="secondary">

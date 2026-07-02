@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Segmented, Modal, Radio } from "antd";
+import { Button, FloatButton, Input, Modal, Radio, Segmented, Skeleton, Space, Typography } from "antd";
 import {
   CameraOutlined,
   CloseOutlined,
@@ -13,7 +13,6 @@ import clsx from "clsx";
 import { MomentItem } from "@/components/moments/MomentItem";
 import { Im4Button, Im4Shell, Im4Empty } from "@/components/im4";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { PageLoading } from "@/components/ui/loading-states";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 import { useAuthStore } from "@/lib/store";
 import { useMomentStore } from "@/lib/store/moment";
@@ -271,13 +270,16 @@ export default function MomentsPage() {
           </button>
         </div>
 
-        <button
-          type="button"
-          className="wx-session-compose-btn"
+        <Button
+          type="primary"
+          icon={<CameraOutlined />}
+          block
+          size="large"
+          style={{ margin: "16px 18px", width: "calc(100% - 36px)", fontWeight: 600 }}
           onClick={() => setComposerOpen(true)}
         >
-          <CameraOutlined /> 发布动态
-        </button>
+          发布动态
+        </Button>
       </div>
     </div>
   );
@@ -292,9 +294,13 @@ export default function MomentsPage() {
       avatarSrc={currentUser?.avatar}
       avatarName={currentUser?.nickname || "我"}
       rightSlot={
-        <button type="button" className="wx-mobile-compose-btn" onClick={() => setComposerOpen(true)} aria-label="发布动态">
-          <CameraOutlined />
-        </button>
+        <Button
+          type="text"
+          icon={<CameraOutlined />}
+          onClick={() => setComposerOpen(true)}
+          aria-label="发布动态"
+          style={{ color: "#2563eb", background: "rgba(37,99,235,0.08)", borderRadius: 8 }}
+        />
       }
     >
       <div className="wx-moments-page" ref={feedRef}>
@@ -332,7 +338,11 @@ export default function MomentsPage() {
         {/* Feed */}
         <div className="wx-moments-feed">
           {loading && moments.length === 0 ? (
-            <PageLoading message="加载动态中..." size="md" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: 16 }}>
+              <Skeleton active avatar paragraph={{ rows: 2 }} />
+              <Skeleton active avatar paragraph={{ rows: 2 }} />
+              <Skeleton active avatar paragraph={{ rows: 2 }} />
+            </div>
           ) : moments.length === 0 ? (
             <Im4Empty
               title={activeTab === "timeline" ? "暂无朋友动态" : "还没有发布任何动态"}
@@ -359,117 +369,109 @@ export default function MomentsPage() {
         </div>
 
         {/* Mobile floating compose button */}
-        <button
-          type="button"
-          className="wx-fab-compose"
+        <FloatButton
+          icon={<CameraOutlined />}
+          type="primary"
           onClick={() => setComposerOpen(true)}
-          aria-label="发布动态"
-        >
-          <CameraOutlined />
-        </button>
+          tooltip="发布动态"
+          style={{ bottom: "calc(76px + env(safe-area-inset-bottom))" }}
+        />
       </div>
 
       {/* Composer modal */}
       <Modal
         open={composerOpen}
         onCancel={() => setComposerOpen(false)}
-        footer={null}
-        closable={false}
+        title="发布动态"
         centered
         width="min(560px, calc(100vw - 24px))"
-        className="wx-composer-modal"
         destroyOnClose
-      >
-        <div className="wx-composer">
-          <div className="wx-composer-head">
-            <span className="wx-composer-title">发布动态</span>
-            <button type="button" className="wx-composer-close" onClick={() => setComposerOpen(false)}>
-              <CloseOutlined />
-            </button>
-          </div>
-
-          <div className="wx-composer-body">
-            <textarea
-              className="wx-composer-textarea"
-              placeholder="分享这一刻的想法..."
-              value={content}
-              onChange={(e) => setContent(e.target.value.slice(0, 500))}
-              maxLength={500}
-              rows={5}
-            />
-
-            {images.length > 0 ? (
-              <div className="wx-composer-images">
-                {images.map((url, i) => (
-                  <div key={i} className="wx-composer-image" style={{ backgroundImage: `url(${url})` }}>
-                    <button type="button" onClick={() => removeImage(i)} aria-label="移除图片">
-                      <CloseOutlined />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="wx-composer-location">
-              <EnvironmentOutlined />
-              <input
-                type="text"
-                placeholder="添加位置"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="wx-composer-foot">
-            <div className="wx-composer-tools">
-              <button
-                type="button"
-                className="wx-composer-tool"
+        footer={
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Space>
+              <Button
+                icon={<PictureOutlined />}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <PictureOutlined />
-                <span>{images.length > 0 ? `${images.length}/9` : "图片"}</span>
-              </button>
-              {content.trim() || location.trim() || images.length > 0 ? (
-                <button type="button" className="wx-composer-tool" onClick={clearComposer}>
-                  清空
-                </button>
+                {images.length > 0 ? `${images.length}/9` : "图片"}
+              </Button>
+              {(content.trim() || location.trim() || images.length > 0) ? (
+                <Button onClick={clearComposer}>清空</Button>
               ) : null}
-            </div>
-            <div className="wx-composer-actions">
-              <Radio.Group
-                size="small"
-                value={visible}
-                onChange={(e) => setVisible(e.target.value)}
-                optionType="button"
-                buttonStyle="solid"
-              >
-                <Radio.Button value={0}>所有人</Radio.Button>
-                <Radio.Button value={1}>仅好友</Radio.Button>
-                <Radio.Button value={2}>私密</Radio.Button>
-              </Radio.Group>
-              <span className="wx-composer-count">{content.length}/500</span>
-              <button
-                type="button"
-                className="wx-composer-send"
-                disabled={publishing || (!content.trim() && images.length === 0)}
+            </Space>
+            <Space>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>{content.length}/500</Typography.Text>
+              <Button
+                type="primary"
+                loading={publishing}
+                disabled={!content.trim() && images.length === 0}
                 onClick={handlePublish}
               >
-                {publishing ? "发布中..." : "发布"}
-              </button>
+                发布
+              </Button>
+            </Space>
+          </div>
+        }
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <Input.TextArea
+            placeholder="分享这一刻的想法..."
+            value={content}
+            onChange={(e) => setContent(e.target.value.slice(0, 500))}
+            maxLength={500}
+            autoSize={{ minRows: 5, maxRows: 10 }}
+            style={{ border: "none", resize: "none", fontSize: 15 }}
+          />
+
+          {images.length > 0 ? (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {images.map((url, i) => (
+                <div key={i} style={{ width: 72, height: 72, borderRadius: 6, backgroundSize: "cover", backgroundPosition: "center", backgroundImage: `url(${url})`, position: "relative" }}>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    aria-label="移除图片"
+                    style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, border: "2px solid #fff", borderRadius: "50%", background: "#ef4444", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    <CloseOutlined />
+                  </button>
+                </div>
+              ))}
             </div>
+          ) : null}
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 8, borderTop: "1px solid #f0f0f0", color: "#888", fontSize: 14 }}>
+            <EnvironmentOutlined />
+            <Input
+              variant="borderless"
+              placeholder="添加位置"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              style={{ fontSize: 14 }}
+            />
           </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          <Radio.Group
+            size="small"
+            value={visible}
+            onChange={(e) => setVisible(e.target.value)}
+            optionType="button"
+            buttonStyle="solid"
+          >
+            <Radio.Button value={0}>所有人</Radio.Button>
+            <Radio.Button value={1}>仅好友</Radio.Button>
+            <Radio.Button value={2}>私密</Radio.Button>
+          </Radio.Group>
         </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </Modal>
     </Im4Shell>
   );

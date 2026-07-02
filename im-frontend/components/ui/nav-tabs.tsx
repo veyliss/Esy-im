@@ -69,24 +69,24 @@ const items: Array<{
 const styles = {
   light: {
     container:
-      "rounded-lg border border-slate-200/80 bg-white/92 p-1 shadow-sm dark:border-slate-800 dark:bg-slate-950/80",
-    link: "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100",
-    active: "bg-primary text-white shadow-sm dark:bg-primary",
+      "rounded-lg border border-slate-200/80 bg-white/92 p-1 shadow-sm",
+    link: "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+    active: "bg-primary text-white shadow-sm",
   },
   muted: {
     container:
-      "rounded-lg border border-slate-200/70 bg-slate-50/85 p-1 dark:border-slate-800 dark:bg-slate-950/60",
-    link: "text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200",
-    active: "bg-white text-primary shadow-sm dark:bg-slate-900 dark:text-primary-light",
+      "rounded-lg border border-slate-200/70 bg-slate-50/85 p-1",
+    link: "text-slate-500 hover:bg-white hover:text-slate-900",
+    active: "bg-white text-primary shadow-sm",
   },
   classic: {
     container: "",
-    link: "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
+    link: "text-slate-500 hover:text-slate-800",
     active: "border-b-2 border-primary text-primary",
   },
   modern: {
     container: "im-nav-tabs bg-transparent p-0",
-    link: "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100",
+    link: "text-slate-500 hover:text-slate-800",
     active: "is-active text-primary font-bold",
   },
 } as const;

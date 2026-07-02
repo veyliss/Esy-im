@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Input, type InputRef } from "antd";
+import { Button, Input, Popover, Space, type InputRef } from "antd";
 import {
   DeleteOutlined,
   EnvironmentOutlined,
@@ -49,25 +49,12 @@ export function MomentItem({
   const [commentOpen, setCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState<MomentComment | null>(null);
-  const actionRef = useRef<HTMLDivElement>(null);
   const commentInputRef = useRef<InputRef>(null);
 
   const images = parseImages(moment.images);
   const isLiked = moment.likes?.some((l: MomentLike) => l.user_id === currentUser?.user_id);
   const authorName = moment.user?.nickname || "用户";
   const isOwner = currentUser?.user_id === moment.user_id;
-
-  // Close action popup when clicking outside
-  useEffect(() => {
-    if (!actionOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (actionRef.current && !actionRef.current.contains(e.target as Node)) {
-        setActionOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [actionOpen]);
 
   // Focus comment input when opened
   useEffect(() => {
@@ -142,44 +129,52 @@ export function MomentItem({
                     {moment.visible === 1 ? <TeamOutlined style={{ fontSize: 12, color: '#999', marginLeft: 4 }} title="仅好友可见" /> : null}
                     {moment.visible === 2 ? <LockOutlined style={{ fontSize: 12, color: '#999', marginLeft: 4 }} title="私密" /> : null}
 
-          {/* Action trigger button */}
-          <div className="wx-moment-action-wrap" ref={actionRef}>
-            <button
-              type="button"
-              className={clsx("wx-moment-action-btn", actionOpen && "is-open")}
-              onClick={() => setActionOpen((v) => !v)}
-              aria-label="操作"
-            >
-              <MoreOutlined />
-            </button>
-
-            {/* Action popup (like / comment / delete) */}
-            {actionOpen ? (
-              <div className="wx-moment-action-popup">
-                <button type="button" className="wx-action-popup-item" onClick={handleLike}>
-                  {isLiked ? <HeartFilled className="is-liked" /> : <HeartOutlined />}
-                  <span>{isLiked ? "取消" : "赞"}</span>
-                </button>
-                <button type="button" className="wx-action-popup-item" onClick={handleToggleComment}>
-                  <MessageOutlined />
-                  <span>评论</span>
-                </button>
+          {/* Action trigger button with Popover */}
+          <Popover
+            open={actionOpen}
+            onOpenChange={setActionOpen}
+            trigger="click"
+            placement="bottomRight"
+            content={
+              <Space direction="horizontal" style={{ gap: 0 }}>
+                <Button
+                  type="text"
+                  icon={isLiked ? <HeartFilled style={{ color: "#fa5151" }} /> : <HeartOutlined />}
+                  onClick={handleLike}
+                >
+                  {isLiked ? "取消" : "赞"}
+                </Button>
+                <Button
+                  type="text"
+                  icon={<MessageOutlined />}
+                  onClick={handleToggleComment}
+                >
+                  评论
+                </Button>
                 {isOwner ? (
-                  <button
-                    type="button"
-                    className="wx-action-popup-item is-danger"
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
                     onClick={() => {
                       setActionOpen(false);
                       onDelete(moment.id);
                     }}
                   >
-                    <DeleteOutlined />
-                    <span>删除</span>
-                  </button>
+                    删除
+                  </Button>
                 ) : null}
-              </div>
-            ) : null}
-          </div>
+              </Space>
+            }
+          >
+            <button
+              type="button"
+              className={clsx("wx-moment-action-btn", actionOpen && "is-open")}
+              aria-label="操作"
+            >
+              <MoreOutlined />
+            </button>
+          </Popover>
         </div>
 
         {/* Likes + Comments combined section */}

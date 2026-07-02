@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Descriptions, Empty, Input, List, Modal, Space, Tag, Typography } from "antd";
+import { Button, Card, Descriptions, Empty, Input, List, Modal, Skeleton, Space, Tag, Typography } from "antd";
 import { CopyOutlined, LogoutOutlined, MessageOutlined, SearchOutlined, PlusOutlined, SoundOutlined } from "@ant-design/icons";
 import { useGroupStore } from "@/lib/store/group";
 import { GroupAPI } from "@/lib/api/group";
@@ -12,7 +12,6 @@ import type { Group, Friend, GroupAnnouncement } from "@/lib/types/api";
 import { MobileDetailHeader } from "@/components/workspace/mobile-detail-header";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { PageLoading } from "@/components/ui/loading-states";
 import { useAppInteractions } from "@/components/ui/app-interactions";
 
 export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?: () => void; onBack?: () => void }) {
@@ -304,7 +303,11 @@ export function GroupDetail({ group, onLeave, onBack }: { group: Group; onLeave?
           }
         >
           {loading ? (
-            <PageLoading message="加载群成员中..." size="sm" />
+            <>
+              <Skeleton active avatar paragraph={{ rows: 1 }} style={{ marginBottom: 12 }} />
+              <Skeleton active avatar paragraph={{ rows: 1 }} style={{ marginBottom: 12 }} />
+              <Skeleton active avatar paragraph={{ rows: 1 }} />
+            </>
           ) : filteredMembers.length === 0 ? (
             <Empty description={memberKeyword.trim() ? "未找到相关成员" : "暂无成员信息"} />
           ) : (

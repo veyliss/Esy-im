@@ -40,12 +40,12 @@ export function WorkspaceShell({
   return (
     <div
       className={clsx(
-        "im-shell min-h-screen bg-background-light font-display text-slate-800 dark:bg-background-dark dark:text-slate-200",
+        "im-shell min-h-screen bg-background-light font-display text-slate-800",
         shellClassName,
       )}
     >
       <div className="flex flex-col" style={{ height: "100svh" }}>
-        <header className="im-topbar flex shrink-0 items-center justify-between border-b border-slate-200 bg-background-light px-6 dark:border-slate-800 dark:bg-background-dark sm:px-8">
+        <header className="im-topbar flex shrink-0 items-center justify-between border-b border-slate-200 bg-background-light px-6 sm:px-8">
           <div className="flex min-w-0 flex-1 items-center">
             <div className="im-mobile-title">{activeLabels[active]}</div>
             <NavTabs active={active} variant={navVariant} showIcons={false} />
@@ -54,9 +54,9 @@ export function WorkspaceShell({
           <div className="flex shrink-0 items-center justify-end gap-3 pl-6">{rightSlot}</div>
         </header>
 
-        <div className="im-shell-body flex-1 overflow-hidden bg-white dark:bg-slate-900">
+        <div className="im-shell-body flex-1 overflow-hidden bg-white">
           {headerDescription && (
-            <div className="border-b border-slate-200 bg-white px-6 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+            <div className="border-b border-slate-200 bg-white px-6 py-3 text-sm text-slate-500">
               {headerDescription}
             </div>
           )}
@@ -71,7 +71,7 @@ export function WorkspaceShell({
           >
             <aside
               className={clsx(
-                "im-workspace-sidebar flex w-[352px] shrink-0 flex-col border-r border-slate-200 bg-background-light dark:border-slate-800 dark:bg-background-dark",
+                "im-workspace-sidebar flex w-[352px] shrink-0 flex-col border-r border-slate-200 bg-background-light",
                 sidebarClassName,
               )}
             >
@@ -80,7 +80,7 @@ export function WorkspaceShell({
 
             <main
               className={clsx(
-                "im-workspace-main min-w-0 flex-1 overflow-y-auto bg-white dark:bg-slate-900",
+                "im-workspace-main min-w-0 flex-1 overflow-y-auto bg-white",
                 mainClassName,
               )}
             >

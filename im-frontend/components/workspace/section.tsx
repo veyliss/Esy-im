@@ -12,7 +12,7 @@ export function SectionCard({ children, className, ...props }: SectionCardProps)
   return (
     <div
       className={clsx(
-        "im-panel rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950",
+        "im-panel rounded-lg border border-slate-200 bg-white p-5 shadow-sm",
         className,
       )}
       {...props}
@@ -33,9 +33,9 @@ export function SectionTitle({ title, description, action, className }: SectionT
   return (
     <div className={clsx("im-section-title flex items-start justify-between gap-4", className)}>
       <div className="min-w-0">
-        <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-100">{title}</h2>
+        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
         {description ? (
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+          <p className="mt-1 text-sm text-slate-500">{description}</p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -52,8 +52,8 @@ interface SidebarSectionProps {
 
 export function SidebarSection({ title, children, className, bodyClassName }: SidebarSectionProps) {
   return (
-    <section className={clsx("border-b border-slate-200 px-6 py-6 last:border-b-0 dark:border-slate-800", className)}>
-      <h3 className="px-1 pb-4 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{title}</h3>
+    <section className={clsx("border-b border-slate-200 px-6 py-6 last:border-b-0", className)}>
+      <h3 className="px-1 pb-4 text-xs font-semibold uppercase text-slate-500">{title}</h3>
       <div className={clsx("space-y-3", bodyClassName)}>{children}</div>
     </section>
   );
@@ -102,7 +102,7 @@ interface SidebarToolbarProps {
 
 export function SidebarToolbar({ children, className }: SidebarToolbarProps) {
   return (
-    <div className={clsx("workspace-sidebar-toolbar border-b border-slate-200 px-8 py-8 dark:border-slate-800", className)}>
+    <div className={clsx("workspace-sidebar-toolbar border-b border-slate-200 px-8 py-8", className)}>
       {children}
     </div>
   );
@@ -156,8 +156,8 @@ export function SidebarItem({
       type="text"
       aria-current={active ? "true" : undefined}
       className={clsx(
-        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-slate-700 transition-colors hover:bg-slate-100 active:scale-[0.98] dark:text-slate-300 dark:hover:bg-slate-800",
-        active && "is-active bg-primary/10 text-primary dark:bg-primary/20",
+        "workspace-sidebar-item flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-slate-700 transition-colors hover:bg-slate-100 active:scale-[0.98]",
+        active && "is-active bg-primary/10 text-primary",
         className,
       )}
       {...props}
@@ -169,12 +169,12 @@ export function SidebarItem({
           {leading ? <span className="shrink-0">{leading}</span> : null}
           <span className="min-w-0 flex-1">
             {title ? (
-              <span className={clsx("block truncate text-sm", active ? "font-semibold text-primary" : "font-semibold text-slate-900 dark:text-slate-100")}>
+              <span className={clsx("block truncate text-sm", active ? "font-semibold text-primary" : "font-semibold text-slate-900")}>
                 {title}
               </span>
             ) : null}
             {description ? (
-              <span className="mt-0.5 block truncate text-xs font-normal text-slate-500 dark:text-slate-400">{description}</span>
+              <span className="mt-0.5 block truncate text-xs font-normal text-slate-500">{description}</span>
             ) : null}
           </span>
           {trailing ? <span className="shrink-0">{trailing}</span> : null}
@@ -203,7 +203,7 @@ export function EmptyPanel({ title, description, className, icon, action }: Empt
   return (
     <div
       className={clsx(
-        "workspace-empty-panel flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-950",
+        "workspace-empty-panel flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center",
         className,
       )}
     >

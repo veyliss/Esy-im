@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=block" rel="stylesheet" />
       </head>
-      <body className="font-display bg-background-light dark:bg-background-dark" suppressHydrationWarning>
+      <body className="font-display bg-background-light" suppressHydrationWarning>
         <AntdProvider>
           <AppInteractionProvider>
             <ErrorBoundary>{children}</ErrorBoundary>

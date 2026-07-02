@@ -220,7 +220,7 @@ export const BREAKPOINTS = {
 // 主题配置
 export const THEME_CONFIG = {
   colors: {
-    primary: '#3b82f6',
+    primary: '#2563eb',
     secondary: '#6b7280',
     success: '#10b981',
     warning: '#f59e0b',
